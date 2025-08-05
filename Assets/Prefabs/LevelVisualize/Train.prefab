@@ -162,6 +162,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+  reservedCartSlots: 20
+  debugBack: 0
+  collisionsEnabled: 1
+  collisionDebug: 1
+  safetyGap: 0
+  collisionSampleStep: 0
+  collisionEps: 0
 --- !u!114 &7826959688110568392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,7 +184,31 @@ MonoBehaviour:
   mover: {fileID: 6348664809932929447}
   cartHolder: {fileID: 8694752171462292582}
   trainVisuals: {fileID: 7308468359896602345}
+  renderer: {fileID: 8587673064632495605}
   trainClickView: {fileID: 7255134965727917130}
+  direction: 0
+  CurrentPointModel:
+    gridX: 0
+    gridY: 0
+    type: 0
+    colorIndex: 0
+    id: 0
+    part:
+      partType: 
+      partId: 
+      position: {x: 0, y: 0}
+      rotation: 0
+      occupyingCells: []
+      allowedPathsGroup: []
+    anchor:
+      partId: 
+      exitPin: 0
+      splineIndex: 0
+      t: 0
+    waitingPeople: 
+    initialCarts: 
+    direction: 0
+  reservedCartSlots: 20
 --- !u!1 &6125001769554762776
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.Port;
 
 namespace RailSimCore
 {
@@ -103,7 +104,7 @@ namespace RailSimCore
             if ((prev - headPos).sqrMagnitude > 1e-12f)
                 tape.AppendSegment(prev, headPos);
 
-            tape.TrimToCapacity();
+            //tape.TrimToCapacity();
         }
 
         // ----- Queries / sampling -----
@@ -116,6 +117,12 @@ namespace RailSimCore
         public bool TryGetBackPose(float backMeters, out Vector3 pos, out Vector3 tan)
         {
             return tape.SampleBack(backMeters, out pos, out tan, out _);
+        }
+
+
+        public void EnsureTapeCapacity(float requiredMeters)
+        {
+            if (tape != null) tape.EnsurePrefix(requiredMeters);
         }
 
         public void GetCartPoses(List<Vector3> positions, List<Vector3> tangents)
@@ -222,7 +229,7 @@ namespace RailSimCore
 
             SampleForward(sNew, out var pos, out var rot);
             tape.AppendSegment(lastHeadPos, pos);
-            tape.TrimToCapacity();
+            //tape.TrimToCapacity();
 
             SHead = sNew;
             lastHeadPos = pos;
@@ -441,6 +448,11 @@ namespace RailSimCore
             explicitTrainLengthMeters = Mathf.Max(0f, meters);
         }
 
+        public void EnsureBackPrefix(float minPrefixMeters)
+        {
+            if (tape != null) tape.EnsurePrefix(minPrefixMeters);
+        }
+
         // ----- Back tape -----
         private sealed class PathTape
         {
@@ -471,6 +483,8 @@ namespace RailSimCore
 
             public void TrimToCapacity()
             {
+                return;
+
                 if (pts.Count < 2 || maxLen <= 0f) return;
 
                 float totalSpan = cum[cum.Count - 1] - cum[0];
@@ -533,13 +547,31 @@ namespace RailSimCore
                 return false;
             }
 
-            // Optional: if you want a straight prefix before motion (call externally)
-            public void EnsurePrefix(Vector3 startPoint, Vector3 startForward, float length)
+
+
+            // at the top of your file, after fields:
+            /// <summary>
+            /// Guarantee the tape can answer back-samples up to this length
+            /// by extending the straight-back prefix if needed.
+            /// </summary>
+            public void EnsurePrefix(float minPrefixMeters)
             {
-                if (IsEmpty) { pts.Add(startPoint); cum.Add(0f); }
-                prefixDir = startForward.normalized;
-                if (length > prefixLen) prefixLen = length;
+                if (minPrefixMeters > prefixLen)
+                {
+                    prefixLen = minPrefixMeters;
+                    // prefixDir should already be set in SeedStraight; no need to change it.
+                }
             }
+
+            public void SeedStraight(Vector3 headPos, Vector3 forward, float length, float step)
+            {
+                // your existing implementation plus:
+                prefixDir = forward.normalized;
+                prefixLen = length;
+                // …populate pts & cum as you like…
+            }
+
+
         }
     }
 }

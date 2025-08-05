@@ -1,18 +1,8 @@
-using System.Collections;
+﻿// IRouteAdapter.cs
 using System.Collections.Generic;
-using UnityEngine;
 
-public class IRouteAdapter : MonoBehaviour
+public interface IRouteAdapter
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    // Build a world-space polyline from source → target using your RouteModel.
+    bool TryFindPathPolyline(ScenarioModel scenario, int fromPointId, int toPointId, out List<UnityEngine.Vector3> polyline, out string error);
 }

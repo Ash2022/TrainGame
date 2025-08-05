@@ -1,6 +1,7 @@
 ﻿using RailSimCore; // <- your pure core namespace
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -91,6 +92,7 @@ public class TrainMover : MonoBehaviour
 
         // Fallback seeding (in case controller didn't pre-seed at spawn)
         // Reserve a straight prefix behind start, enough for 'reservedCartSlots'
+        
         if (!TryGetPoseAtBackDistance(0.01f, out _, out _)) // tape not seeded yet
         {
             float cartLen = SimTuning.CartLen(cellSize);
@@ -298,6 +300,17 @@ public class TrainMover : MonoBehaviour
             list.Clear();
             pool.Push(list);
         }
+    }
+
+    public void EnsureBackPrefix(float minMeters)
+    {
+        if (sim != null)
+            sim.EnsureBackPrefix(minMeters);
+    }
+
+    public void EnsureTapeCapacity(float requiredMeters)
+    {
+        if (sim != null) sim.EnsureTapeCapacity(requiredMeters);
     }
 
     public void SetInitialCartOffsetsAndCapacity(IList<float> offs, float currCellSize)

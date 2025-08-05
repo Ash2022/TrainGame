@@ -1,4 +1,5 @@
 ﻿using RailSimCore;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static RailSimCore.Types;
@@ -8,6 +9,7 @@ public class TrainController : MonoBehaviour
     [SerializeField] TrainMover mover;
     [SerializeField] Transform cartHolder;
     [SerializeField] Transform trainVisuals;
+    [SerializeField] Renderer renderer;
     [SerializeField] TrainClickView trainClickView;
 
     List<float> cartCenterOffsets; // lag of each cart center behind the head center (meters)
@@ -25,6 +27,9 @@ public class TrainController : MonoBehaviour
     [Header("Capacity")]
     public int reservedCartSlots = 20;
 
+    // inside TrainController class
+    public Action<MoveCompletion> OnMoveCompletedExternal;
+
     // Quick facts (handy for logs/debug)
     public int TrainId => CurrentPointModel?.id ?? 0;
     public Vector3 HeadWorldPos => transform.position;
@@ -33,6 +38,8 @@ public class TrainController : MonoBehaviour
     {
         currCellSize = cellSize;
         currCarts.Clear();
+
+        renderer.material.color = Utils.colors[p.colorIndex];
 
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Clear();
@@ -146,7 +153,12 @@ public class TrainController : MonoBehaviour
             tailBehind = headHalfLength; // engine body when no carts
         }
 
-        requiredTapeLength = tailBehind + gap + SimTuning.TapeMarginMeters;
+        // NEW: reserve room for 5 more carts behind the tail
+        const int reserveCarts = 25;
+        float reserveBack = reserveCarts * (cartSize + gap);
+
+        // NEW required length = tail + reserve + small safety
+        requiredTapeLength = tailBehind + reserveBack + gap + SimTuning.TapeMarginMeters;
 
         // Seed back tape so this train can be collided with before it ever moves
 
@@ -154,7 +166,7 @@ public class TrainController : MonoBehaviour
         mover.SetInitialCartOffsetsAndCapacity(cartCenterOffsets, currCellSize);
         mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, SimTuning.SampleStep(currCellSize));
 
-        GameManager.Instance.trains.Add(this);
+        GameManager.Instance.RegisterTrain(this);
         trainClickView.Init(TrainWasClicked);
 
         MirrorManager.Instance?.RegisterTrain(this, transform.position, initialForward, cartCenterOffsets, requiredTapeLength, safetyGap: 0f);
@@ -175,66 +187,62 @@ public class TrainController : MonoBehaviour
     {
         if (r.Outcome == MoveOutcome.Arrived)
         {
-            //OnArrivedStation_AddCart(); // your existing arrival logic
+            // no local game logic here
         }
         else if (r.Outcome == MoveOutcome.Blocked)
         {
-            // Collision handling: freeze input, show UI, log, etc.
-            Debug.Log($"Train {CurrentPointModel.id} blocked by Train {r.BlockerId} at {r.HitPos}");
-            // TODO: puzzle fail/retry flow
+            Debug.Log("Train " + CurrentPointModel.id + " blocked by Train " + r.BlockerId + " at " + r.HitPos);
         }
+
+        // forward to engine
+        r.SourceController = this;
+        if (OnMoveCompletedExternal != null) OnMoveCompletedExternal(r);
     }
 
+    public void OnArrivedStation_AddCart(int colorIndex)
+    {
+        var mv = mover ?? GetComponent<TrainMover>();
+        if (mv == null) { Debug.LogError("Mover missing."); return; }
+
+        float cartLen = SimTuning.CartLen(currCellSize);
+        float gap = SimTuning.Gap(currCellSize);
+        float half = SimTuning.CartHalfLen(currCellSize);
+
+        float lastOffset = (cartCenterOffsets?.Count > 0)
+            ? cartCenterOffsets[^1] : 0f;
+        float newOffset = lastOffset + cartLen + gap;
+
+        // --- Guarantee prefix length covers this newOffset + safety ---
+        float requiredBack = newOffset + half + gap + SimTuning.TapeMarginMeters;
+        mv.EnsureBackPrefix(requiredBack);
+
+        // Now sample on the **true** recorded path (or prefix)
+        if (!mv.TryGetPoseAtBackDistance(newOffset, out Vector3 pos, out Quaternion rot))
+        {
+            Debug.Log("Not enough back-path even after prefix grow.");
+            return;
+        }
+
+        // Instantiate cart at pos/rot…
+        var cart = Instantiate(LevelVisualizer.Instance.CartPrefab, transform.parent);
+        cart.transform.position = pos;
+        cart.transform.rotation = rot * Quaternion.Euler(0, 0, -90f);
+        cart.transform.localScale = Vector3.one * cartLen;
+        cart.GetComponent<CartView>()?.Initialize(colorIndex);
+
+        currCarts.Add(cart);
+        cartCenterOffsets.Add(newOffset);
+
+        // Finally, tell the mover about the new offset so future legs drive the cart
+        mv.AddCartOffset(newOffset);
+    }
+
+
+    // Backward-compatible wrapper (uses train’s own color)
     public void OnArrivedStation_AddCart()
     {
-        var mover = GetComponent<TrainMover>();
-        if (mover == null)
-        {
-            Debug.LogError("TrainController: TrainMover not found.");
-            return;
-        }
-
-        // Geometry (match your Init rules)
-        float cartLength = SimTuning.CartLen(currCellSize);   // cart 'size' along the path
-        float gap = SimTuning.Gap(currCellSize);
-        float halfCart = SimTuning.CartHalfLen(currCellSize);
-
-        // Compute new cart center offset from head center
-        float lastOffset = 0f;
-        // with this (controller is source of truth):
-        lastOffset = (cartCenterOffsets != null && cartCenterOffsets.Count > 0)
-            ? cartCenterOffsets[cartCenterOffsets.Count - 1]: 0f;
-
-
-        float newCenterOffset = lastOffset + cartLength + gap;
-
-
-        // Ask mover for the exact pose on the back path
-        if (!mover.TryGetPoseAtBackDistance(newCenterOffset, out Vector3 pos, out Quaternion rot))
-        {
-            Debug.Log("TrainController: Not enough back-path to add a new cart at this station.");
-            return;
-        }
-
-        // Spawn new cart as a sibling of the train (same as your Init end-state)
-        var newCart = Instantiate(LevelVisualizer.Instance.CartPrefab, transform.parent);
-        newCart.name = $"Train_{CurrentPointModel.id}_Cart_{currCarts.Count + 1}";
-        newCart.transform.position = pos;
-        newCart.transform.rotation = rot * Quaternion.Euler(0, 0, -90f);
-        newCart.transform.localScale = new Vector3(cartLength, cartLength, cartLength);
-
-        // Update controller data
-        if (currCarts == null) currCarts = new List<GameObject>();
-        currCarts.Add(newCart);
-
-        if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
-        cartCenterOffsets.Add(newCenterOffset);
-
-        // Keep required tape length up-to-date for the next leg start
-        requiredTapeLength = newCenterOffset + halfCart + gap + SimTuning.TapeMarginMeters;
-
-        // Tell mover about the new offset so it will drive this cart on the next leg
-        mover.AddCartOffset(newCenterOffset);
+        int colorIndex = (CurrentPointModel != null) ? CurrentPointModel.colorIndex : 0;
+        OnArrivedStation_AddCart(colorIndex);
     }
 
     // Already present; keep it public so others can read it

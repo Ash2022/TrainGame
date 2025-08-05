@@ -571,9 +571,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8851ca80e41e0564d99001fa94a34cdf, type: 3}
   - {fileID: 21300000, guid: f84b25dca794f5245a1727a4d96ccece, type: 3}
   - {fileID: 21300000, guid: edebcb435cf9dce499703ed0ac419bb6, type: 3}
-  levelJson: {fileID: 4900000, guid: 9d43998df9b013143a3645bbf7625471, type: 3}
+  levelJson: {fileID: 4900000, guid: b7392e4680b3dcd4fa4a1f8b48888bb2, type: 3}
   partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}
   stationPrefab: {fileID: 7225796874260481156, guid: 5e9e9912989ad5d4c989134b6a52f358, type: 3}
+  depotPrefab: {fileID: 7225796874260481156, guid: 4e96a27e8624f7a49be5ac10cec29fd8, type: 3}
+  passengerPrefab: {fileID: 1267055530054662668, guid: d2ce050b7ff97e24da6c6ca354a55ea2, type: 3}
   trainPrefab: {fileID: 6102414799845618142, guid: cf763bf5645019f4f9fa13aa03ec99c7, type: 3}
   cartPrefab: {fileID: 1267055530054662668, guid: 097eeb02430494341b13e7e653d5eaa3, type: 3}
   levelHolder: {fileID: 1324158658}

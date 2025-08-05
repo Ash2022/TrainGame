@@ -13,8 +13,9 @@ namespace RailSimCore
         public struct MoveCompletion
         {
             public MoveOutcome Outcome;
-            public int BlockerId;     // valid if Blocked
-            public Vector3 HitPos;    // approx world pos of first contact (if Blocked)
+            public int BlockerId;
+            public Vector3 HitPos;
+            public TrainController SourceController; // NEW
         }
     }
 

@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 4080137711301327927}
   - component: {fileID: 4469602489268117598}
   - component: {fileID: 3468136718318547471}
-  - component: {fileID: 4789676343680796740}
+  - component: {fileID: -8001899725189190453}
   m_Layer: 0
-  m_Name: Cart
+  m_Name: Passenger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: be932f628b9129b4c86aa3fa594efec4, type: 2}
+  - {fileID: 2100000, guid: 803565ef0d36f3d489d62d9927cac034, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -84,7 +84,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4789676343680796740
+--- !u!114 &-8001899725189190453
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,7 +93,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1267055530054662668}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78ea6077d55fc384b866900eb2df75ae, type: 3}
+  m_Script: {fileID: 11500000, guid: dab1615479b419c48ac2f696d2d94b28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   renderer: {fileID: 3468136718318547471}

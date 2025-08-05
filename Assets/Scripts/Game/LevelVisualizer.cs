@@ -22,6 +22,8 @@ public class LevelVisualizer : MonoBehaviour
     [Header("Prefabs & Parents")]
     [SerializeField] private GameObject partPrefab;
     [SerializeField] private GameObject stationPrefab;
+    [SerializeField] private GameObject depotPrefab;
+    [SerializeField] private GameObject passengerPrefab;
     [SerializeField] private GameObject trainPrefab;
     [SerializeField] private GameObject cartPrefab;
     [SerializeField] private Transform levelHolder;
@@ -246,7 +248,28 @@ public class LevelVisualizer : MonoBehaviour
             var stationView = go.GetComponent<StationView>();
 
             var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
-            stationView.Initialize(pt, part, cellSize);
+            stationView.Initialize(pt, part, cellSize,passengerPrefab);
+        }
+
+        foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Depot))
+        {
+            float cellX = pt.gridX - minX + 0.5f;
+            float cellY = pt.gridY - minY + 0.5f;
+            Vector2 flipped = new Vector2(cellX, gridH - cellY);
+            Vector3 worldPos = new Vector3(
+                worldOrigin.x + flipped.x * cellSize,
+                worldOrigin.y + flipped.y * cellSize,
+                0f
+            );
+
+            var go = Instantiate(depotPrefab, dynamicHolder);
+            go.name = $"Depot_{pt.id}";
+            go.transform.position = worldPos;
+
+            var depotView = go.GetComponent<DepotView>();
+
+            var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
+            depotView.Initialize(pt, part, cellSize);
         }
 
         foreach (var p in scenarioModel.points.Where(x => x.type == GamePointType.Train))
