@@ -1,0 +1,101 @@
+{
+  "levelName": null,
+  "width": 0,
+  "height": 0,
+  "parts": [
+    {
+      "partType": "Straight",
+      "partId": "Straight_1",
+      "position": {
+        "x": 1,
+        "y": 4
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "CurveRight2x2",
+      "partId": "CurveRight2x2_2",
+      "position": {
+        "x": 2,
+        "y": 2
+      },
+      "rotation": 180,
+      "splines": []
+    },
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_3",
+      "position": {
+        "x": 1,
+        "y": 3
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_4",
+      "position": {
+        "x": 3,
+        "y": 1
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_5",
+      "position": {
+        "x": 4,
+        "y": 1
+      },
+      "rotation": 90,
+      "splines": []
+    }
+  ],
+  "gameData": {
+    "points": [
+      {
+        "gridX": 4,
+        "gridY": 1,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_5",
+          "position": {
+            "x": 4,
+            "y": 1
+          },
+          "rotation": 90,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 31,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      },
+      {
+        "gridX": 1,
+        "gridY": 4,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_1",
+          "position": {
+            "x": 1,
+            "y": 4
+          },
+          "rotation": 0,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 32,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      }
+    ]
+  }
+}
