@@ -202,40 +202,60 @@ public class TrainController : MonoBehaviour
     public void OnArrivedStation_AddCart(int colorIndex)
     {
         var mv = mover ?? GetComponent<TrainMover>();
-        if (mv == null) { Debug.LogError("Mover missing."); return; }
-
-        float cartLen = SimTuning.CartLen(currCellSize);
-        float gap = SimTuning.Gap(currCellSize);
-        float half = SimTuning.CartHalfLen(currCellSize);
-
-        float lastOffset = (cartCenterOffsets?.Count > 0)
-            ? cartCenterOffsets[^1] : 0f;
-        float newOffset = lastOffset + cartLen + gap;
-
-        // --- Guarantee prefix length covers this newOffset + safety ---
-        float requiredBack = newOffset + half + gap + SimTuning.TapeMarginMeters;
-        mv.EnsureBackPrefix(requiredBack);
-
-        // Now sample on the **true** recorded path (or prefix)
-        if (!mv.TryGetPoseAtBackDistance(newOffset, out Vector3 pos, out Quaternion rot))
+        if (mv == null)
         {
-            Debug.Log("Not enough back-path even after prefix grow.");
+            Debug.LogError("TrainController: TrainMover not found.");
             return;
         }
 
-        // Instantiate cart at pos/rot…
+        // geometry
+        float cartLen = SimTuning.CartLen(currCellSize);
+        float gap = SimTuning.Gap(currCellSize);
+        float cartHalf = SimTuning.CartHalfLen(currCellSize);
+        float headHalf = SimTuning.HeadHalfLen(currCellSize);
+
+        // decide new center offset
+        float newOffset;
+        if (cartCenterOffsets == null || cartCenterOffsets.Count == 0)
+        {
+            // first cart goes behind the head: headHalf + gap + cartHalf
+            newOffset = headHalf + gap + cartHalf;
+        }
+        else
+        {
+            // subsequent carts chain off the last one
+            float lastOffset = cartCenterOffsets[cartCenterOffsets.Count - 1];
+            newOffset = lastOffset + cartLen + gap;
+        }
+
+        // ensure the tape/prefix is long enough
+        float requiredBack = newOffset + cartHalf + gap + SimTuning.TapeMarginMeters;
+        mv.EnsureBackPrefix(requiredBack);
+
+        // sample on-track pose
+        if (!mv.TryGetPoseAtBackDistance(newOffset, out Vector3 pos, out Quaternion rot))
+        {
+            Debug.LogError("TrainController: Not enough back-path to add a new cart!");
+            return;
+        }
+
+        // spawn & color the cart
         var cart = Instantiate(LevelVisualizer.Instance.CartPrefab, transform.parent);
+        cart.name = $"Train_{CurrentPointModel.id}_Cart_{currCarts.Count + 1}";
         cart.transform.position = pos;
         cart.transform.rotation = rot * Quaternion.Euler(0, 0, -90f);
         cart.transform.localScale = Vector3.one * cartLen;
         cart.GetComponent<CartView>()?.Initialize(colorIndex);
 
+        // record it
         currCarts.Add(cart);
+        if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Add(newOffset);
 
-        // Finally, tell the mover about the new offset so future legs drive the cart
+        // finally, let the mover drive it on the next leg
         mv.AddCartOffset(newOffset);
     }
+
 
 
     // Backward-compatible wrapper (uses train’s own color)

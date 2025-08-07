@@ -190,9 +190,7 @@ public class TrainMover : MonoBehaviour
 
         // 4) Ensure tape capacity = tail + gap + margin
         float gap = SimTuning.Gap(cellSize);
-        float tailBehind = (offsets.Count > 0)
-            ? offsets[offsets.Count - 1] + cartHalfLen
-            : headHalfLen;
+        float tailBehind = (offsets.Count > 0) ? offsets[offsets.Count - 1] + cartHalfLen : headHalfLen;
         sim.TapeCapacityMeters = tailBehind + gap + SimTuning.TapeMarginMeters;
 
         // 5) Fallback seeding if no tape yet
@@ -213,9 +211,7 @@ public class TrainMover : MonoBehaviour
         // 6) SampleStep for visuals: about 1/10 of cell
         float visualStep = cellSize * 0.1f;
 
-        SplineUtils.BuildSmoothSpline(
-            cornerPoints: worldPoints,
-            handleRatio: 0.3f,       // rounded‐corner tightness
+        SplineUtils.BuildSmoothSpline(cornerPoints: worldPoints,handleRatio: 0.3f,       // rounded‐corner tightness
             sampleStep: visualStep,
             out _smoothPos,
             out _smoothTan);

@@ -179,8 +179,18 @@ public class ScenarioEditor
 
                     if (Event.current.type == EventType.MouseDown && pr.Contains(Event.current.mousePosition))
                     {
-                        p.waitingPeople[j] = (colorIdx + 1) % colors.Length;
+                        if (Event.current.button == 0)
+                        {
+                            // Left-click: cycle color
+                            p.waitingPeople[j] = (colorIdx + 1) % colors.Length;
+                        }
+                        else if (Event.current.button == 1)
+                        {
+                            // Right-click: remove this person
+                            p.waitingPeople.RemoveAt(j);
+                        }
                         Event.current.Use();
+                        break; // stop processing this row, since the list changed
                     }
 
                     px += personSize + iconSpacing;

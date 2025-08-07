@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -9,9 +9,12 @@ public class StationView : MonoBehaviour
     [SerializeField] Transform passengersHolder;
     [SerializeField] Transform exits;
 
-    // Tune if needed
-    [SerializeField] float verticalSpacingFactor = 0.5f; // fraction of cellSize
+    // fraction of cellSize used as passenger size/spacing
+    [SerializeField] float verticalSpacingFactor = 0.5f;
     [SerializeField] bool clearExistingOnInit = true;
+
+    // computed once per Initialize
+    private float _spacing;
 
     /// <summary>
     /// Call this right after Instantiate to wire up the model.
@@ -26,50 +29,40 @@ public class StationView : MonoBehaviour
         if (passengersHolder == null || passengerPrefab == null || _pointModel == null)
             return;
 
-        // Optional: clear any previous visuals
+        // clear old visuals
         if (clearExistingOnInit)
         {
             for (int i = passengersHolder.childCount - 1; i >= 0; i--)
                 Destroy(passengersHolder.GetChild(i).gameObject);
         }
 
-        // Stack passengers along local +Y inside the holder
-        float spacing = Mathf.Max(0.01f, cellSize * verticalSpacingFactor);
+        // compute spacing = size of one passenger
+        _spacing = Mathf.Max(0.01f, cellSize * verticalSpacingFactor);
 
-        for (int i = 0; i < _pointModel.waitingPeople.Count; i++)
+        int count = _pointModel.waitingPeople.Count;
+        // draw in reverse: last in list at stackIdx=0, then backward
+        for (int stackIdx = 0; stackIdx < count; stackIdx++)
         {
-            int colorIndex = _pointModel.waitingPeople[i];
+            int dataIdx = count - 1 - stackIdx;
+            int colorIndex = _pointModel.waitingPeople[dataIdx];
 
             GameObject go = Instantiate(passengerPrefab, passengersHolder, false);
-            go.name = "Passenger_" + colorIndex + "_" + (i + 1);
+            go.name = $"Passenger_{colorIndex}_{dataIdx + 1}";
 
-            // Local placement (one on top of another)
-            go.transform.localPosition = new Vector3(0f, 0f, i * spacing);
+            // position at -(0.5 + stackIdx) * spacing along local -Z
+            float z = -(0.5f + stackIdx) * _spacing;
+            go.transform.localPosition = new Vector3(0f, 0f, z);
             go.transform.localRotation = Quaternion.identity;
 
-            // Optional sizing (comment out if prefab already sized)
-            // go.transform.localScale = Vector3.one * (cellSize * 0.25f);
-
-            // Initialize the PassengerView with its color
+            // init color
             PassengerView pv = go.GetComponent<PassengerView>();
-            if (pv != null)
-            {
-                pv.Initialize(colorIndex);
-            }
-            else
-            {
-                Debug.LogWarning("PassengerView missing on passenger prefab.");
-            }
+            if (pv != null) pv.Initialize(colorIndex);
+            else Debug.LogWarning("PassengerView missing on passenger prefab.");
         }
     }
 
     /// <summary>
-    /// Remove the first 'count' passengers (queue head) visually and re-pack.
-    /// Assumes visuals were created in waitingPeople order.
-    /// </summary>
-    /// <summary>
-    /// Remove the first `count` passenger visuals in one batch,
-    /// then re-stack the rest along local +Y using the same spacing.
+    /// Remove the first 'count' passenger visuals (head of queue) and re-stack.
     /// </summary>
     public void RemoveHeadPassengers(int count)
     {
@@ -78,22 +71,26 @@ public class StationView : MonoBehaviour
         int available = passengersHolder.childCount;
         int toRemove = Mathf.Min(count, available);
 
-        // 1) Collect the first `toRemove` transforms
+        // 1) Collect the last 'toRemove' children now (indices won’t change)
         var victims = new List<Transform>(toRemove);
         for (int i = 0; i < toRemove; i++)
-            victims.Add(passengersHolder.GetChild(i));
+        {
+            int idx = available - 1 - i;                // e.g. if available=5 and toRemove=2, idx=4,3
+            victims.Add(passengersHolder.GetChild(idx));
+        }
 
-        // 2) Destroy them
+        // 2) Destroy them (Destroy is deferred, but we’ve already captured them)
         foreach (var t in victims)
             Destroy(t.gameObject);
 
-        // 3) Restack the remaining children along +Y
-        for (int i = 0; i < passengersHolder.childCount; i++)
+        // 3) Restack what’s left at the same offsets
+        int rem = passengersHolder.childCount;
+        for (int stackIdx = 0; stackIdx < rem; stackIdx++)
         {
-            var c = passengersHolder.GetChild(i);
-            c.localPosition = new Vector3(0f, 0f, i * 0.5f);
+            var c = passengersHolder.GetChild(stackIdx);
+            float z = -(0.5f + stackIdx) * _spacing;
+            c.localPosition = new Vector3(0f, 0f, z);
             c.localRotation = Quaternion.identity;
         }
     }
 }
-
