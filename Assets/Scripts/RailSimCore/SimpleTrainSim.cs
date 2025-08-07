@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.Port;
 
 namespace RailSimCore
 {
@@ -26,9 +25,11 @@ namespace RailSimCore
         // ----- Config / tunables -----
         public float CellSize { get; private set; } = 1f;
         public float SampleStep { get; private set; } = 0.25f;   // ≈ CellSize/8
-        public float Eps { get; private set; } = 1e-4f;   // ≈ 1e-4 * CellSize
+        public float Eps { get; private set; } = 1f;// 1e-4f;   // ≈ 1e-4 * CellSize
         public float SafetyGap { get; private set; } = 0f;      // along tape
         public float TapeCapacityMeters { get => tapeCapacity; set { tapeCapacity = Mathf.Max(0f, value); tape.SetMaxLen(tapeCapacity); } }
+
+        private bool noseLogged = false;
 
         public float PathLength => totalLen;
 
@@ -62,6 +63,7 @@ namespace RailSimCore
             SampleStep = (sampleStep > 0f) ? sampleStep : SimTuning.SampleStep(CellSize);
             Eps = (eps > 0f) ? eps : SimTuning.Eps(CellSize);
             SafetyGap = Mathf.Max(0f, safetyGap);
+            
         }
 
         // ----- Initialize a leg -----
@@ -166,7 +168,20 @@ namespace RailSimCore
                 float iter = Mathf.Min(remaining, SampleStep * 0.5f, distToEnd);
                 if (iter <= 1e-6f) break;
 
-                var movingSlice = BuildForwardSlice(SHead + advanced, SHead + advanced + iter, SampleStep);
+                //var movingSlice = BuildForwardSlice(SHead + advanced, SHead + advanced + iter, SampleStep);
+
+                // shift the slice forward by the train’s half‐length (“nose”)
+                float nose = SimTuning.HeadHalfLen(CellSize);
+                if (!noseLogged)
+                    {
+                    Debug.Log($"[SimpleTrainSim] headHalfLen (nose) = {nose:F3}m");
+                    noseLogged = true;
+                    }
+                var movingSlice = BuildForwardSlice(SHead + advanced + nose,SHead + advanced + nose + iter,SampleStep);
+
+
+                LastMovingSlice = movingSlice;
+
                 float cap = iter;
 
                 if (others != null)
@@ -174,8 +189,12 @@ namespace RailSimCore
                     for (int i = 0; i < others.Count; i++)
                     {
                         var other = others[i];
-                        if (ReferenceEquals(other, this)) continue;
-                        if (!other.TryGetOccupiedBackSlice(SafetyGap, SampleStep, out var occupiedSlice)) continue;
+                        if (ReferenceEquals(other, this))
+                            continue;
+
+                        if (!other.TryGetOccupiedBackSlice(SafetyGap, SampleStep*.5f, out var occupiedSlice))
+                            continue;
+
 
                         if (IntersectPolylines(movingSlice, occupiedSlice, Eps, out float alongMoving, out Vector3 hitPos))
                         {
@@ -184,7 +203,7 @@ namespace RailSimCore
 
                             if (!hitRecorded)
                             {
-                                LastMovingSlice = movingSlice;
+                                
                                 LastBlockedSlice = occupiedSlice;
                                 LastBlockerId = getId != null ? getId(other) : 0;
 
@@ -437,6 +456,8 @@ namespace RailSimCore
             }
             return false;
         }
+
+        
 
         public bool AtEnd(float tol = 1e-5f)
         {
