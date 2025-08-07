@@ -1,6 +1,7 @@
 ﻿using RailSimCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -162,6 +163,11 @@ public class TrainController : MonoBehaviour
 
         // Seed back tape so this train can be collided with before it ever moves
 
+        Debug.Log(
+                $"[Init] tailBehind={tailBehind:F2}, cartLen={cartSize:F2}, gap={gap:F2} → " +
+                $"reserveBack={reserveBack:F2}, requiredTape={requiredTapeLength:F2}"
+            );
+
         // make the train collidable BEFORE any movement
         mover.SetInitialCartOffsetsAndCapacity(cartCenterOffsets, currCellSize);
         mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, SimTuning.SampleStep(currCellSize));
@@ -180,7 +186,10 @@ public class TrainController : MonoBehaviour
     public void MoveAlongPath(List<Vector3> worldPoints)
     {
         if (mover != null)
-            mover.MoveAlongPath(worldPoints,currCarts, currCellSize, OnMoveCompleted);
+        {
+            Debug.Log($"[CartCtrOff] canonical=[{string.Join(", ", cartCenterOffsets.Select(o => o.ToString("F2")))}]");
+            mover.MoveAlongPath(cartCenterOffsets,worldPoints, currCarts, currCellSize, OnMoveCompleted);
+        }
     }
 
     private void OnMoveCompleted(MoveCompletion r)
@@ -232,6 +241,7 @@ public class TrainController : MonoBehaviour
         float requiredBack = newOffset + cartHalf + gap + SimTuning.TapeMarginMeters;
         mv.EnsureBackPrefix(requiredBack);
 
+
         // sample on-track pose
         if (!mv.TryGetPoseAtBackDistance(newOffset, out Vector3 pos, out Quaternion rot))
         {
@@ -256,14 +266,6 @@ public class TrainController : MonoBehaviour
         mv.AddCartOffset(newOffset);
     }
 
-
-
-    // Backward-compatible wrapper (uses train’s own color)
-    public void OnArrivedStation_AddCart()
-    {
-        int colorIndex = (CurrentPointModel != null) ? CurrentPointModel.colorIndex : 0;
-        OnArrivedStation_AddCart(colorIndex);
-    }
 
     // Already present; keep it public so others can read it
     public float GetTrainLengthMeters()

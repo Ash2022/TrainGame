@@ -252,7 +252,8 @@ public class GameManager : MonoBehaviour
             var p = pts[i];
             if (p.type != GamePointType.Station) continue;
             for (int k = 0; k < p.waitingPeople.Count; k++)
-                if (p.waitingPeople[k] == colorIndex) return true;
+                if (p.waitingPeople[k] == colorIndex) 
+                    return true;
         }
         return false;
     }

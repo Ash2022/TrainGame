@@ -38,6 +38,8 @@ public class LevelVisualizer : MonoBehaviour
 
     [SerializeField] LineRenderer globalPathRenderer;
 
+    ScenarioModel orgScenarioModel;
+
     public TrainMover trainMover;
 
     LevelData currLevel;
@@ -119,6 +121,9 @@ public class LevelVisualizer : MonoBehaviour
 
     private IEnumerator BuildCoroutine(LevelData level)
     {
+        orgScenarioModel = CloneScenarioModelFromLevel(currLevel);
+
+
         // clear out any previously spawned parts
         for (int i = levelHolder.childCount - 1; i >= 0; i--)
             DestroyImmediate(levelHolder.GetChild(i).gameObject);
@@ -222,7 +227,10 @@ public class LevelVisualizer : MonoBehaviour
 
     public void GenerateDynamic()
     {
-        ScenarioModel scenarioModel = CloneScenarioModel(currLevel);
+        ScenarioModel scenarioModel = CloneScenarioModelFromScenario(orgScenarioModel);
+
+        // 2) Overwrite the level’s live data with that clone
+        currLevel.gameData.points = scenarioModel.points;
 
         // clear out any previously spawned parts
         for (int i = dynamicHolder.childCount - 1; i >= 0; i--)
@@ -487,7 +495,7 @@ public class LevelVisualizer : MonoBehaviour
     }
 
 
-    public static ScenarioModel CloneScenarioModel(LevelData source)
+    public static ScenarioModel CloneScenarioModelFromLevel(LevelData source)
     {
         var clone = new ScenarioModel();
 
@@ -515,5 +523,36 @@ public class LevelVisualizer : MonoBehaviour
 
         return clone;
     }
+
+
+    public static ScenarioModel CloneScenarioModelFromScenario(ScenarioModel source)
+    {
+        var clone = new ScenarioModel();
+
+        foreach (var point in source.points)
+        {
+            var newPoint = new GamePoint(
+                point.part,
+                point.gridX,
+                point.gridY,
+                point.type,
+                point.colorIndex,
+                point.anchor
+            );
+
+            newPoint.direction = point.direction;
+
+            if (point.waitingPeople != null)
+                newPoint.waitingPeople = new List<int>(point.waitingPeople);
+
+            if (point.initialCarts != null)
+                newPoint.initialCarts = new List<int>(point.initialCarts);
+
+            clone.points.Add(newPoint);
+        }
+
+        return clone;
+    }
+
 }
 

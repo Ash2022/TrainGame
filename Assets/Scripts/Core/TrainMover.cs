@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using static RailSimCore.Types;
@@ -43,6 +44,8 @@ public class TrainMover : MonoBehaviour
     private List<Vector3> _smoothTan;
     private float _smoothTotalLen;
     private List<float> _smoothCumLen;
+
+    public SimpleTrainSim Sim => sim;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // PUBLIC API (unchanged signatures)
@@ -152,7 +155,7 @@ public class TrainMover : MonoBehaviour
         moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
     }
     */
-    public void MoveAlongPath(
+    public void MoveAlongPath(List<float> cartCenterOffsets,
         List<Vector3> worldPoints,
         List<GameObject> currCarts,
         float currCellSize,
@@ -172,14 +175,14 @@ public class TrainMover : MonoBehaviour
         headHalfLen = SimTuning.HeadHalfLen(cellSize);
 
         // 2) Compute current cart‐center offsets along the new leg direction
-        offsets.Clear();
-        Vector3 headPos = transform.position;
-        Vector3 legFwd = (worldPoints[1] - worldPoints[0]).normalized;
-        for (int i = 0; i < carts.Count; i++)
-        {
-            float off = Vector3.Dot(headPos - carts[i].transform.position, legFwd);
-            offsets.Add(Mathf.Max(0f, off));
-        }
+        // NEW: use the controller’s exact offsets
+        offsets.Clear();        
+        offsets.AddRange(cartCenterOffsets);
+        sim.SetCartOffsets(offsets);
+
+        //Debug.Log($"[Offsets] legFwd={legFwd:F2}  computed=[{string.Join(", ", offsets.Select(o => o.ToString("F2")))}]");
+        
+        
 
         // 3) Configure the sim for this leg
         float step = (collisionSampleStep > 0f) ? collisionSampleStep : SimTuning.SampleStep(cellSize);
@@ -196,14 +199,13 @@ public class TrainMover : MonoBehaviour
         // 5) Fallback seeding if no tape yet
         if (!TryGetPoseAtBackDistance(0.01f, out _, out _))
         {
+            Vector3 legFwd = (worldPoints[1] - worldPoints[0]).normalized;
+
             float cartLen = SimTuning.CartLen(cellSize);
             float firstOffset = headHalfLen + gap + cartHalfLen;
             int slots = Mathf.Max(1, reservedCartSlots);
             float reservedBackMeters = firstOffset + (cartLen + gap) * (slots - 1);
-            sim.SeedTapePrefixStraight(
-                worldPoints[0],
-                legFwd,
-                reservedBackMeters + SimTuning.TapeMarginMeters);
+            sim.SeedTapePrefixStraight(worldPoints[0],legFwd,reservedBackMeters + SimTuning.TapeMarginMeters);
         }
 
         // ------ NEW: Build the smooth visual spline ------
