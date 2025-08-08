@@ -238,6 +238,8 @@ public class LevelVisualizer : MonoBehaviour
 
         ClearGlobalPathRenderer();
 
+        MirrorManager.Instance?.InitFromLevel(currLevel, cellSize);
+
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
         {
             float cellX = pt.gridX - minX + 0.5f;
@@ -289,7 +291,7 @@ public class LevelVisualizer : MonoBehaviour
             trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
         }
 
-        MirrorManager.Instance?.InitFromLevel(currLevel, cellSize);
+        
     }
 
     /// <summary>  
