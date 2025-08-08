@@ -10,7 +10,7 @@ public sealed class MirrorManager : MonoBehaviour
     [SerializeField] float allowedTol = 1e-4f;    // meters
     [SerializeField] float hitTolMult = 3f;       // × SimTuning.Eps(cellSize)
 
-    private SimController sim = new SimController();
+    public SimController sim = new SimController();
     private readonly Dictionary<TrainController, int> map = new Dictionary<TrainController, int>();
     private readonly Dictionary<int, int> mirrorToGame = new();  // mirrorId -> gameTrainId
 

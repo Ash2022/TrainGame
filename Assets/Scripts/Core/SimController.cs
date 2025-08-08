@@ -9,7 +9,7 @@ using RailSimCore; // SimWorld, TrackDto, TrackSegmentKey, Polyline, AdvanceResu
 
 public sealed class SimController
 {
-    private readonly SimWorld _world = new SimWorld();
+    public readonly SimWorld _world = new SimWorld();
     private TrackDto _track = new TrackDto();
     private readonly Dictionary<int, int> _pointIdToTrainId = new Dictionary<int, int>(); // GamePoint.id -> trainId
 

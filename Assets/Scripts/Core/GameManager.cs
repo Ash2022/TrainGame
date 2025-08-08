@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
             HandleClick();
 
         if (Input.GetKeyDown(KeyCode.R))
-            LevelVisualizer.Instance.GenerateDynamic();
+            LevelVisualizer.Instance.ResetLevel();
     }
 
     private void HandleClick()

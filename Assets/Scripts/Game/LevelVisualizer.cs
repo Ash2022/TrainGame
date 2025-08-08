@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RailSimCore;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -220,8 +221,34 @@ public class LevelVisualizer : MonoBehaviour
 
         GameManager.Instance.level = currLevel;
 
+        StartCoroutine(BuildAndResetTest());
+
+    }
+
+    /// <summary>
+    /// Resets the level visuals and runs the full build+compare check.
+    /// </summary>
+    public void ResetLevel()
+    {
+        StartCoroutine(BuildAndResetTest());
+    }
+
+    private IEnumerator BuildAndResetTest()
+    {
+        // 1) Verify splines
+        SplineComparer.CompareAllSplines(currLevel, levelHolder, cellSize);
+
+        // 2) Build the live dynamic content
         GenerateDynamic();
-        
+
+        // 3) Build the data-driven “raw” dynamic content
+        GenerateDynamicFromData();
+
+        // 4) Wait until the end of the frame so all Transforms have updated
+        yield return new WaitForEndOfFrame();
+
+        // 5) Compare live vs. raw children
+        CompareDynamicHolders();
     }
 
 
@@ -293,6 +320,79 @@ public class LevelVisualizer : MonoBehaviour
 
         
     }
+
+    /// <summary>
+    /// Call right after GenerateDynamic() to spawn a second set of “raw” dynamic objects
+    /// using only the precomputed world‐space data (worldSplines & SimWorld).
+    /// </summary>
+    public void GenerateDynamicFromData()
+    {
+        // 1) Clone the scenario data and overwrite live gameData
+        ScenarioModel scenarioModel = currLevel.gameData;
+        //currLevel.gameData.points = scenarioModel.points;
+
+        // 2) Ensure RawDynamicHolder exists as a child of dynamicHolder
+        const string rawName = "RawDynamicHolder";
+        Transform rawHolder = dynamicHolder.Find(rawName);
+        if (rawHolder == null)
+        {
+            rawHolder = new GameObject(rawName).transform;
+            rawHolder.SetParent(dynamicHolder, false);
+        }
+        // clear previous raw content
+        for (int i = rawHolder.childCount - 1; i >= 0; i--)
+            DestroyImmediate(rawHolder.GetChild(i).gameObject);
+
+        // 3) Instantiate stations under rawHolder exactly as GenerateDynamic does
+        foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
+        {
+            float cellX = pt.gridX - minX + 0.5f;
+            float cellY = pt.gridY - minY + 0.5f;
+            Vector2 flipped = new Vector2(cellX, gridH - cellY);
+            Vector3 worldPos = new Vector3(
+                worldOrigin.x + flipped.x * cellSize,
+                worldOrigin.y + flipped.y * cellSize,
+                0f
+            );
+            var go = Instantiate(stationPrefab, rawHolder);
+            go.name = $"Station_{pt.id}";
+            go.transform.position = worldPos;
+            var part = currLevel.parts.First(p2 => p2.partId == pt.anchor.partId);
+            go.GetComponent<StationView>()?.Initialize(pt, part, cellSize, passengerPrefab);
+        }
+
+        // 4) Instantiate depots under rawHolder
+        foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Depot))
+        {
+            float cellX = pt.gridX - minX + 0.5f;
+            float cellY = pt.gridY - minY + 0.5f;
+            Vector2 flipped = new Vector2(cellX, gridH - cellY);
+            Vector3 worldPos = new Vector3(
+                worldOrigin.x + flipped.x * cellSize,
+                worldOrigin.y + flipped.y * cellSize,
+                0f
+            );
+            var go = Instantiate(depotPrefab, rawHolder);
+            go.name = $"Depot_{pt.id}";
+            go.transform.position = worldPos;
+            var part = currLevel.parts.First(p2 => p2.partId == pt.anchor.partId);
+            go.GetComponent<DepotView>()?.Initialize(pt, part, cellSize);
+        }
+
+        // 5) Instantiate trains (with carts) under rawHolder
+        foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Train))
+        {
+            var trainGO = Instantiate(trainPrefab, rawHolder);
+            trainGO.name = $"Train_{pt.id}";
+            var trainController = trainGO.GetComponent<TrainController>();
+            trainController.Init(pt, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
+        }
+    }
+
+
+
+
+
 
     /// <summary>  
     /// Returns the sprite for the given partType, or null if not found.  
@@ -555,6 +655,57 @@ public class LevelVisualizer : MonoBehaviour
 
         return clone;
     }
+
+    /// <summary>
+    /// Walks the children of dynamicHolder and RawDynamicHolder in order,
+    /// ensuring each pair has the same name and nearly the same position.
+    /// </summary>
+    public void CompareDynamicHolders(float eps = 0.001f)
+    {
+        // find the raw holder
+        Transform rawHolder = dynamicHolder.Find("RawDynamicHolder");
+        if (rawHolder == null)
+        {
+            Debug.LogError("CompareDynamicHolders: RawDynamicHolder not found under dynamicHolder");
+            return;
+        }
+
+        // build a filtered list of “live” children (exclude the raw holder itself)
+        var liveChildren = new List<Transform>();
+        foreach (Transform t in dynamicHolder)
+            if (t.name != "RawDynamicHolder")
+                liveChildren.Add(t);
+
+        int liveCount = liveChildren.Count;
+        int rawCount = rawHolder.childCount;
+        if (liveCount != rawCount)
+        {
+            Debug.LogError($"CompareDynamicHolders: child count mismatch: live={liveCount} vs raw={rawCount}");
+            return;
+        }
+
+        // compare them in order
+        for (int i = 0; i < liveCount; i++)
+        {
+            var live = liveChildren[i];
+            var raw = rawHolder.GetChild(i);
+
+            // 1) Name check
+            if (live.name != raw.name)
+            {
+                Debug.LogError($"Child #{i} name mismatch: live='{live.name}' vs raw='{raw.name}'");
+                continue;
+            }
+
+            // 2) Position check
+            float dist = Vector3.Distance(live.position, raw.position);
+            if (dist > eps)
+                Debug.LogError($"'{live.name}' position mismatch: live={live.position} vs raw={raw.position}, dist={dist:F4}");
+            else
+                Debug.Log($"'{live.name}' OK (dist={dist:F4})");
+        }
+    }
+
 
 }
 
