@@ -1,46 +1,98 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using RailSimCore;
+using RailSimCore; // assumes SimController, SpawnSpec, AdvanceResult live here
 
-public sealed class MirrorManager : MonoBehaviour
+public sealed class MirrorManager
 {
-    public static MirrorManager Instance { get; private set; }
+    // -------- Singleton (no MonoBehaviour) --------
+    public static readonly MirrorManager Instance = new MirrorManager();
+    private MirrorManager() { }
 
-    [SerializeField] bool enabledInPlay = true;   // toggle at runtime
-    [SerializeField] float allowedTol = 1e-4f;    // meters
-    [SerializeField] float hitTolMult = 3f;       // × SimTuning.Eps(cellSize)
+    // -------- Core sim --------
+    public bool enabledInPlay = true;
+    public float cellSize = 1f;
+    public readonly SimController sim = new SimController();
 
-    public SimController sim = new SimController();
-    private readonly Dictionary<TrainController, int> map = new Dictionary<TrainController, int>();
-    private readonly Dictionary<int, int> mirrorToGame = new();  // mirrorId -> gameTrainId
+    // Active legs/speeds (ID-only; no game refs needed)
+    private readonly HashSet<int> _active = new HashSet<int>();              // mirror train ids with an active leg
+    private readonly Dictionary<int, float> _speed = new Dictionary<int, float>(); // mirrorId -> m/s
 
-    [SerializeField] bool verboseParity = true;  // turn on in Inspector
+    // Optional bridge map (lets the game call by TrainController when present)
+    private readonly Dictionary<TrainController, int> _tc2id = new Dictionary<TrainController, int>();
 
-    private float cellSize = 1f;
+    public int GetId(TrainController tc) { return (_tc2id.TryGetValue(tc, out var id) ? id : -1); }
 
-    void Awake()
-    {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
+    public void MarkInactiveById(int id) => StopLegById(id);
 
+    // -------- Level/track --------
     public void InitFromLevel(LevelData level, float cellSizeMeters)
     {
         if (!enabledInPlay) return;
-        this.cellSize = Mathf.Max(1e-6f, cellSizeMeters);
+        cellSize = Mathf.Max(1e-6f, cellSizeMeters);
         sim.Reset();
-        sim.BuildTrackDtoFromWorld(level); // uses PlacedPartInstance.worldSplines
+        sim.BuildTrackDtoFromWorld(level);
+        _active.Clear();
+        _speed.Clear();
+        _tc2id.Clear();
     }
 
-    public void RegisterTrain(TrainController tc, Vector3 headPos, Vector3 headForward,
-                              IList<float> cartOffsets, float tapeSeedLen, float safetyGap = 0f)
+    // -------- ID-only API (standalone) --------
+    public int RegisterTrain(SpawnSpec spec)
+    {
+        if (!enabledInPlay) return -1;
+        return sim.Mirror_SpawnTrain(spec);
+    }
+
+    public void StartLegById(int mirrorId, IList<Vector3> worldPoints, float speedMetersPerSec = 1f)
     {
         if (!enabledInPlay) return;
-        
+        sim.Mirror_StartLeg(mirrorId, worldPoints);
+        _active.Add(mirrorId);
+        _speed[mirrorId] = Mathf.Max(0f, speedMetersPerSec);
+    }
+
+    public void StopLegById(int mirrorId)
+    {
+        _active.Remove(mirrorId);
+        _speed.Remove(mirrorId);
+    }
+
+    public void SetSpeedById(int mirrorId, float metersPerSecond)
+    {
+        _speed[mirrorId] = Mathf.Max(0f, metersPerSecond);
+    }
+
+    public IEnumerable<MirrorRunner.Step> EnumerateActive()
+    {
+        var ids = new List<int>(_active); // snapshot to avoid "modified during enumeration"
+        for (int i = 0; i < ids.Count; i++)
+        {
+            int id = ids[i];
+            if (_speed.TryGetValue(id, out var v) && v > 0f)
+                yield return new MirrorRunner.Step(id, v);
+        }
+    }
+
+    public AdvanceResult PreviewById(int mirrorId, float wantMeters)
+    {
+        var others = new List<int>(_active.Count);
+        foreach (var a in _active) if (a != mirrorId) others.Add(a);
+        return sim.Mirror_PreviewAdvance(mirrorId, wantMeters, others);
+    }
+
+    public void CommitById(int mirrorId, float allowedMeters, out Vector3 headPos, out Vector3 headTan)
+    {
+        sim.Mirror_CommitAdvance(mirrorId, allowedMeters, out headPos, out headTan);
+    }
+
+    // -------- Optional game bridge (keeps existing code working) --------
+    public int RegisterTrain(TrainController tc, Vector3 headPos, Vector3 headForward, IList<float> cartOffsets, float tapeSeedLen, float safetyGap = 0f)
+    {
+        if (!enabledInPlay || tc == null) return -1;
+
         var spec = new SpawnSpec
         {
-            Path = null,            // first leg will be provided at StartLeg
+            Path = null,
             HeadPos = headPos,
             HeadForward = headForward,
             CartOffsets = new List<float>(cartOffsets ?? new List<float>()),
@@ -49,83 +101,36 @@ public sealed class MirrorManager : MonoBehaviour
             SafetyGap = safetyGap
         };
 
-        int id = sim.Mirror_SpawnTrain(spec);
-
-        map[tc] = id;
-        mirrorToGame[id] = tc.TrainId;
-
-        map[tc] = id;
+        int id = RegisterTrain(spec);
+        if (id >= 0) _tc2id[tc] = id;
+        return id;
     }
 
-    // Reverse lookup via the existing map (small N, linear is fine)
-    private int MirrorToGameId(int mirrorId)
+    public void StartLeg(TrainController tc, IList<Vector3> worldPoints, float speedMetersPerSec = 1f)
     {
-        foreach (var kv in map)
-            if (kv.Value == mirrorId)
-                return kv.Key.TrainId;   // game-side ID
-        return 0;
-    }
-
-    public void StartLeg(TrainController tc, IList<Vector3> worldPoints)
-    {
-        if (!enabledInPlay) return;
-        if (!map.TryGetValue(tc, out var id)) return;
-        sim.Mirror_StartLeg(id, worldPoints);
+        if (tc == null) return;
+        if (!_tc2id.TryGetValue(tc, out var id)) return;
+        StartLegById(id, worldPoints, speedMetersPerSec);
     }
 
     public AdvanceResult Preview(TrainController tc, float wantMeters)
     {
-        if (!enabledInPlay) return default;
-        if (!map.TryGetValue(tc, out var id)) return default;
-
-        // other trains (mirror ids)
-        var others = new List<int>();
-        var all = GameManager.Instance.trains;
-        for (int i = 0; i < all.Count; i++)
-        {
-            var o = all[i];
-            if (o == null || o == tc) continue;
-            if (map.TryGetValue(o, out var oid)) others.Add(oid);
-        }
-        return sim.Mirror_PreviewAdvance(id, wantMeters, others);
+        if (tc == null) return default;
+        if (!_tc2id.TryGetValue(tc, out var id)) return default;
+        return PreviewById(id, wantMeters);
     }
 
-    public void Commit(TrainController tc, float allowed, out Vector3 headPos, out Vector3 headTan)
+    public void Commit(TrainController tc, float allowedMeters, out Vector3 headPos, out Vector3 headTan)
     {
-        headPos = default; headTan = default;
-        if (!enabledInPlay) return;
-        if (!map.TryGetValue(tc, out var id)) return;
-        sim.Mirror_CommitAdvance(id, allowed, out headPos, out headTan);
+        headPos = headTan = default;
+        if (tc == null) return;
+        if (!_tc2id.TryGetValue(tc, out var id)) return;
+        CommitById(id, allowedMeters, out headPos, out headTan);
     }
 
-    public void CompareTickResults(string tag, AdvanceResult gameRes, AdvanceResult mirrorRes)
+    public bool HasActiveLeg(TrainController tc)
     {
-        if (!enabledInPlay) return;
-
-        // --- existing mismatch checks (keep) ---
-        float diff = Mathf.Abs(gameRes.Allowed - mirrorRes.Allowed);
-        if (diff > allowedTol)
-            Debug.LogWarning($"[Mirror] {tag} allowed mismatch  game={gameRes.Allowed:F6}  mirror={mirrorRes.Allowed:F6}  Δ={diff:F6}");
-
-        if (gameRes.Kind != mirrorRes.Kind)
-            Debug.LogWarning($"[Mirror] {tag} reason mismatch  game={gameRes.Kind}  mirror={mirrorRes.Kind}");
-
-        if (gameRes.Kind == AdvanceResultKind.Blocked && mirrorRes.Kind == AdvanceResultKind.Blocked)
-        {
-            int mirrorBlockerGameId = MirrorToGameId(mirrorRes.BlockerId);
-            if (gameRes.BlockerId != mirrorBlockerGameId)
-                Debug.LogWarning($"[Mirror] {tag} blocker mismatch  game={gameRes.BlockerId}  mirror(gameId)={mirrorBlockerGameId}");
-
-            float eps = SimTuning.Eps(cellSize) * hitTolMult;
-            float hitDelta = Vector3.Distance(gameRes.HitPos, mirrorRes.HitPos);
-            if (hitDelta > eps)
-                Debug.LogWarning($"[Mirror] {tag} hitPos mismatch  |Δ|={hitDelta:F6} > {eps:F6}");
-            else if (verboseParity)
-                Debug.Log($"[Mirror] {tag} OK Blocked by T{mirrorBlockerGameId}  Δallowed={diff:F6}  Δhit={hitDelta:F6}");
-        }
-        else if (gameRes.Kind == AdvanceResultKind.EndOfPath && mirrorRes.Kind == AdvanceResultKind.EndOfPath && verboseParity)
-        {
-            Debug.Log($"[Mirror] {tag} OK Arrived  Δallowed={diff:F6}");
-        }
+        if (tc == null) return false;
+        return _tc2id.TryGetValue(tc, out var id) && _active.Contains(id);
     }
 }

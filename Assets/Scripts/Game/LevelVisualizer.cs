@@ -45,6 +45,8 @@ public class LevelVisualizer : MonoBehaviour
 
     LevelData currLevel;
 
+    public SimApp SimAppInstance;
+
     //level dynamic params
     int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
     Vector2 worldOrigin;
@@ -172,6 +174,15 @@ public class LevelVisualizer : MonoBehaviour
         worldOrigin = new Vector2(frameMin.x + marginX,
                                   frameMin.y + marginY);
 
+
+        // 2) create and bootstrap the sim app (no scene refs)
+        if (SimAppInstance == null)
+        {
+            SimAppInstance = new SimApp(MirrorManager.Instance, new SimGame(MirrorManager.Instance));
+            SimAppInstance.SetFixedDt(Time.fixedDeltaTime);
+        }
+
+
         foreach (var inst in level.parts)
         {
             // 1) find the bounding box of the occupied cells
@@ -265,7 +276,12 @@ public class LevelVisualizer : MonoBehaviour
 
         ClearGlobalPathRenderer();
 
-        MirrorManager.Instance?.InitFromLevel(currLevel, cellSize);
+        //GameManager.Instance.InitMirror(currLevel, cellSize);
+
+        SimAppInstance.Bootstrap(currLevel, cellSize, scenarioModel, worldOrigin, minX, minY, gridH,partsLibrary);
+
+        // (optional) hook outcome logs once
+        SimAppInstance.Game.OnOutcome += o => Debug.Log($"[SIM/OUTCOME] {o.Kind} {o.Reason} train={o.TrainId} point={o.PointId}");
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
         {
@@ -316,6 +332,8 @@ public class LevelVisualizer : MonoBehaviour
 
             var trainController = trainGO.GetComponent<TrainController>();
             trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
+
+            trainController.AssignMirrorId(SimAppInstance.GetMirrorIdByPoint(p.id));
         }
 
         
@@ -620,6 +638,8 @@ public class LevelVisualizer : MonoBehaviour
             if (point.initialCarts != null)
                 newPoint.initialCarts = new List<int>(point.initialCarts);
 
+            newPoint.id = point.id;
+
             clone.points.Add(newPoint);
         }
 
@@ -649,6 +669,8 @@ public class LevelVisualizer : MonoBehaviour
 
             if (point.initialCarts != null)
                 newPoint.initialCarts = new List<int>(point.initialCarts);
+
+            newPoint.id = point.id;
 
             clone.points.Add(newPoint);
         }

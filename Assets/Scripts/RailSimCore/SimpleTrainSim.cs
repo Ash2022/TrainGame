@@ -172,6 +172,10 @@ namespace RailSimCore
 
                 // shift the slice forward by the train’s half‐length (“nose”)
                 float nose = SimTuning.HeadHalfLen(CellSize);
+
+
+                //Debug.Log($"[GAME/SETUP] cell={CellSize:F3} sample={SampleStep:F3} eps={Eps:F4} safety={SafetyGap:F3} nose={nose:F3} latTol=0.050 want={want:F3} S={SHead:F3} others={(others != null ? others.Count : 0)}");
+
                 if (!noseLogged)
                     {
                     Debug.Log($"[SimpleTrainSim] headHalfLen (nose) = {nose:F3}m");
@@ -195,9 +199,16 @@ namespace RailSimCore
                         if (!other.TryGetOccupiedBackSlice(SafetyGap, SampleStep*.5f, out var occupiedSlice))
                             continue;
 
+                        //Debug.Log($"[OCC/USED] safety={SafetyGap:F3} sub={SampleStep * 0.5f:F3} occPts={occupiedSlice.Count} p0={occupiedSlice[0]} pN={occupiedSlice[occupiedSlice.Count - 1]}");
 
                         if (IntersectPolylines(movingSlice, occupiedSlice, Eps,0.05f, out float alongMoving, out Vector3 hitPos))
                         {
+                            //Debug.Log($"[MOVE/USED] movePts={movingSlice.Count} p0={movingSlice[0]} pN={movingSlice[movingSlice.Count - 1]} along={alongMoving:F3}");
+
+                            //Debug.Log($"[GAME/HIT/INPUTS] cell={CellSize:F3} sample={SampleStep:F3} eps={Eps:F4} nose={SimTuning.HeadHalfLen(CellSize):F3} safety={SafetyGap:F3} lat=0.050 S={SHead:F3} move[{movingSlice.Count}] {movingSlice[0]}->{movingSlice[movingSlice.Count - 1]} occ[{occupiedSlice.Count}] {occupiedSlice[0]}->{occupiedSlice[occupiedSlice.Count - 1]} blocker={(getId != null ? getId(other) : 0)}");
+
+                            //Debug.Log($"[GAME/HIT] along={alongMoving:F3} hit={hitPos} movePts={movingSlice.Count} occPts={occupiedSlice.Count} blocker={(getId != null ? getId(other) : 0)}");
+
                             cap = Mathf.Min(cap, Mathf.Max(0f, alongMoving));
                             blocked = true;
 
@@ -275,35 +286,50 @@ namespace RailSimCore
 
             // Total occupied distance *behind* the head (include safety)
             float backLen = Mathf.Max(0f, baseLen + Mathf.Max(0f, safetyGap));
-            if (backLen <= 1e-6f) return false;
+            if (backLen <= 1e-6f)
+            {
+                //Debug.Log($"[OCC/PARAMS] backLen<=0 tail={tailBehind:F3} base={baseLen:F3} safety={safetyGap:F3}");
+                return false;
+            }
 
             sampleStep = Mathf.Max(1e-5f, sampleStep);
             int count = Mathf.Max(2, Mathf.CeilToInt(backLen / sampleStep) + 1);
             float step = backLen / (count - 1);
 
+            //Debug.Log($"[OCC/PARAMS] halfCart={halfCart:F3} headHalf={headHalf:F3} tail={tailBehind:F3} base={baseLen:F3} safety={safetyGap:F3} backLen={backLen:F3} sub={sampleStep:F3} n={count}");
+
             // Get head pose from TAPE (robust even before a leg is loaded)
             if (!tape.SampleBack(0f, out var headPos, out var headTan, out _))
+            {
+                //Debug.Log("[OCC/FAIL] no tape at d=0");
                 return false; // no tape yet (should be seeded at spawn)
+            }
 
             var pts = new List<Vector3>(count + 2);
 
             // Forward "nose" so head-on contact triggers before centers meet
             float noseLen = headHalf;
-            pts.Add(headPos + headTan * noseLen); // nose tip (ahead of head)
-            pts.Add(headPos);                      // head center
+            var noseTip = headPos + headTan * noseLen;
+            pts.Add(noseTip); // nose tip (ahead of head)
+            pts.Add(headPos); // head center
 
             // Then sample along the back tape
             for (int i = 1; i < count; i++)
             {
                 float d = i * step; // distance behind head
                 if (!tape.SampleBack(d, out var p, out _, out _))
+                {
+                    //Debug.Log($"[OCC/FAIL] tape too short at d={d:F3} / backLen={backLen:F3} builtPts={pts.Count}");
                     return false; // tape/prefix not long enough yet
+                }
                 pts.Add(p);
             }
 
             points = pts;
+            //Debug.Log($"[OCC/BUILT] pts={pts.Count} p0={pts[0]} pN={pts[pts.Count - 1]}");
             return true;
         }
+
 
 
         // ===== Internals =====

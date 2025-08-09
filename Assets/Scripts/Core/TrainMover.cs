@@ -50,111 +50,7 @@ public class TrainMover : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────────────
     // PUBLIC API (unchanged signatures)
 
-    /// <summary>
-    /// Start moving along a leg; will invoke onArrivedStation once at the end.
-    /// </summary>
-    /*
-    public void MoveAlongPath(List<Vector3> worldPoints, List<GameObject> currCarts, float currCellSize, System.Action<MoveCompletion> onCompleted = null)
-
-    {
-        if (isMoving) return;
-        if (worldPoints == null || worldPoints.Count < 2)
-        {
-            Debug.LogWarning("TrainMover: Invalid path");
-            return;
-        }
-
-        // Cache inputs
-        carts = currCarts ?? new List<GameObject>();
-        cellSize = currCellSize;
-        cartHalfLen = SimTuning.CartHalfLen(cellSize);
-        headHalfLen = SimTuning.HeadHalfLen(cellSize);
-
-        // Build cart center offsets from current world poses (keep exact visual spacing at start of leg)
-        offsets.Clear();
-        Vector3 headPos = transform.position;
-        Vector3 legFwd = (worldPoints[1] - worldPoints[0]).normalized;
-        for (int i = 0; i < carts.Count; i++)
-        {
-            float off = Vector3.Dot(headPos - carts[i].transform.position, legFwd);
-            if (off < 0f) off = 0f;
-            offsets.Add(off);
-        }
-
-        // Configure core sim for this leg
-        float step = (collisionSampleStep > 0f) ? collisionSampleStep : SimTuning.SampleStep(cellSize);
-        float eps = (collisionEps > 0f) ? collisionEps : SimTuning.Eps(cellSize);
-        sim.Configure(cellSize, sampleStep: step, eps: eps, safetyGap: Mathf.Max(0f, safetyGap));
-        sim.LoadLeg(worldPoints);
-        sim.SetCartOffsets(offsets);
-
-        // Ensure tape capacity at least tail + small margin
-        float gap = SimTuning.Gap(cellSize);
-        float tailBehind;
-        if (offsets.Count > 0)
-        {
-            int lastIdx = offsets.Count - 1;
-            tailBehind = offsets[lastIdx] + cartHalfLen;
-        }
-        else
-        {
-            tailBehind = headHalfLen; // fallback to head size if no carts
-        }
-        sim.TapeCapacityMeters = tailBehind + gap + SimTuning.TapeMarginMeters;
-
-        // Fallback seeding (in case controller didn't pre-seed at spawn)
-        // Reserve a straight prefix behind start, enough for 'reservedCartSlots'
-        
-        if (!TryGetPoseAtBackDistance(0.01f, out _, out _)) // tape not seeded yet
-        {
-            float cartLen = SimTuning.CartLen(cellSize);
-            float firstOffset = headHalfLen + gap + cartHalfLen;
-            int slots = Mathf.Max(1, reservedCartSlots);
-            float reservedBackMeters = firstOffset + (cartLen + gap) * (slots - 1);
-            // seed behind the current head pose
-            sim.SeedTapePrefixStraight(worldPoints[0], legFwd, reservedBackMeters + SimTuning.TapeMarginMeters);
-        }
-
-        MirrorManager.Instance?.StartLeg(GetComponent<TrainController>(), worldPoints);
-
-        moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
-    }
-    */
-
-    /// <summary>
-    /// Start a move: load sim leg, build smooth visuals, then kick off the coroutine.
-    /// </summary>
-    /// 
-    /*
-    public void MoveAlongPath(List<Vector3> worldPoints, IList<GameObject> carts, float cellSize, Action<MoveCompletion> onCompleted)
-    {
-        // 1) configure sim exactly as before
-        sim.LoadLeg(worldPoints);
-        // …your existing SetCartOffsets, SeedTapePrefixStraight, etc…
-
-        // 2) build a smooth, sampled spline for visuals
-        SplineUtils.BuildSmoothSpline(worldPoints,
-                                      handleRatio: 0.3f,            // tweak to taste
-                                      sampleStep: cellSize * 0.1f,   // ~10 samples per cell
-                                      out _smoothPos,
-                                      out _smoothTan);
-
-        // build cumulative length table on the smooth samples
-        _smoothCumLen = new List<float>(_smoothPos.Count);
-        float acc = 0f;
-        _smoothCumLen.Add(0f);
-        for (int i = 1; i < _smoothPos.Count; i++)
-        {
-            acc += Vector3.Distance(_smoothPos[i - 1], _smoothPos[i]);
-            _smoothCumLen.Add(acc);
-        }
-        _smoothTotalLen = acc;
-
-        // 3) start your existing coroutine
-        if (moveCoroutine != null) StopCoroutine(moveCoroutine);
-        moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
-    }
-    */
+   
     public void MoveAlongPath(List<float> cartCenterOffsets,
         List<Vector3> worldPoints,
         List<GameObject> currCarts,
@@ -229,9 +125,7 @@ public class TrainMover : MonoBehaviour
         }
         _smoothTotalLen = acc;
 
-        // ------ Mirror & start move ------
-
-        MirrorManager.Instance?.StartLeg(GetComponent<TrainController>(), worldPoints);
+        
 
         moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
     }
@@ -271,153 +165,23 @@ public class TrainMover : MonoBehaviour
         sim.SeedTapePrefixStraight(headPos, forwardWorld, Mathf.Max(0f, length));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // MAIN LOOP (adapter over SimpleTrainSim)
-    /*
-    private IEnumerator MoveRoutine(System.Action<MoveCompletion> onCompleted)
-    {
-        isMoving = true;
-
-        // Place head and carts at s=0 using the core
-        sim.SampleHead(0f, out var headPos0, out var headTan0);
-        transform.position = headPos0;
-        transform.rotation = Quaternion.LookRotation(Vector3.forward, headTan0) * Quaternion.Euler(0, 0, -90f);
-
-        // Initial cart placement from tape/prefix
-        var cartPos = ListPool<Vector3>.Get();
-        var cartTan = ListPool<Vector3>.Get();
-        sim.GetCartPoses(cartPos, cartTan);
-        for (int i = 0; i < carts.Count && i < cartPos.Count; i++)
-        {
-            carts[i].transform.position = cartPos[i];
-            carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cartTan[i]) * Quaternion.Euler(0, 0, -90f);
-        }
-        ListPool<Vector3>.Release(cartPos);
-        ListPool<Vector3>.Release(cartTan);
-
-        AdvanceResult lastRes = new AdvanceResult { Kind = AdvanceResultKind.EndOfPath };
-        var myCtrl = GetComponent<TrainController>();
-
-        yield return null; // first rendered frame
-
-        // MAIN LOOP
-        while (true)
-        {
-            float want = moveSpeed * Time.deltaTime;
-
-            if (want > 0f)
-            {
-                // Build "others" list of core sims (stationary) and an id map for debug
-                IList<SimpleTrainSim> others = null;
-                Dictionary<SimpleTrainSim, int> idMap = null;
-
-                if (collisionsEnabled)
-                {
-                    var trains = GameManager.Instance.trains;
-                    var list = new List<SimpleTrainSim>(trains.Count);
-                    idMap = new Dictionary<SimpleTrainSim, int>(trains.Count);
-                    for (int i = 0; i < trains.Count; i++)
-                    {
-                        var tc = trains[i];
-                        if (tc == null) continue;
-                        var mv = tc.GetComponent<TrainMover>();
-                        if (mv == null) continue;
-                        if (ReferenceEquals(mv, this)) continue;
-                        list.Add(mv.sim);
-                        idMap[mv.sim] = tc.TrainId;
-                    }
-                    others = list;
-                }
-
-                int GetId(SimpleTrainSim s) => (idMap != null && idMap.TryGetValue(s, out var id)) ? id : 0;
-
-                // Game-side computation
-                var res = sim.ComputeAllowedAdvance(want, others, getId: GetId);
-                float allowed = res.Allowed;
-
-                // Mirror preview + compare (editor/dev only manager)
-                var mirrorRes = MirrorManager.Instance != null ? MirrorManager.Instance.Preview(myCtrl, want) : default;
-                MirrorManager.Instance?.CompareTickResults($"T{myCtrl.TrainId}", res, mirrorRes);
-
-                // Debug gizmos
-                if (collisionDebug)
-                {
-                    dbgMovingSlice = sim.LastMovingSlice;
-                    dbgBlockedSlice = sim.LastBlockedSlice;
-                    if (others != null && sim.LastBlockedSlice != null)
-                        Debug.Log($"[TrainMover] BLOCKED by Train {sim.LastBlockerId}  allowed={allowed:F3} m");
-                }
-
-                // Apply movement in game
-                if (allowed > 1e-6f)
-                {
-                    sim.CommitAdvance(allowed, out var headPos, out var headTan);
-                    transform.position = headPos;
-                    transform.rotation = Quaternion.LookRotation(Vector3.forward, headTan) * Quaternion.Euler(0, 0, -90f);
-
-                    cartPos = ListPool<Vector3>.Get();
-                    cartTan = ListPool<Vector3>.Get();
-                    sim.GetCartPoses(cartPos, cartTan);
-                    for (int i = 0; i < carts.Count && i < cartPos.Count; i++)
-                    {
-                        carts[i].transform.position = cartPos[i];
-                        carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cartTan[i]) * Quaternion.Euler(0, 0, -90f);
-                    }
-                    ListPool<Vector3>.Release(cartPos);
-                    ListPool<Vector3>.Release(cartTan);
-                }
-
-                // Commit same advance to mirror so it stays in lockstep
-                MirrorManager.Instance?.Commit(myCtrl, allowed, out _, out _);
-
-                lastRes = res;
-
-                // End-of-leg?
-                if (res.Kind == AdvanceResultKind.EndOfPath || res.Kind == AdvanceResultKind.Blocked || sim.AtEnd())
-                    break;
-            }
-
-            yield return null;
-        }
-
-        isMoving = false;
-        moveCoroutine = null;
-
-        if (onCompleted != null)
-        {
-            if (lastRes.Kind == AdvanceResultKind.EndOfPath || sim.AtEnd())
-                onCompleted(new MoveCompletion { Outcome = MoveOutcome.Arrived });
-            else if (lastRes.Kind == AdvanceResultKind.Blocked)
-                onCompleted(new MoveCompletion { Outcome = MoveOutcome.Blocked, BlockerId = lastRes.BlockerId, HitPos = lastRes.HitPos });
-            else
-                onCompleted(new MoveCompletion { Outcome = MoveOutcome.Arrived });
-        }
-    }
-    */
 
     private IEnumerator MoveRoutine(Action<MoveCompletion> onCompleted)
     {
         isMoving = true;
 
         // INITIAL HEAD + CARTS PLACEMENT
-
-        // 1) Advance sim to s=0 (seeds tape internally)
         sim.SampleHead(0f, out _, out _);
-
-        // 2) Place head visually on the smooth curve start
         transform.position = _smoothPos[0];
-        transform.rotation = Quaternion.LookRotation(Vector3.forward, _smoothTan[0])
-                             * Quaternion.Euler(0f, 0f, -90f);
+        transform.rotation = Quaternion.LookRotation(Vector3.forward, _smoothTan[0]) * Quaternion.Euler(0f, 0f, -90f);
 
-        // 3) Initial cart placement from sim tape
         var cartPos = ListPool<Vector3>.Get();
         var cartTan = ListPool<Vector3>.Get();
         sim.GetCartPoses(cartPos, cartTan);
         for (int i = 0; i < carts.Count && i < cartPos.Count; i++)
         {
             carts[i].transform.position = cartPos[i];
-            carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cartTan[i])
-                                          * Quaternion.Euler(0f, 0f, -90f);
+            carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cartTan[i]) * Quaternion.Euler(0f, 0f, -90f);
         }
         ListPool<Vector3>.Release(cartPos);
         ListPool<Vector3>.Release(cartTan);
@@ -453,17 +217,24 @@ public class TrainMover : MonoBehaviour
                 }
                 int GetId(SimpleTrainSim s) => (idMap != null && idMap.TryGetValue(s, out var id)) ? id : 0;
 
-                // Compute allowed advance
+                //if (collisionsEnabled && idMap != null) 
+                //    Debug.Log($"[GAME/OTHERS] T{myCtrl.TrainId} -> [{string.Join(",", idMap.Values)}]");
+
+                // Game compute
                 var res = sim.ComputeAllowedAdvance(want, others, GetId);
                 float allowed = res.Allowed;
 
-                // Mirror preview & compare
-                var mirrorRes = MirrorManager.Instance != null
-                    ? MirrorManager.Instance.Preview(myCtrl, want)
+                // Mirror preview BEFORE any commit, same want as game
+                var mirrorRes = (LevelVisualizer.Instance.SimAppInstance != null)
+                    ? LevelVisualizer.Instance.SimAppInstance.Mirror.PreviewById(myCtrl.MirrorId, want)
                     : default;
-                MirrorManager.Instance?.CompareTickResults($"T{myCtrl.TrainId}", res, mirrorRes);
 
-                // Debug slices
+                if (mirrorRes.Kind != res.Kind || mirrorRes.BlockerId != res.BlockerId)
+                    Debug.LogWarning($"[CMP] T{myCtrl.TrainId} game={res.Kind}/{res.BlockerId}({res.Allowed:F3})  mirror={mirrorRes.Kind}/{mirrorRes.BlockerId}({mirrorRes.Allowed:F3})");
+                else
+                    Debug.Log("AllGood");
+
+                // Debug slices (game-side)
                 if (collisionDebug)
                 {
                     dbgMovingSlice = sim.LastMovingSlice;
@@ -472,44 +243,35 @@ public class TrainMover : MonoBehaviour
                         Debug.Log($"[TrainMover] BLOCKED by Train {sim.LastBlockerId} allowed={allowed:F3}m");
                 }
 
-                // Apply movement
+                // Apply movement (game visuals driven by game sim only)
                 if (allowed > 1e-6f)
                 {
                     sim.CommitAdvance(allowed, out _, out _);
 
-                    // Map sim.SHead along sim.PathLength to smooth curve
                     float u = Mathf.Clamp01(sim.SHead / sim.PathLength);
                     float targetLen = u * _smoothTotalLen;
                     SampleSmooth(targetLen, out var smoothPos, out var smoothTan);
 
-                    // Update head visuals
                     transform.position = smoothPos;
-                    transform.rotation = Quaternion.LookRotation(Vector3.forward, smoothTan)
-                                         * Quaternion.Euler(0f, 0f, -90f);
+                    transform.rotation = Quaternion.LookRotation(Vector3.forward, smoothTan) * Quaternion.Euler(0f, 0f, -90f);
 
-                    // Update cart visuals from sim tape
                     cartPos = ListPool<Vector3>.Get();
                     cartTan = ListPool<Vector3>.Get();
                     sim.GetCartPoses(cartPos, cartTan);
                     for (int i = 0; i < carts.Count && i < cartPos.Count; i++)
                     {
                         carts[i].transform.position = cartPos[i];
-                        carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cartTan[i])
-                                                     * Quaternion.Euler(0f, 0f, -90f);
+                        carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cartTan[i]) * Quaternion.Euler(0f, 0f, -90f);
                     }
                     ListPool<Vector3>.Release(cartPos);
                     ListPool<Vector3>.Release(cartTan);
                 }
 
-                // Mirror commit
-                MirrorManager.Instance?.Commit(myCtrl, res.Allowed, out _, out _);
-
                 lastRes = res;
 
-                // End-of-leg?
-                if (res.Kind == AdvanceResultKind.EndOfPath
-                 || res.Kind == AdvanceResultKind.Blocked
-                 || sim.AtEnd())
+
+                // End-of-leg? (based on GAME result only)
+                if (res.Kind == AdvanceResultKind.EndOfPath || res.Kind == AdvanceResultKind.Blocked || sim.AtEnd())
                 {
                     break;
                 }
@@ -518,13 +280,13 @@ public class TrainMover : MonoBehaviour
             yield return null;
         }
 
-        // FINISH
+        // FINISH (based on GAME result only)
         isMoving = false;
         moveCoroutine = null;
 
         if (onCompleted != null)
         {
-            if (lastRes.Kind == AdvanceResultKind.EndOfPath || sim.AtEnd())
+            if (lastRes.Kind == AdvanceResultKind.EndOfPath)
                 onCompleted(new MoveCompletion { Outcome = MoveOutcome.Arrived });
             else if (lastRes.Kind == AdvanceResultKind.Blocked)
                 onCompleted(new MoveCompletion
@@ -539,8 +301,6 @@ public class TrainMover : MonoBehaviour
     }
 
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Gizmos
 
     private void OnDrawGizmosSelected()
     {

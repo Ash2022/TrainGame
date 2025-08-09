@@ -35,6 +35,9 @@ public class TrainController : MonoBehaviour
     public int TrainId => CurrentPointModel?.id ?? 0;
     public Vector3 HeadWorldPos => transform.position;
 
+    public int MirrorId { get; private set; }
+    public void AssignMirrorId(int id) { MirrorId = id; }
+
     public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize, GameObject cartPrefab)
     {
         currCellSize = cellSize;
@@ -175,7 +178,9 @@ public class TrainController : MonoBehaviour
         GameManager.Instance.RegisterTrain(this);
         trainClickView.Init(TrainWasClicked);
 
-        MirrorManager.Instance?.RegisterTrain(this, transform.position, initialForward, cartCenterOffsets, requiredTapeLength, safetyGap: 0f);
+        Debug.Log($"[SPAWN/GAME] T{CurrentPointModel.id} head={transform.position} fwd={initialForward} cell={currCellSize:F3} headHalf={SimTuning.HeadHalfLen(currCellSize):F3} cartOffsets=[{string.Join(",", cartCenterOffsets.Select(x => x.ToString("F3")))}] reqTape={requiredTapeLength:F3} sampleStep={SimTuning.SampleStep(currCellSize):F3} eps={mover.Sim.Eps:F4} safetyGap={mover.Sim.SafetyGap:F3}");
+
+        //MirrorManager.Instance?.RegisterTrain(this, transform.position, initialForward, cartCenterOffsets, requiredTapeLength, safetyGap: 0f);
     }
 
     private void TrainWasClicked()
