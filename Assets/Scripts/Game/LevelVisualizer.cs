@@ -242,13 +242,13 @@ public class LevelVisualizer : MonoBehaviour
         GenerateDynamic();
 
         // 3) Build the data-driven “raw” dynamic content
-        GenerateDynamicFromData();
+        //GenerateDynamicFromData();
 
         // 4) Wait until the end of the frame so all Transforms have updated
         yield return new WaitForEndOfFrame();
 
         // 5) Compare live vs. raw children
-        CompareDynamicHolders();
+        //CompareDynamicHolders();
     }
 
 

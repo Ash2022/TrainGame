@@ -196,7 +196,7 @@ namespace RailSimCore
                             continue;
 
 
-                        if (IntersectPolylines(movingSlice, occupiedSlice, Eps, out float alongMoving, out Vector3 hitPos))
+                        if (IntersectPolylines(movingSlice, occupiedSlice, Eps,0.05f, out float alongMoving, out Vector3 hitPos))
                         {
                             cap = Mathf.Min(cap, Mathf.Max(0f, alongMoving));
                             blocked = true;
@@ -379,7 +379,7 @@ namespace RailSimCore
         }
 
         // Polyline–polyline intersection with colinear overlap detection.
-        private static bool IntersectPolylines(List<Vector3> A, List<Vector3> B, float eps, out float alongA, out Vector3 hitPos)
+        private static bool IntersectPolylines(List<Vector3> A, List<Vector3> B, float eps, float lateralTol, out float alongA, out Vector3 hitPos)
         {
             alongA = 0f; hitPos = Vector3.zero;
             float accA = 0f;
@@ -395,21 +395,12 @@ namespace RailSimCore
                     float bLen = Vector2.Distance(b0, b1);
                     if (bLen <= eps) continue;
 
-                    if (TryIntersectSegments2D(a0, a1, b0, b1, eps, out float ta, out float tb, out bool colinear, out Vector2 inter))
+                    if (TryIntersectSegments2D(a0, a1, b0, b1, eps, lateralTol, out float ta, out float tb, out bool colinear, out Vector2 inter))
                     {
-                        if (!colinear)
-                        {
-                            ta = Mathf.Clamp01(ta);
-                            alongA = accA + ta * aLen;
-                            hitPos = inter;
-                            return true;
-                        }
-                        else
-                        {
-                            alongA = accA;
-                            hitPos = A[i]; // approx: start of overlap
-                            return true;
-                        }
+                        ta = Mathf.Clamp01(ta);
+                        alongA = accA + ta * aLen;
+                        hitPos = inter;
+                        return true;
                     }
                 }
                 accA += aLen;
@@ -417,16 +408,21 @@ namespace RailSimCore
             return false;
         }
 
-
-        private static bool TryIntersectSegments2D(Vector2 p, Vector2 p2, Vector2 q, Vector2 q2, float eps,
+        private static bool TryIntersectSegments2D(Vector2 p, Vector2 p2, Vector2 q, Vector2 q2, float eps, float lateralTol,
                                                    out float tP, out float tQ, out bool colinear, out Vector2 inter)
         {
             tP = tQ = 0f; inter = Vector2.zero; colinear = false;
+
             Vector2 r = p2 - p;
             Vector2 s = q2 - q;
+            float aLen = r.magnitude;
+            float bLen = s.magnitude;
+            if (aLen <= eps || bLen <= eps) return false;
+
             float rxs = r.x * s.y - r.y * s.x;
             float q_pxr = (q.x - p.x) * r.y - (q.y - p.y) * r.x;
 
+            // (1) Colinear overlap
             if (Mathf.Abs(rxs) < eps && Mathf.Abs(q_pxr) < eps)
             {
                 colinear = true;
@@ -437,27 +433,97 @@ namespace RailSimCore
                 float tmin = Mathf.Max(0f, Mathf.Min(t0, t1));
                 float tmax = Mathf.Min(1f, Mathf.Max(t0, t1));
                 if (tmax - tmin < eps) return false;
-                tP = tmin; tQ = 0f; inter = p + r * ((tmin + tmax) * 0.5f);
+                tP = (tmin + tmax) * 0.5f;
+                tQ = 0f;
+                inter = p + r * tP;
                 return true;
             }
 
-            if (Mathf.Abs(rxs) < eps) return false;
-
-            float t = ((q.x - p.x) * s.y - (q.y - p.y) * s.x) / rxs;
-            float u = ((q.x - p.x) * r.y - (q.y - p.y) * r.x) / rxs;
-
-            if (t >= -eps && t <= 1f + eps && u >= -eps && u <= 1f + eps)
+            // (2) Proper intersection
+            if (Mathf.Abs(rxs) >= eps)
             {
-                t = Mathf.Clamp01(t);
-                u = Mathf.Clamp01(u);
-                inter = p + t * r;
-                tP = t; tQ = u;
+                float t = ((q.x - p.x) * s.y - (q.y - p.y) * s.x) / rxs;
+                float u = ((q.x - p.x) * r.y - (q.y - p.y) * r.x) / rxs;
+                if (t >= -eps && t <= 1f + eps && u >= -eps && u <= 1f + eps)
+                {
+                    t = Mathf.Clamp01(t);
+                    u = Mathf.Clamp01(u);
+                    inter = p + t * r;
+                    tP = t; tQ = u;
+                    return true;
+                }
+            }
+
+            // (3) General capsule–capsule test via closest points between two segments
+            //     (works for any angle; catches near-parallel slides and T-bones)
+            // Real-Time Collision Detection (Ericson) style
+            Vector2 uvec = r;
+            Vector2 vvec = s;
+            Vector2 w0 = p - q;
+
+            float A = Vector2.Dot(uvec, uvec);        // |u|^2
+            float B = Vector2.Dot(uvec, vvec);        // u·v
+            float C = Vector2.Dot(vvec, vvec);        // |v|^2
+            float D = Vector2.Dot(uvec, w0);          // u·w0
+            float E = Vector2.Dot(vvec, w0);          // v·w0
+
+            float denom = A * C - B * B;
+            float sN, sD = denom;   // s parameter (on [0,1]) numerator/denominator
+            float tN, tD = denom;   // t parameter (on [0,1]) numerator/denominator
+
+            const float SMALL = 1e-8f;
+
+            // parallel?
+            if (denom < SMALL)
+            {
+                sN = 0f; sD = 1f;   // force s = 0
+                tN = E; tD = C;    // t = clamp(E/C)
+            }
+            else
+            {
+                sN = (B * E - C * D);
+                tN = (A * E - B * D);
+
+                if (sN < 0f) { sN = 0f; tN = E; tD = C; }
+                else if (sN > sD) { sN = sD; tN = E + B; tD = C; }
+            }
+
+            if (tN < 0f)
+            {
+                tN = 0f;
+                if (-D < 0f) sN = 0f;
+                else if (-D > A) sN = sD;
+                else { sN = -D; sD = A; }
+            }
+            else if (tN > tD)
+            {
+                tN = tD;
+                if (-D + B < 0f) sN = 0f;
+                else if (-D + B > A) sN = sD;
+                else { sN = (-D + B); sD = A; }
+            }
+
+            float sc = (Mathf.Abs(sN) < SMALL ? 0f : sN / sD);
+            float tc = (Mathf.Abs(tN) < SMALL ? 0f : tN / tD);
+
+            Vector2 Pc = p + sc * uvec;   // closest point on A-segment
+            Vector2 Qc = q + tc * vvec;   // closest point on B-segment
+            float dist = Vector2.Distance(Pc, Qc);
+
+            // Debug: uncomment to see distances even when not counted as collisions
+            // Debug.Log($"[CapsuleCheck] d={dist:F4} tol={lateralTol:F4} tA={sc:F3} tB={tc:F3}");
+
+            if (dist <= lateralTol + eps)
+            {
+                tP = sc; tQ = tc; colinear = false;
+                inter = (Pc + Qc) * 0.5f;
                 return true;
             }
+
             return false;
         }
 
-        
+
 
         public bool AtEnd(float tol = 1e-5f)
         {
