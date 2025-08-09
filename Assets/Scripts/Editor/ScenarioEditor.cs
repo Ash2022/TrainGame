@@ -6,6 +6,7 @@ using UnityEngine;
 using RailSimCore;
 using static SimController;
 
+
 /// <summary>
 /// Editor-side manager for placing/cycling/removing GamePoints,
 /// and (new) a thin host for SimWorld via SimController.

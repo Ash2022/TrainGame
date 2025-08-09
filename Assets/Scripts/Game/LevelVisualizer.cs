@@ -178,8 +178,8 @@ public class LevelVisualizer : MonoBehaviour
         // 2) create and bootstrap the sim app (no scene refs)
         if (SimAppInstance == null)
         {
-            SimAppInstance = new SimApp(MirrorManager.Instance, new SimGame(MirrorManager.Instance));
-            SimAppInstance.SetFixedDt(Time.fixedDeltaTime);
+            SimAppInstance = new SimApp();
+            
         }
 
 
@@ -280,8 +280,6 @@ public class LevelVisualizer : MonoBehaviour
 
         SimAppInstance.Bootstrap(currLevel, cellSize, scenarioModel, worldOrigin, minX, minY, gridH,partsLibrary);
 
-        // (optional) hook outcome logs once
-        SimAppInstance.Game.OnOutcome += o => Debug.Log($"[SIM/OUTCOME] {o.Kind} {o.Reason} train={o.TrainId} point={o.PointId}");
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
         {

@@ -224,7 +224,10 @@ public class TrainMover : MonoBehaviour
                 var res = sim.ComputeAllowedAdvance(want, others, GetId);
                 float allowed = res.Allowed;
 
+               
                 // Mirror preview BEFORE any commit, same want as game
+
+                /*
                 var mirrorRes = (LevelVisualizer.Instance.SimAppInstance != null)
                     ? LevelVisualizer.Instance.SimAppInstance.Mirror.PreviewById(myCtrl.MirrorId, want)
                     : default;
@@ -233,6 +236,7 @@ public class TrainMover : MonoBehaviour
                     Debug.LogWarning($"[CMP] T{myCtrl.TrainId} game={res.Kind}/{res.BlockerId}({res.Allowed:F3})  mirror={mirrorRes.Kind}/{mirrorRes.BlockerId}({mirrorRes.Allowed:F3})");
                 else
                     Debug.Log("AllGood");
+                */
 
                 // Debug slices (game-side)
                 if (collisionDebug)

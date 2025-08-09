@@ -25,7 +25,6 @@ public class GameManager : MonoBehaviour
     private readonly Dictionary<TrainController, int> _carried = new Dictionary<TrainController, int>(); // carts onboard (unlimited cap)
     private readonly Dictionary<TrainController, Action<MoveCompletion>> _moveHandlers = new Dictionary<TrainController, Action<MoveCompletion>>();
 
-    private MirrorRunner _mirrorRunner;
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -59,7 +58,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             LevelVisualizer.Instance.ResetLevel();
 
-        LevelVisualizer.Instance.SimAppInstance.Step(Time.deltaTime);
+        //LevelVisualizer.Instance.SimAppInstance.Step(Time.deltaTime);
     }
 
     private void HandleClick()
@@ -123,7 +122,7 @@ public class GameManager : MonoBehaviour
             //MirrorManager.Instance?.StartLeg(selectedTrain, worldPoints);          // your existing start-leg into sim
             //MirrorManager.Instance?.MarkActive(selectedTrain, selectedTrain.GetComponent<TrainMover>()?.moveSpeed ?? 1f);
 
-            LevelVisualizer.Instance.SimAppInstance?.Game.StartLegFromPoint(selectedTrain.TrainId, target.id, worldPoints);
+           // LevelVisualizer.Instance.SimAppInstance?.Game.StartLegFromPoint(selectedTrain.TrainId, target.id, worldPoints);
 
             // Clear click state
             _lastTargetId = 0;
