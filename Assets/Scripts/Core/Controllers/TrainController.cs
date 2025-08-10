@@ -10,7 +10,7 @@ public class TrainController : MonoBehaviour
     [SerializeField] TrainMover mover;
     [SerializeField] Transform cartHolder;
     [SerializeField] Transform trainVisuals;
-    [SerializeField] Renderer renderer;
+    [SerializeField] Renderer trainRenderer;
     [SerializeField] TrainClickView trainClickView;
     [SerializeField] GameObject trainSelectedHighLight;
 
@@ -44,7 +44,7 @@ public class TrainController : MonoBehaviour
         currCellSize = cellSize;
         currCarts.Clear();
 
-        renderer.material.color = Utils.colors[p.colorIndex];
+        trainRenderer.material.color = Utils.colors[p.colorIndex];
 
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Clear();
@@ -168,10 +168,7 @@ public class TrainController : MonoBehaviour
 
         // Seed back tape so this train can be collided with before it ever moves
 
-        Debug.Log(
-                $"[Init] tailBehind={tailBehind:F2}, cartLen={cartSize:F2}, gap={gap:F2} → " +
-                $"reserveBack={reserveBack:F2}, requiredTape={requiredTapeLength:F2}"
-            );
+        //Debug.Log($"[Init] tailBehind={tailBehind:F2}, cartLen={cartSize:F2}, gap={gap:F2} → " + $"reserveBack={reserveBack:F2}, requiredTape={requiredTapeLength:F2}");
 
         // make the train collidable BEFORE any movement
         mover.SetInitialCartOffsetsAndCapacity(cartCenterOffsets, currCellSize);
@@ -180,9 +177,8 @@ public class TrainController : MonoBehaviour
         GameManager.Instance.RegisterTrain(this);
         trainClickView.Init(TrainWasClicked);
 
-        Debug.Log($"[SPAWN/GAME] T{CurrentPointModel.id} head={transform.position} fwd={initialForward} cell={currCellSize:F3} headHalf={SimTuning.HeadHalfLen(currCellSize):F3} cartOffsets=[{string.Join(",", cartCenterOffsets.Select(x => x.ToString("F3")))}] reqTape={requiredTapeLength:F3} sampleStep={SimTuning.SampleStep(currCellSize):F3} eps={mover.Sim.Eps:F4} safetyGap={mover.Sim.SafetyGap:F3}");
+        //Debug.Log($"[SPAWN/GAME] T{CurrentPointModel.id} head={transform.position} fwd={initialForward} cell={currCellSize:F3} headHalf={SimTuning.HeadHalfLen(currCellSize):F3} cartOffsets=[{string.Join(",", cartCenterOffsets.Select(x => x.ToString("F3")))}] reqTape={requiredTapeLength:F3} sampleStep={SimTuning.SampleStep(currCellSize):F3} eps={mover.Sim.Eps:F4} safetyGap={mover.Sim.SafetyGap:F3}");
 
-        //MirrorManager.Instance?.RegisterTrain(this, transform.position, initialForward, cartCenterOffsets, requiredTapeLength, safetyGap: 0f);
     }
 
     private void TrainWasClicked()
@@ -279,8 +275,6 @@ public class TrainController : MonoBehaviour
         // finally, let the mover drive it on the next leg
         mv.AddCartOffset(newOffset);
     }
-
-
 
     
 }

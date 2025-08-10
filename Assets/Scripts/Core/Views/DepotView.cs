@@ -8,7 +8,9 @@ public class DepotView : MonoBehaviour
     private GamePoint _pointModel;
 
     [SerializeField] Transform exits;
-    [SerializeField] Renderer renderer;
+    [SerializeField] Renderer depotRenderer;
+
+    public GamePoint PointModel { get => _pointModel; set => _pointModel = value; }
 
     /// <summary>
     /// Call this right after Instantiate to wire up the model.
@@ -19,7 +21,7 @@ public class DepotView : MonoBehaviour
 
         exits.transform.localEulerAngles = new Vector3(0, 0, -part.rotation);
 
-        renderer.material.color = Utils.colors[point.colorIndex];
+        depotRenderer.material.color = Utils.colors[point.colorIndex];
     }
 
 }

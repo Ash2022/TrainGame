@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -104,7 +102,6 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             LevelVisualizer.Instance.ResetLevel();
 
-        //LevelVisualizer.Instance.SimAppInstance.Step(Time.deltaTime);
     }
 
     private void HandleClick()
@@ -167,16 +164,8 @@ public class GameManager : MonoBehaviour
                 lastSimRes = simApp.StartLegFromPoints(selectedTrain.TrainId, target.id, worldPoints);
             }
 
-            
-            
             // Start the move
             selectedTrain.MoveAlongPath(worldPoints);
-
-
-            //MirrorManager.Instance?.StartLeg(selectedTrain, worldPoints);          // your existing start-leg into sim
-            //MirrorManager.Instance?.MarkActive(selectedTrain, selectedTrain.GetComponent<TrainMover>()?.moveSpeed ?? 1f);
-
-            // LevelVisualizer.Instance.SimAppInstance?.Game.StartLegFromPoint(selectedTrain.TrainId, target.id, worldPoints);
 
             // Clear click state
             _lastTargetId = 0;
@@ -230,12 +219,7 @@ public class GameManager : MonoBehaviour
         if (r.Outcome == MoveOutcome.Blocked)
         {
             Debug.Log($"[Game] LOSE (collision). Train {tc.TrainId} vs {r.BlockerId}");
-            _arrivalTarget = null;
-
-            if (UseSimulation)
-            {
-                // optional WL compare for collision already done in CompareGameVsSim
-            }
+            _arrivalTarget = null;            
 
             GameOver(false);
             return;
@@ -308,11 +292,10 @@ public class GameManager : MonoBehaviour
     private static GamePoint GetPointFromView(Component view)
     {
         if (view == null) return null;
-        var fi = view.GetType().GetField("_pointModel", BindingFlags.NonPublic | BindingFlags.Instance);
-        return fi != null ? (GamePoint)fi.GetValue(view) : null;
+        if (view is StationView sv) return sv.PointModel;
+        if (view is DepotView dv) return dv.PointModel;
+        return null;
     }
-
-   
 
     private StationView FindStationViewByPointId(int id)
     {

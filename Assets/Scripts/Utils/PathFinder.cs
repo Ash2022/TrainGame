@@ -190,7 +190,7 @@ public class PathFinder
         log.AppendLine("=== Chosen path ===");
         DumpEdges(edgePathFinal, log);
         log.AppendLine("TotalCost: " + totalCost);
-        Debug.Log(log.ToString());
+        //Debug.Log(log.ToString());
 
         // build traversal output
         var traversals = BuildTraversals(edgePathFinal);
@@ -250,15 +250,7 @@ private struct PrevRec
         var result = new List<PathModel.PartTraversal>();
         if (steps == null || steps.Count == 0) return result;
 
-        // local inline: how far along a simple spline we enter/exit
-        float ExitT(PlacedPartInstance part, int exitIndex)
-        {
-            if (exitIndex < 0) return 0.5f;
-            // find the exit detail
-            var ed = part.exits.FirstOrDefault(e => e.exitIndex == exitIndex);
-            // 0=Up,1=Right => start (0f), 2=Down,3=Left => end (1f)
-            return (ed.direction == 0 || ed.direction == 1) ? 0f : 1f;
-        }
+        
 
         int i = 0;
         while (i < steps.Count)

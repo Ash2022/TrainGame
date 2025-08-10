@@ -31,9 +31,6 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] private SpriteRenderer frameRenderer;
     [SerializeField] private float tileDelay = 0.05f;
 
-    //[SerializeField] float frameWidthUnits = 9f;
-    //[SerializeField] float frameHeightUnits = 16f;
-
     [SerializeField] LineRenderer globalPathRenderer;
 
     ScenarioModel orgScenarioModel;
@@ -57,8 +54,6 @@ public class LevelVisualizer : MonoBehaviour
 
     public float MAX_CELL_SIZE = 100;
 
-    
-
     void Awake()
     {
         Instance = this;
@@ -79,7 +74,6 @@ public class LevelVisualizer : MonoBehaviour
     {
         orgScenarioModel = CloneScenarioModelFromLevel(currLevel);
 
-
         // clear out any previously spawned parts
         for (int i = levelHolder.childCount - 1; i >= 0; i--)
             Destroy(levelHolder.GetChild(i).gameObject);
@@ -90,7 +84,6 @@ public class LevelVisualizer : MonoBehaviour
         minY = int.MaxValue;
         maxX = int.MinValue;
         maxY = int.MinValue;
-
 
         foreach (var inst in level.parts)
             foreach (var cell in inst.occupyingCells)
@@ -131,8 +124,6 @@ public class LevelVisualizer : MonoBehaviour
         // worldOrigin is the world position of grid cell (0,0)
         worldOrigin = new Vector2(frameMin.x + marginX,
                                   frameMin.y + marginY);
-
-
         
 
         foreach (var inst in level.parts)
@@ -248,13 +239,10 @@ public class LevelVisualizer : MonoBehaviour
 
         ClearGlobalPathRenderer();
 
-        //GameManager.Instance.InitMirror(currLevel, cellSize);
-
         GameManager.Instance.ResetCurrLevel();
 
         if (useSimulation && SimAppInstance != null)
             SimAppInstance.Reset(scenarioModel);
-
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
         {
@@ -305,7 +293,6 @@ public class LevelVisualizer : MonoBehaviour
 
             var trainController = trainGO.GetComponent<TrainController>();
             trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
-
 
             // SAFE mirror id assignment (works with or without sim)
             int mirrorId = -1;
@@ -388,10 +375,6 @@ public class LevelVisualizer : MonoBehaviour
     }
 
 
-
-
-
-
     /// <summary>  
     /// Returns the sprite for the given partType, or null if not found.  
     /// </summary>
@@ -401,11 +384,8 @@ public class LevelVisualizer : MonoBehaviour
         return (idx >= 0 && idx < partSprites.Count) ? partSprites[idx] : null;
     }
 
-
     public void DrawGlobalSplinePath(PathModel pathModel,List<Vector3> worldPts,Color color)
     {
-        
-
         for (int pi = 0; pi < pathModel.Traversals.Count; pi++)
         {
             var trav = pathModel.Traversals[pi];
@@ -627,7 +607,6 @@ public class LevelVisualizer : MonoBehaviour
 
         return clone;
     }
-
 
     public static ScenarioModel CloneScenarioModelFromScenario(ScenarioModel source)
     {

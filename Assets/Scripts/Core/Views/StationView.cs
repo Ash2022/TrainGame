@@ -16,6 +16,8 @@ public class StationView : MonoBehaviour
     // computed once per Initialize
     private float _spacing;
 
+    public GamePoint PointModel { get => _pointModel; set => _pointModel = value; }
+
     /// <summary>
     /// Call this right after Instantiate to wire up the model.
     /// </summary>

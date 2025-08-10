@@ -31,12 +31,7 @@ public static class RouteModelBuilder
             return pc;
         }
 
-        PlacedPartInstance.ExitDetails GetExit(PlacedPartInstance part, int pin)
-        {
-            for (int i = 0; i < part.exits.Count; i++)
-                if (part.exits[i].exitIndex == pin) return part.exits[i];
-            return default;
-        }
+        
 
         bool IsOpposite(PlacedPartInstance.ExitDetails a, PlacedPartInstance.ExitDetails b)
         {

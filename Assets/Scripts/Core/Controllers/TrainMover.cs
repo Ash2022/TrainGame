@@ -2,8 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -37,7 +35,6 @@ public class TrainMover : MonoBehaviour
 
     // Debug (gizmos)
     private List<Vector3> dbgMovingSlice, dbgBlockedSlice;
-
 
     // new fields to hold the smoothed curve
     private List<Vector3> _smoothPos;
@@ -78,8 +75,6 @@ public class TrainMover : MonoBehaviour
 
         //Debug.Log($"[Offsets] legFwd={legFwd:F2}  computed=[{string.Join(", ", offsets.Select(o => o.ToString("F2")))}]");
         
-        
-
         // 3) Configure the sim for this leg
         float step = (collisionSampleStep > 0f) ? collisionSampleStep : SimTuning.SampleStep(cellSize);
         float eps = (collisionEps > 0f) ? collisionEps : SimTuning.Eps(cellSize);
@@ -125,7 +120,7 @@ public class TrainMover : MonoBehaviour
         }
         _smoothTotalLen = acc;
 
-        Debug.Log($"[RUN/GAME] cell={cellSize:F3} headHalf={SimTuning.HeadHalfLen(cellSize):F3} step={step:F3} eps={eps:E3} safety={safetyGap:F3}");
+        //Debug.Log($"[RUN/GAME] cell={cellSize:F3} headHalf={SimTuning.HeadHalfLen(cellSize):F3} step={step:F3} eps={eps:E3} safety={safetyGap:F3}");
 
         moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
     }
@@ -217,68 +212,10 @@ public class TrainMover : MonoBehaviour
                 }
                 int GetId(SimpleTrainSim s) => (idMap != null && idMap.TryGetValue(s, out var id)) ? id : 0;
 
-                //if (collisionsEnabled && idMap != null) 
-                //    Debug.Log($"[GAME/OTHERS] T{myCtrl.TrainId} -> [{string.Join(",", idMap.Values)}]");
-                /*
-                foreach (var tc in GameManager.Instance.trains)
-                {
-                    var mv = tc.GetComponent<TrainMover>();
-                    if (mv == null || mv == this) continue;
-
-                    // sample other's head pose from its tape
-                    var ok = mv.sim.TryGetOccupiedBackSlice(safetyGap, SimTuning.SampleStep(cellSize), out var occ);
-                    if (ok && occ != null && occ.Count >= 2)
-                    {
-                        var noseTip = occ[0];
-                        var headPos = occ[1];
-                        var otherTan = (noseTip - headPos).normalized; // this should point FORWARD
-                        var approxFwd = (tc.transform.rotation * Vector3.up); // your visual forward (after -90 later)
-                        Debug.Log($"[HEADFWD] other T{tc.TrainId} tan·vis={Vector3.Dot(otherTan, approxFwd):F3}");
-                    }
-                }*/
-
-                // ONE-TIME DEBUG: compare other's tape head to its visual head
-               /*
-                if (collisionsEnabled && idMap != null)
-                {
-                    foreach (var kv in idMap)
-                    {
-                        var otherId = kv.Value;
-                        var otherTc = GameManager.Instance.trains.Find(t => t.TrainId == otherId);
-                        if (otherTc == null) continue;
-                        var otherMv = otherTc.GetComponent<TrainMover>();
-                        if (otherMv == null) continue;
-
-                        if (otherMv.sim.TryGetOccupiedBackSlice(safetyGap, SimTuning.SampleStep(cellSize)*0.5f, out var occ) && occ != null && occ.Count >= 2)
-                        {
-                            var tapeHead = occ[1];
-                            var visHead = otherTc.transform.position;
-                            var d = Vector3.Distance(tapeHead, visHead);
-                            Debug.Log($"[HEADCHK] other T{otherId} tapeHead={tapeHead} visHead={visHead}  d={d:F3}  noseLen={(occ[0] - occ[1]).magnitude:F3}");
-                        }
-                    }
-                }*/
-
-
                 // Game compute
                 var res = sim.ComputeAllowedAdvance(want, others, GetId);
                 float allowed = res.Allowed;
 
-               
-                // Mirror preview BEFORE any commit, same want as game
-
-                /*
-                var mirrorRes = (LevelVisualizer.Instance.SimAppInstance != null)
-                    ? LevelVisualizer.Instance.SimAppInstance.Mirror.PreviewById(myCtrl.MirrorId, want)
-                    : default;
-
-                if (mirrorRes.Kind != res.Kind || mirrorRes.BlockerId != res.BlockerId)
-                    Debug.LogWarning($"[CMP] T{myCtrl.TrainId} game={res.Kind}/{res.BlockerId}({res.Allowed:F3})  mirror={mirrorRes.Kind}/{mirrorRes.BlockerId}({mirrorRes.Allowed:F3})");
-                else
-                    Debug.Log("AllGood");
-                */
-
-                // Debug slices (game-side)
                 if (collisionDebug)
                 {
                     dbgMovingSlice = sim.LastMovingSlice;
@@ -384,11 +321,6 @@ public class TrainMover : MonoBehaviour
     {
         if (sim != null)
             sim.EnsureBackPrefix(minMeters);
-    }
-
-    public void EnsureTapeCapacity(float requiredMeters)
-    {
-        if (sim != null) sim.EnsureTapeCapacity(requiredMeters);
     }
 
     public void SetInitialCartOffsetsAndCapacity(IList<float> offs, float currCellSize)

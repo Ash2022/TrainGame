@@ -55,13 +55,13 @@ public static class PathService
         // 5) Determine end entry pin
         int endEntryPin = target.anchor.exitPin >= 0 ? target.anchor.exitPin : -1;
 
-        UnityEngine.Debug.Log(log.ToString());
+        //UnityEngine.Debug.Log(log.ToString());
 
         // 6) Run pathfinder
         var pf = new PathFinder();
         pf.Init(level.routeModelData);
         return pf.GetPath(startPart, endPart, startExitPin);
-        //return pf.GetPath(startPart, endPart);
+
     }
 
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
@@ -9,9 +8,7 @@ public class TrackPartView : MonoBehaviour
     [SerializeField]LineRenderer lineRenderer1;
     [SerializeField] LineRenderer lineRenderer2;
 
-
     public SpriteRenderer MainPartImage { get => mainPartImage; set => mainPartImage = value; }
-
 
     /// <summary>
     /// Called from LevelVisualizer.BuildCoroutine after Instantiate.
@@ -29,9 +26,6 @@ public class TrackPartView : MonoBehaviour
         //    our sprites import at 100px = 1 unit, and a 2×1 part is 200×100 px → 2×1 world units.
         float s = LevelVisualizer.Instance.CellSize;
         transform.localScale = new Vector3(s, s, 1f);
-
-
-        
 
         // 3) compute the “half‐size” of this part in LOCAL grid‐units
         //    sprite.bounds.size is (gridWidth, gridHeight) at scale==1

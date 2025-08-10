@@ -263,17 +263,7 @@ namespace RailSimCore
             return tr;
         }
 
-        // Best-effort cell-size inference if caller doesn't supply it:
-        private static float MeasureCell(Polyline p)
-        {
-            if (p == null || p.Points == null || p.Points.Count < 2) return 1f;
-            // average segment length as a heuristic cell size
-            float total = p.Length;
-            int segs = Mathf.Max(1, p.Points.Count - 1);
-            float avg = total / segs;
-            return Mathf.Max(1e-3f, avg);
-        }
-
+       
         internal void SetLegPolyline(int trainId, Polyline polyline)
         {
             if (polyline == null || polyline.Points == null || polyline.Points.Count < 2)
