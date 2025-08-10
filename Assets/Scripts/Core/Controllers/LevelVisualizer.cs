@@ -42,6 +42,10 @@ public class LevelVisualizer : MonoBehaviour
     bool useSimulation;
     SimApp SimAppInstance;
 
+    Coroutine levelBuildRoutine;
+    Coroutine dynamicBuildRoutine;
+
+
     //level dynamic params
     int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
     Vector2 worldOrigin;
@@ -65,8 +69,22 @@ public class LevelVisualizer : MonoBehaviour
     {
         useSimulation = _useSimulation;              // your existing flag
         SimAppInstance = simAppFromManager;         // DO NOT create one inside visualizer
-        currLevel = levelFromManager;               // use the copy from ModelManager
-        StartCoroutine(BuildCoroutine(currLevel));  // your existing coroutine
+        currLevel = levelFromManager;    
+        
+        if(levelBuildRoutine !=null)
+        {
+            StopCoroutine(levelBuildRoutine);
+            levelBuildRoutine = null;
+        }
+
+        if(dynamicBuildRoutine !=null)
+        {
+            StopCoroutine(dynamicBuildRoutine);
+            dynamicBuildRoutine = null;
+        }
+
+        // use the copy from ModelManager
+        levelBuildRoutine = StartCoroutine(BuildCoroutine(currLevel));  // your existing coroutine
     }
 
 
@@ -81,6 +99,9 @@ public class LevelVisualizer : MonoBehaviour
         // clear out any previously spawned parts
         for (int i = dynamicHolder.childCount - 1; i >= 0; i--)
             Destroy(dynamicHolder.GetChild(i).gameObject);
+
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
 
         // compute grid bounds
 
@@ -197,7 +218,7 @@ public class LevelVisualizer : MonoBehaviour
             SimAppInstance.Bootstrap(currLevel, cellSize, currLevel.gameData, worldOrigin, minX, minY, gridH, partsLibrary);
         }
 
-        StartCoroutine(BuildAndResetTest());
+        dynamicBuildRoutine = StartCoroutine(BuildAndResetTest());
 
     }
 
@@ -206,7 +227,12 @@ public class LevelVisualizer : MonoBehaviour
     /// </summary>
     public void ResetLevel()
     {
-        StartCoroutine(BuildAndResetTest());
+        if (dynamicBuildRoutine != null)
+        {
+            StopCoroutine(dynamicBuildRoutine);
+            dynamicBuildRoutine = null;
+        }
+        dynamicBuildRoutine = StartCoroutine(BuildAndResetTest());
     }
 
     private IEnumerator BuildAndResetTest()

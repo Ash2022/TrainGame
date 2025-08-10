@@ -204,6 +204,8 @@ public class TrainController : MonoBehaviour
 
     private void OnMoveCompleted(MoveCompletion r)
     {
+        LevelVisualizer.Instance.ClearGlobalPathRenderer();
+
         if (r.Outcome == MoveOutcome.Arrived)
         {
             // no local game logic here
