@@ -78,6 +78,10 @@ public class LevelVisualizer : MonoBehaviour
         for (int i = levelHolder.childCount - 1; i >= 0; i--)
             Destroy(levelHolder.GetChild(i).gameObject);
 
+        // clear out any previously spawned parts
+        for (int i = dynamicHolder.childCount - 1; i >= 0; i--)
+            Destroy(dynamicHolder.GetChild(i).gameObject);
+
         // compute grid bounds
 
         minX = int.MaxValue;

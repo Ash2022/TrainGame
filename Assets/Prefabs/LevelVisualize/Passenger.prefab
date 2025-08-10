@@ -96,4 +96,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dab1615479b419c48ac2f696d2d94b28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderer: {fileID: 3468136718318547471}
+  passengerRenderer: {fileID: 3468136718318547471}

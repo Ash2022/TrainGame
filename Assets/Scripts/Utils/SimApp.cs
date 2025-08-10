@@ -29,6 +29,7 @@ public sealed class SimApp
     // Keep our own mirror of cart offsets per train (meters behind head center)
     private readonly Dictionary<int, List<float>> _cartOffsetsByPointId = new();
 
+    private readonly HashSet<int> _parkedTrains = new HashSet<int>();
     public int GetMirrorIdByPoint(int trainPointId) =>
         _trainPointIdToMirrorId.TryGetValue(trainPointId, out var id) ? id : -1;
 
@@ -107,62 +108,7 @@ public sealed class SimApp
         }
     }
 
-    /* ============================================================
-     * Reset dynamic state (trains + station passengers); keep track
-     * ============================================================ */
-    public void Reset()
-    {
-        if (_level == null || _scenarioRef == null) return;
 
-        // Restore station passengers
-        _stationPeople.Clear();
-        foreach (var kv in _stationPeopleOrig)
-            _stationPeople[kv.Key] = new List<int>(kv.Value);
-
-        // Respawn trains fresh (tracks/worldSplines remain as built)
-        _world = new SimWorld();
-        _trainPointIdToMirrorId.Clear();
-        _lastResultByTrainPointId.Clear();
-        _cartOffsetsByPointId.Clear();
-
-        foreach (var p in _scenarioRef.points)
-        {
-            if (p.type != GamePointType.Train) continue;
-
-            SimLevelBuilder.GetTrainStart(p, _worldOrigin, _minX, _minY, _gridH, _cellSize,
-                                          out var headPos, out var headFwd);
-
-            var cartOffsets = new List<float>();
-            float headHalf = SimTuning.HeadHalfLen(_cellSize);
-            float cartHalf = SimTuning.CartHalfLen(_cellSize);
-            float cartLen = SimTuning.CartLen(_cellSize);
-            float gap = SimTuning.Gap(_cellSize);
-
-            float first = headHalf + gap + cartHalf;
-            int k = (p.initialCarts != null) ? p.initialCarts.Count : 0;
-            for (int i = 0; i < k; i++) cartOffsets.Add(first + i * (cartLen + gap));
-
-            float tailBehind = (k > 0) ? (cartOffsets[k - 1] + cartHalf) : headHalf;
-            const int reserveCarts = 25;
-            float reserveBack = reserveCarts * (cartLen + gap);
-            float tapeSeedLen = tailBehind + reserveBack + gap + SimTuning.TapeMarginMeters;
-
-            var spec = new SpawnSpec
-            {
-                Path = null,
-                HeadPos = headPos,
-                HeadForward = headFwd,
-                CartOffsets = cartOffsets,
-                TapeSeedLen = tapeSeedLen,
-                CellSizeHint = _cellSize,
-                SafetyGap = 0f
-            };
-
-            int simId = _world.SpawnTrain(spec);
-            _trainPointIdToMirrorId[p.id] = simId;
-            _cartOffsetsByPointId[p.id] = cartOffsets; // reset mirror
-        }
-    }
 
     /* ============================================================
      * Run a leg instantly and return a game-shaped result
@@ -171,7 +117,13 @@ public sealed class SimApp
     {
         Debug.Log($"[RUN/SIM ] cell={_cellSize:F3} headHalf={SimTuning.HeadHalfLen(_cellSize):F3}");
 
-        var mc = new MoveCompletion { Outcome = MoveOutcome.Arrived, BlockerId = 0, HitPos = Vector3.zero, SourceController = null };
+        var mc = new MoveCompletion
+        {
+            Outcome = MoveOutcome.Arrived,
+            BlockerId = 0,
+            HitPos = Vector3.zero,
+            SourceController = null
+        };
 
         if (!_trainPointIdToMirrorId.TryGetValue(trainPointId, out int simId) || simId <= 0)
             return mc;
@@ -179,10 +131,10 @@ public sealed class SimApp
         if (worldPoints == null || worldPoints.Count < 2)
             return mc;
 
-        // Load leg
+        // Load leg into sim
         _world.SetLegPolyline(simId, new Polyline(worldPoints));
 
-        // Tight while-loop run to event
+        // Tight while-loop until event
         float metersPerTick = SimTuning.SampleStep(_cellSize) * 0.5f;
         var ev = _world.RunToNextEvent(simId, metersPerTick);
 
@@ -196,13 +148,38 @@ public sealed class SimApp
         {
             mc.Outcome = MoveOutcome.Arrived;
 
-            // Apply arrival rules that mutate sim state (station pickups → add carts)
+            // Apply arrival rules (stations add carts, etc.)
             ApplyArrivalRules(trainPointId, targetPointId);
+
+            // NEW: depot parking logic (engine-only after correct depot & no more color passengers)
+            var dest = FindPoint(targetPointId);
+            if (dest != null && dest.type == GamePointType.Depot)
+            {
+                var train = FindPoint(trainPointId);
+                int trainColor = train?.colorIndex ?? 0;
+
+                bool correctDepot = (dest.colorIndex == trainColor);
+                bool anyColorLeft = AnyStationHasColor(trainColor);
+
+                if (correctDepot && !anyColorLeft)
+                {
+                    // mark parked
+                    _parkedTrains.Add(trainPointId);
+
+                    // clear carts in sim → engine-only (keeps tape/prefix intact)
+                    if (_trainPointIdToMirrorId.TryGetValue(trainPointId, out var sid) && sid > 0)
+                    {
+                        // requires SimWorld.SetCartOffsets(int, IList<float>)
+                        _world.SetCartOffsets(sid, new List<float>());
+                    }
+                }
+            }
         }
 
         _lastResultByTrainPointId[trainPointId] = mc;
         return mc;
     }
+
 
     public MoveCompletion GetLastResult(int trainPointId)
     {
@@ -301,6 +278,7 @@ public sealed class SimApp
         if (scenario == null) throw new ArgumentNullException(nameof(scenario));
         _scenarioRef = scenario;  // rebind to the game’s current scenario
 
+        _parkedTrains.Clear();
         // Re-snapshot stations from the *new* scenario (fresh orig + live)
         _stationPeopleOrig.Clear();
         _stationPeople.Clear();
@@ -373,7 +351,8 @@ public sealed class SimApp
         if (AnyStationHasColor(trainColor))
             return SimDepotResult.LosePrematureDepot;
 
-        if (AllStationsEmpty())
+        // correct depot & no more of this color → parked; only Win if *everything* is done
+        if (AllStationsEmpty() && AllTrainsParked())
             return SimDepotResult.Win;
 
         return SimDepotResult.None;
@@ -396,5 +375,14 @@ public sealed class SimApp
             if (kv.Value != null && kv.Value.Count > 0)
                 return false;
         return true;
+    }
+
+    private bool AllTrainsParked()
+    {
+        // Count only trains in the scenario
+        int totalTrains = 0;
+        foreach (var p in _scenarioRef.points)
+            if (p.type == GamePointType.Train) totalTrains++;
+        return totalTrains > 0 && _parkedTrains.Count == totalTrains;
     }
 }

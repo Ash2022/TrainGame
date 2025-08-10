@@ -416,7 +416,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -440,7 +440,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 135439757}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1678449356}
+        m_TargetAssemblyTypeName: GameOverView, Assembly-CSharp
+        m_MethodName: OnButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &135439757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -959,13 +971,14 @@ GameObject:
   m_Component:
   - component: {fileID: 1678449355}
   - component: {fileID: 1678449356}
+  - component: {fileID: 1678449357}
   m_Layer: 5
   m_Name: GameOverView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1678449355
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1003,6 +1016,19 @@ MonoBehaviour:
   captionText: {fileID: 817626243}
   buttonCaptionText: {fileID: 72155396}
   actionButton: {fileID: 135439756}
+  gameOverCanvas: {fileID: 1678449357}
+--- !u!225 &1678449357
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1678449354}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1725684048
 GameObject:
   m_ObjectHideFlags: 0

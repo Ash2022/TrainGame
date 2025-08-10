@@ -8,15 +8,9 @@ public class GameOverView : MonoBehaviour
     [SerializeField] TMP_Text captionText;
     [SerializeField] TMP_Text buttonCaptionText;
     [SerializeField] Button actionButton;
+    [SerializeField] CanvasGroup gameOverCanvas;
 
     private Action _onPressed;
-
-    void Awake()
-    {
-        if (actionButton != null)
-            actionButton.onClick.AddListener(OnButtonClicked);
-        gameObject.SetActive(false);
-    }
 
     public void ShowWin(Action onNext)
     {
@@ -31,7 +25,7 @@ public class GameOverView : MonoBehaviour
     public void Hide()
     {
         _onPressed = null;
-        gameObject.SetActive(false);
+        gameOverCanvas.alpha = 0;
     }
 
     private void Setup(string caption, string btnText, Action callback)
@@ -39,10 +33,10 @@ public class GameOverView : MonoBehaviour
         if (captionText != null) captionText.text = caption;
         if (buttonCaptionText != null) buttonCaptionText.text = btnText;
         _onPressed = callback;
-        gameObject.SetActive(true);
+        gameOverCanvas.alpha = 1;
     }
 
-    private void OnButtonClicked()
+    public void OnButtonClicked()
     {
         var cb = _onPressed;
         Hide();

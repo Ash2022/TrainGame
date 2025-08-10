@@ -276,5 +276,29 @@ public class TrainController : MonoBehaviour
         mv.AddCartOffset(newOffset);
     }
 
-    
+    public void ClearAllCarts()
+    {
+        // 1) Destroy cart GameObjects
+        if (currCarts != null)
+        {
+            for (int i = 0; i < currCarts.Count; i++)
+                if (currCarts[i] != null) Destroy(currCarts[i]);
+            currCarts.Clear();
+        }
+
+        // 2) Clear offsets in controller
+        if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
+        cartCenterOffsets.Clear();
+
+        // 3) Update sim offsets to empty so occupied slice = engine only
+        var mv = mover != null ? mover : GetComponent<TrainMover>();
+        if (mv != null)
+        {
+            mv.Sim.SetCartOffsets(cartCenterOffsets); // engine-only
+                                                      // keep some back prefix so it stays collidable right after arrival
+            float cell = currCellSize > 0 ? currCellSize : 1f;
+            float headHalf = SimTuning.HeadHalfLen(cell);
+            mv.EnsureBackPrefix(headHalf + SimTuning.Gap(cell) + SimTuning.TapeMarginMeters);
+        }
+    }
 }

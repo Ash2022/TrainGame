@@ -184,7 +184,7 @@ MonoBehaviour:
   mover: {fileID: 6348664809932929447}
   cartHolder: {fileID: 8694752171462292582}
   trainVisuals: {fileID: 7308468359896602345}
-  renderer: {fileID: 8587673064632495605}
+  trainRenderer: {fileID: 8587673064632495605}
   trainClickView: {fileID: 7255134965727917130}
   trainSelectedHighLight: {fileID: 8644729710373687336}
   direction: 0

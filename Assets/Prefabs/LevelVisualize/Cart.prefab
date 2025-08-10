@@ -96,4 +96,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78ea6077d55fc384b866900eb2df75ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderer: {fileID: 3468136718318547471}
+  cartRenderer: {fileID: 3468136718318547471}

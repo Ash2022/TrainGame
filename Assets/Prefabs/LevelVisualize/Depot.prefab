@@ -495,4 +495,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   exits: {fileID: 7020560412307322390}
-  renderer: {fileID: 7852994778699620721}
+  depotRenderer: {fileID: 7852994778699620721}

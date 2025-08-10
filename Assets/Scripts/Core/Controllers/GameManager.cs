@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     private readonly Dictionary<TrainController, int> _carried = new Dictionary<TrainController, int>(); // carts onboard (unlimited cap)
     private readonly Dictionary<TrainController, Action<MoveCompletion>> _moveHandlers = new Dictionary<TrainController, Action<MoveCompletion>>();
 
+    private readonly HashSet<int> _parkedTrains = new HashSet<int>();
+
     MoveCompletion lastSimRes;
 
     [Header("App")]
@@ -51,6 +53,7 @@ public class GameManager : MonoBehaviour
         if (UseSimulation)
             simApp = new SimApp(); // single sim instance for the app
 
+     
         LoadCurrentLevel();
     }
 
@@ -72,8 +75,6 @@ public class GameManager : MonoBehaviour
         if (levelVisualizer != null)
             levelVisualizer.Build(levelCopy, UseSimulation ? simApp : null, UseSimulation);
 
-        // hide game over UI
-        if (gameOverView != null) gameOverView.Hide();
     }
 
     // Call this from TrainController.Init when the train is ready
@@ -213,19 +214,22 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"DONE ← T{tc.TrainId} outcome={r.Outcome} blocker={r.BlockerId}");
 
+        // Per-leg compare (Arrived/Blocked + hit pos), only if sim is enabled
         if (UseSimulation)
             CompareGameVsSim(r, lastSimRes, tc.TrainId, 0.05f);
 
+        // === Lose by collision ===
         if (r.Outcome == MoveOutcome.Blocked)
         {
             Debug.Log($"[Game] LOSE (collision). Train {tc.TrainId} vs {r.BlockerId}");
-            _arrivalTarget = null;            
-
-            GameOver(false);
+            _arrivalTarget = null;
+            GameOver(false);                 // centralized: shows UI and triggers dynamic-only reset on click
             return;
         }
+
         if (r.Outcome != MoveOutcome.Arrived) return;
 
+        // === Arrived ===
         var dest = _arrivalTarget;
         _arrivalTarget = null;
         if (dest == null) return;
@@ -247,44 +251,61 @@ public class GameManager : MonoBehaviour
             Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
             var sv = FindStationViewByPointId(dest.id);
             if (sv != null) sv.RemoveHeadPassengers(removed);
-            return;
+            return; // no WL check on station arrival
         }
         else if (dest.type == GamePointType.Depot)
         {
-            GameEndOutcome gameOutcome;
+            // --- Wrong depot => immediate lose ---
             if (dest.colorIndex != trainColor)
             {
-                gameOutcome = GameEndOutcome.LoseWrongDepot;
                 Debug.Log($"[Game] LOSE (wrong depot). Train {tc.TrainId} at depot {dest.id}");
+
+                if (UseSimulation && simApp != null)
+                {
+                    var simOutcome = simApp.EvaluateDepotOutcome(tc.TrainId, dest.id);
+                    CompareWinLose(GameEndOutcome.LoseWrongDepot, simOutcome, tc.TrainId, dest.id);
+                }
+
                 GameOver(false);
-            }
-            else if (AnyStationHasColor(trainColor))
-            {
-                gameOutcome = GameEndOutcome.LosePrematureDepot;
-                Debug.Log($"[Game] LOSE (premature depot). Train {tc.TrainId} at depot {dest.id}");
-                GameOver(false);
-            }
-            else if (AllStationsEmpty())
-            {
-                gameOutcome = GameEndOutcome.Win;
-                Debug.Log("[Game] WIN");
-                GameOver(true);
-            }
-            else
-            {
-                gameOutcome = GameEndOutcome.None;
+                return;
             }
 
-            if (UseSimulation)
+            // --- Premature depot => immediate lose ---
+            if (AnyStationHasColor(trainColor))
+            {
+                Debug.Log($"[Game] LOSE (premature depot). Train {tc.TrainId} at depot {dest.id}");
+
+                if (UseSimulation && simApp != null)
+                {
+                    var simOutcome = simApp.EvaluateDepotOutcome(tc.TrainId, dest.id);
+                    CompareWinLose(GameEndOutcome.LosePrematureDepot, simOutcome, tc.TrainId, dest.id);
+                }
+
+                GameOver(false);
+                return;
+            }
+
+            // --- Correct depot, no more passengers of this color → park this train ---
+            tc.ClearAllCarts();                 // visuals + sim offsets cleared (engine-only)
+            _parkedTrains.Add(tc.TrainId);
+
+            // WL compare (sim may report Win if global state is already complete)
+            if (UseSimulation && simApp != null)
             {
                 var simOutcome = simApp.EvaluateDepotOutcome(tc.TrainId, dest.id);
-                CompareWinLose(gameOutcome, simOutcome, tc.TrainId, dest.id);
+                CompareWinLose(GameEndOutcome.None, simOutcome, tc.TrainId, dest.id);
             }
+
+            // Win only when ALL stations empty AND ALL trains parked
+            if (AllStationsEmpty() && AllTrainsParked())
+            {
+                Debug.Log("[Game] WIN");
+                GameOver(true);                // centralized: shows UI and loads next level on click
+            }
+
             return;
         }
     }
-
-
 
 
     // === Helpers ===
@@ -397,22 +418,31 @@ public class GameManager : MonoBehaviour
 
     private void CompareWinLose(GameEndOutcome game, SimApp.SimDepotResult sim, int trainId, int depotId)
     {
+        // If the game hasn't labeled it "Win" yet but global state already indicates a win,
+        // normalize to Win so we compare apples-to-apples with the sim.
+        var normalizedGame = game;
+        if (game == GameEndOutcome.None && AllStationsEmpty() && AllTrainsParked())
+            normalizedGame = GameEndOutcome.Win;
+
         string G(GameEndOutcome g) => g.ToString();
         string S(SimApp.SimDepotResult s) => s.ToString();
 
-        // Perfect match
-        if ((game == GameEndOutcome.Win && sim == SimApp.SimDepotResult.Win) ||
-            (game == GameEndOutcome.LoseWrongDepot && sim == SimApp.SimDepotResult.LoseWrongDepot) ||
-            (game == GameEndOutcome.LosePrematureDepot && sim == SimApp.SimDepotResult.LosePrematureDepot) ||
-            (game == GameEndOutcome.None && sim == SimApp.SimDepotResult.None))
-        {
-            Debug.Log($"[CMP-WL] T{trainId}@D{depotId} OK: game={G(game)} sim={S(sim)}");
-            return;
-        }
+        bool match =
+            (normalizedGame == GameEndOutcome.Win && sim == SimApp.SimDepotResult.Win) ||
+            (normalizedGame == GameEndOutcome.LoseWrongDepot && sim == SimApp.SimDepotResult.LoseWrongDepot) ||
+            (normalizedGame == GameEndOutcome.LosePrematureDepot && sim == SimApp.SimDepotResult.LosePrematureDepot) ||
+            (normalizedGame == GameEndOutcome.None && sim == SimApp.SimDepotResult.None);
 
-        // Mismatch
-        Debug.LogError($"[CMP-WL] T{trainId}@D{depotId} MISMATCH: game={G(game)} vs sim={S(sim)}");
+        if (match)
+        {
+            Debug.Log($"[CMP-WL] T{trainId}@D{depotId} OK: game={G(normalizedGame)} sim={S(sim)}");
+        }
+        else
+        {
+            Debug.LogError($"[CMP-WL] T{trainId}@D{depotId} MISMATCH: game={G(normalizedGame)} vs sim={S(sim)}");
+        }
     }
+
 
     private static string Fmt(Vector3 v) => $"({v.x:F3},{v.y:F3})";
 
@@ -429,35 +459,41 @@ public class GameManager : MonoBehaviour
         _carried.Clear();
         _moveHandlers.Clear();
         selectedTrain = null;
+        _parkedTrains.Clear();
+        if (gameOverView != null) 
+            gameOverView.Hide();
     }
 
     public void GameOver(bool win)
     {
-        if (gameOverView == null)
-        {
-            Debug.LogWarning("GameOverView not assigned.");
-            // fallback behavior if you want:
-            if (win) { AdvanceLevelAndReload(); } else { ReloadCurrentLevel(); }
-            return;
-        }
-
-        if (win) 
+        if (win)
             gameOverView.ShowWin(AdvanceLevelAndReload);
-        else 
-            gameOverView.ShowLose(ReloadCurrentLevel);
+        else
+            gameOverView.ShowLose(ReloadDynamicOnly);
+    }
+
+    private void ReloadDynamicOnly()
+    {
+        // dynamic-only reset (no static rebuild)
+        ResetCurrLevel();
+        if (levelVisualizer != null)
+            levelVisualizer.ResetLevel();   // your GenerateDynamic-only path
+        gameOverView.Hide();
     }
 
     private void AdvanceLevelAndReload()
     {
         if (modelManager != null && modelManager.LevelCount > 0)
             CurrentLevelIndex = (CurrentLevelIndex + 1) % modelManager.LevelCount;
-
-        LoadCurrentLevel();
+        LoadCurrentLevel();                 // full load (static + dynamic)
     }
+      
 
-    private void ReloadCurrentLevel()
+    private bool AllTrainsParked()
     {
-        LoadCurrentLevel();
+        // only trains present in this level
+        int totalTrains = trains.Count;
+        return totalTrains > 0 && _parkedTrains.Count == totalTrains;
     }
 
 }
