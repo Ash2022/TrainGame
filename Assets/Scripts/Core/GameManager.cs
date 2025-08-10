@@ -27,8 +27,16 @@ public class GameManager : MonoBehaviour
 
     MoveCompletion lastSimRes;
 
+    [Header("App")]
+    [SerializeField] private ModelManager modelManager;
+    [SerializeField] private LevelVisualizer levelVisualizer;
+    [SerializeField] private GameOverView gameOverView;
+
     [Header("Simulation")]
     public bool UseSimulation = true;   // toggle sim on/off
+    private SimApp simApp;
+
+    public int CurrentLevelIndex = 0;
 
     private enum GameEndOutcome { None, Win, LoseWrongDepot, LosePrematureDepot }
 
@@ -36,7 +44,38 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+    }
 
+    private void Start()
+    {
+        if (modelManager != null) modelManager.Init();
+
+        if (UseSimulation)
+            simApp = new SimApp(); // single sim instance for the app
+
+        LoadCurrentLevel();
+    }
+
+    private void LoadCurrentLevel()
+    {
+        var levelCopy = (modelManager != null) ? modelManager.GetLevelCopy(CurrentLevelIndex) : null;
+        if (levelCopy == null)
+        {
+            Debug.LogError("[GameManager] No level to load.");
+            return;
+        }
+
+        level = levelCopy; // keep your existing reference if needed elsewhere
+
+        // optional: reset GameManager state for a clean run
+        ResetCurrLevel();
+
+        // build via visualizer
+        if (levelVisualizer != null)
+            levelVisualizer.Build(levelCopy, UseSimulation ? simApp : null, UseSimulation);
+
+        // hide game over UI
+        if (gameOverView != null) gameOverView.Hide();
     }
 
     // Call this from TrainController.Init when the train is ready
@@ -125,7 +164,7 @@ public class GameManager : MonoBehaviour
 
             if (UseSimulation)
             {
-                lastSimRes = LevelVisualizer.Instance.SimAppInstance.StartLegFromPoints(selectedTrain.TrainId, target.id, worldPoints);
+                lastSimRes = simApp.StartLegFromPoints(selectedTrain.TrainId, target.id, worldPoints);
             }
 
             
@@ -185,48 +224,24 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"DONE ← T{tc.TrainId} outcome={r.Outcome} blocker={r.BlockerId}");
 
-        // Per-leg compare (Arrived/Blocked + hit pos), only if sim is enabled
         if (UseSimulation)
             CompareGameVsSim(r, lastSimRes, tc.TrainId, 0.05f);
 
-        // ===== Lose by collision =====
         if (r.Outcome == MoveOutcome.Blocked)
         {
-            // Win/Lose compare for collision (treat as loss), only if sim is enabled
-            if (UseSimulation)
-            {
-                if (lastSimRes.Outcome == MoveOutcome.Blocked)
-                {
-                    float d = Vector3.Distance(r.HitPos, lastSimRes.HitPos);
-                    if (d <= 0.05f)
-                    {
-                        Debug.Log($"[CMP-WL] T{tc.TrainId} OK: Lose (collision). " +
-                                  $"gameBlk={r.BlockerId} simBlk={lastSimRes.BlockerId} " +
-                                  $"hitΔ={d:F3}m");
-                    }
-                    else
-                    {
-                        Debug.LogError($"[CMP-WL] T{tc.TrainId} MISMATCH: Lose (collision) but hit pos differs. " +
-                                       $"gameBlk={r.BlockerId} simBlk={lastSimRes.BlockerId} " +
-                                       $"gameHit=({r.HitPos.x:F3},{r.HitPos.y:F3}) " +
-                                       $"simHit=({lastSimRes.HitPos.x:F3},{lastSimRes.HitPos.y:F3}) " +
-                                       $"hitΔ={d:F3}m");
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"[CMP-WL] T{tc.TrainId} MISMATCH: Game=Lose (collision) vs Sim={lastSimRes.Outcome}");
-                }
-            }
-
             Debug.Log($"[Game] LOSE (collision). Train {tc.TrainId} vs {r.BlockerId}");
             _arrivalTarget = null;
+
+            if (UseSimulation)
+            {
+                // optional WL compare for collision already done in CompareGameVsSim
+            }
+
+            GameOver(false);
             return;
         }
-
         if (r.Outcome != MoveOutcome.Arrived) return;
 
-        // ===== Arrived =====
         var dest = _arrivalTarget;
         _arrivalTarget = null;
         if (dest == null) return;
@@ -248,42 +263,43 @@ public class GameManager : MonoBehaviour
             Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
             var sv = FindStationViewByPointId(dest.id);
             if (sv != null) sv.RemoveHeadPassengers(removed);
-            return; // no win/lose check on station arrival
+            return;
         }
         else if (dest.type == GamePointType.Depot)
         {
-            // --- Determine GAME outcome ---
             GameEndOutcome gameOutcome;
             if (dest.colorIndex != trainColor)
             {
                 gameOutcome = GameEndOutcome.LoseWrongDepot;
                 Debug.Log($"[Game] LOSE (wrong depot). Train {tc.TrainId} at depot {dest.id}");
+                GameOver(false);
             }
             else if (AnyStationHasColor(trainColor))
             {
                 gameOutcome = GameEndOutcome.LosePrematureDepot;
                 Debug.Log($"[Game] LOSE (premature depot). Train {tc.TrainId} at depot {dest.id}");
+                GameOver(false);
             }
             else if (AllStationsEmpty())
             {
                 gameOutcome = GameEndOutcome.Win;
                 Debug.Log("[Game] WIN");
+                GameOver(true);
             }
             else
             {
                 gameOutcome = GameEndOutcome.None;
             }
 
-            // --- Compare with SIM outcome (if enabled) ---
             if (UseSimulation)
             {
-                var simOutcome = LevelVisualizer.Instance.SimAppInstance
-                    .EvaluateDepotOutcome(tc.TrainId, dest.id);
+                var simOutcome = simApp.EvaluateDepotOutcome(tc.TrainId, dest.id);
                 CompareWinLose(gameOutcome, simOutcome, tc.TrainId, dest.id);
             }
             return;
         }
     }
+
 
 
 
@@ -430,6 +446,35 @@ public class GameManager : MonoBehaviour
         _carried.Clear();
         _moveHandlers.Clear();
         selectedTrain = null;
+    }
+
+    public void GameOver(bool win)
+    {
+        if (gameOverView == null)
+        {
+            Debug.LogWarning("GameOverView not assigned.");
+            // fallback behavior if you want:
+            if (win) { AdvanceLevelAndReload(); } else { ReloadCurrentLevel(); }
+            return;
+        }
+
+        if (win) 
+            gameOverView.ShowWin(AdvanceLevelAndReload);
+        else 
+            gameOverView.ShowLose(ReloadCurrentLevel);
+    }
+
+    private void AdvanceLevelAndReload()
+    {
+        if (modelManager != null && modelManager.LevelCount > 0)
+            CurrentLevelIndex = (CurrentLevelIndex + 1) % modelManager.LevelCount;
+
+        LoadCurrentLevel();
+    }
+
+    private void ReloadCurrentLevel()
+    {
+        LoadCurrentLevel();
     }
 
 }

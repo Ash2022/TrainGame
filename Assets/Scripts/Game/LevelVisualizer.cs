@@ -42,7 +42,8 @@ public class LevelVisualizer : MonoBehaviour
 
     LevelData currLevel;
 
-    public SimApp SimAppInstance;
+    bool useSimulation;
+    SimApp SimAppInstance;
 
     //level dynamic params
     int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
@@ -64,60 +65,15 @@ public class LevelVisualizer : MonoBehaviour
         partsLibrary = JsonConvert.DeserializeObject<List<TrackPart>>(partsJson.text);
     }
 
-    void Start()
+
+    public void Build(LevelData levelFromManager, SimApp simAppFromManager, bool _useSimulation)
     {
-        LoadLevel();
-        BuildCurrLevel();
+        useSimulation = _useSimulation;              // your existing flag
+        SimAppInstance = simAppFromManager;         // DO NOT create one inside visualizer
+        currLevel = levelFromManager;               // use the copy from ModelManager
+        StartCoroutine(BuildCoroutine(currLevel));  // your existing coroutine
     }
 
-
-    /// <summary>
-    /// Call this to (re)build the entire level.
-    /// </summary>
-    public void LoadLevel()
-    {
-        var settings = new JsonSerializerSettings
-        {
-            Converters = new List<JsonConverter>
-            {
-                new Vector2Converter(),
-                new Vector2IntConverter(),
-                new Vector3Converter()
-            },
-            Formatting = Formatting.Indented
-        };
-
-        
-
-        if (levelJson == null || partPrefab == null || levelHolder == null)
-        {
-            Debug.LogError("LevelVisualizer: missing references.");
-            return;
-        }
-
-        
-        try
-        {
-            currLevel = JsonConvert.DeserializeObject<LevelData>(levelJson.text, settings);
-        }
-        catch
-        {
-            Debug.LogError("LevelVisualizer: failed to parse LevelData JSON.");
-            return;
-        }
-
-        if (currLevel.parts == null || currLevel.parts.Count == 0)
-        {
-            Debug.LogWarning("LevelVisualizer: no parts in level.");
-            return;
-        }        
-    }
-
-
-    private void BuildCurrLevel()
-    {
-        StartCoroutine(BuildCoroutine(currLevel));
-    }
 
     private IEnumerator BuildCoroutine(LevelData level)
     {
@@ -240,11 +196,8 @@ public class LevelVisualizer : MonoBehaviour
 
         //create and bootstrap the sim app (no scene refs)
 
-        if (GameManager.Instance.UseSimulation)
+        if (useSimulation && SimAppInstance != null)
         {
-            if (SimAppInstance == null)
-                SimAppInstance = new SimApp();
-
             // keep your existing bootstrap here
             SimAppInstance.Bootstrap(currLevel, cellSize, currLevel.gameData, worldOrigin, minX, minY, gridH, partsLibrary);
         }
@@ -299,7 +252,7 @@ public class LevelVisualizer : MonoBehaviour
 
         GameManager.Instance.ResetCurrLevel();
 
-        if (GameManager.Instance.UseSimulation)
+        if (useSimulation && SimAppInstance != null)
             SimAppInstance.Reset(scenarioModel);
 
 
@@ -356,7 +309,7 @@ public class LevelVisualizer : MonoBehaviour
 
             // SAFE mirror id assignment (works with or without sim)
             int mirrorId = -1;
-            if (GameManager.Instance.UseSimulation && SimAppInstance != null)
+            if (useSimulation && SimAppInstance != null)
                 mirrorId = SimAppInstance.GetMirrorIdByPoint(p.id);
 
             trainController.AssignMirrorId(mirrorId);

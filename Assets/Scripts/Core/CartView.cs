@@ -6,7 +6,7 @@ using UnityEngine;
 public class CartView : MonoBehaviour
 {
     [SerializeField] Renderer renderer;
-    internal void Initialize(int colorIndex)
+    internal void SetCartColor(int colorIndex)
     {
         renderer.material.color = Utils.colors[colorIndex];
     }

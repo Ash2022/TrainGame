@@ -135,6 +135,7 @@ public class TrainController : MonoBehaviour
             cartGO.transform.localRotation = Quaternion.identity;
             cartGO.transform.localScale = new Vector3(cartSize, cartSize, cartSize);
 
+            cartGO.GetComponent<CartView>()?.SetCartColor(p.colorIndex);
             // Keep world pose but make them siblings (matches your previous setup)
             cartGO.transform.SetParent(transform.parent, true);
 
@@ -268,7 +269,7 @@ public class TrainController : MonoBehaviour
         cart.transform.position = pos;
         cart.transform.rotation = rot * Quaternion.Euler(0, 0, -90f);
         cart.transform.localScale = Vector3.one * cartLen;
-        cart.GetComponent<CartView>()?.Initialize(colorIndex);
+        cart.GetComponent<CartView>()?.SetCartColor(colorIndex);
 
         // record it
         currCarts.Add(cart);
