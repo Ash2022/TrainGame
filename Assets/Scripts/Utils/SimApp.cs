@@ -7,6 +7,9 @@ using static RailSimCore.Types;
 
 public sealed class SimApp
 {
+
+    public enum SimDepotResult { None, Win, LoseWrongDepot, LosePrematureDepot }
+
     // ----- Immutable bootstrap context -----
     private LevelData _level;
     private ScenarioModel _scenarioRef; // read-only reference (we never mutate it)
@@ -355,4 +358,43 @@ public sealed class SimApp
         }
     }
 
+    public SimDepotResult EvaluateDepotOutcome(int trainPointId, int depotPointId)
+    {
+        var train = FindPoint(trainPointId);
+        var depot = FindPoint(depotPointId);
+        if (train == null || depot == null || depot.type != GamePointType.Depot)
+            return SimDepotResult.None;
+
+        int trainColor = train.colorIndex;
+
+        if (depot.colorIndex != trainColor)
+            return SimDepotResult.LoseWrongDepot;
+
+        if (AnyStationHasColor(trainColor))
+            return SimDepotResult.LosePrematureDepot;
+
+        if (AllStationsEmpty())
+            return SimDepotResult.Win;
+
+        return SimDepotResult.None;
+    }
+
+    private bool AnyStationHasColor(int colorIndex)
+    {
+        foreach (var kv in _stationPeople)
+        {
+            var lst = kv.Value;
+            for (int i = 0; i < lst.Count; i++)
+                if (lst[i] == colorIndex) return true;
+        }
+        return false;
+    }
+
+    private bool AllStationsEmpty()
+    {
+        foreach (var kv in _stationPeople)
+            if (kv.Value != null && kv.Value.Count > 0)
+                return false;
+        return true;
+    }
 }

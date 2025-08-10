@@ -12,6 +12,7 @@ public class TrainController : MonoBehaviour
     [SerializeField] Transform trainVisuals;
     [SerializeField] Renderer renderer;
     [SerializeField] TrainClickView trainClickView;
+    [SerializeField] GameObject trainSelectedHighLight;
 
     List<float> cartCenterOffsets; // lag of each cart center behind the head center (meters)
     Vector3 initialForward; // world forward at spawn (from p.direction)
@@ -185,7 +186,14 @@ public class TrainController : MonoBehaviour
 
     private void TrainWasClicked()
     {
+        ShowHideTrainHighLight(true);
+
         GameManager.Instance.SelectTrain(this);
+    }
+
+    public void ShowHideTrainHighLight(bool showHighlight)
+    {
+        trainSelectedHighLight.SetActive(showHighlight);
     }
 
     public void MoveAlongPath(List<Vector3> worldPoints)

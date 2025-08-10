@@ -158,6 +158,7 @@ MonoBehaviour:
     parts: []
   trains: []
   selectedTrain: {fileID: 0}
+  UseSimulation: 0
 --- !u!4 &190145369
 Transform:
   m_ObjectHideFlags: 0

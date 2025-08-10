@@ -177,13 +177,7 @@ public class LevelVisualizer : MonoBehaviour
                                   frameMin.y + marginY);
 
 
-        // 2) create and bootstrap the sim app (no scene refs)
-        if (SimAppInstance == null)
-        {
-            SimAppInstance = new SimApp();
-            
-        }
-
+        
 
         foreach (var inst in level.parts)
         {
@@ -244,7 +238,16 @@ public class LevelVisualizer : MonoBehaviour
        
         GameManager.Instance.StartNewLevel(currLevel);
 
-        SimAppInstance.Bootstrap(currLevel, cellSize, currLevel.gameData, worldOrigin, minX, minY, gridH, partsLibrary);
+        //create and bootstrap the sim app (no scene refs)
+
+        if (GameManager.Instance.UseSimulation)
+        {
+            if (SimAppInstance == null)
+                SimAppInstance = new SimApp();
+
+            // keep your existing bootstrap here
+            SimAppInstance.Bootstrap(currLevel, cellSize, currLevel.gameData, worldOrigin, minX, minY, gridH, partsLibrary);
+        }
 
         StartCoroutine(BuildAndResetTest());
 
@@ -295,7 +298,9 @@ public class LevelVisualizer : MonoBehaviour
         //GameManager.Instance.InitMirror(currLevel, cellSize);
 
         GameManager.Instance.ResetCurrLevel();
-        SimAppInstance.Reset(scenarioModel);
+
+        if (GameManager.Instance.UseSimulation)
+            SimAppInstance.Reset(scenarioModel);
 
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
@@ -348,7 +353,13 @@ public class LevelVisualizer : MonoBehaviour
             var trainController = trainGO.GetComponent<TrainController>();
             trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
 
-            trainController.AssignMirrorId(SimAppInstance.GetMirrorIdByPoint(p.id));
+
+            // SAFE mirror id assignment (works with or without sim)
+            int mirrorId = -1;
+            if (GameManager.Instance.UseSimulation && SimAppInstance != null)
+                mirrorId = SimAppInstance.GetMirrorIdByPoint(p.id);
+
+            trainController.AssignMirrorId(mirrorId);
 
         }
 
@@ -438,7 +449,7 @@ public class LevelVisualizer : MonoBehaviour
     }
 
 
-    public void DrawGlobalSplinePath(PathModel pathModel,List<Vector3> worldPts)
+    public void DrawGlobalSplinePath(PathModel pathModel,List<Vector3> worldPts,Color color)
     {
         
 
@@ -565,11 +576,13 @@ public class LevelVisualizer : MonoBehaviour
             }
         }
 
+        globalPathRenderer.material.color = color;
+
         globalPathRenderer.positionCount = worldPts.Count;
         globalPathRenderer.SetPositions(worldPts.ToArray());
     }
 
-    private void ClearGlobalPathRenderer()
+    public void ClearGlobalPathRenderer()
     {
         globalPathRenderer.positionCount = 0;
     }
@@ -626,7 +639,7 @@ public class LevelVisualizer : MonoBehaviour
     public List<Vector3> ExtractWorldPointsFromPath(PathModel pathModel)
     {
         var pts = new List<Vector3>();
-        DrawGlobalSplinePath(pathModel, pts);
+        DrawGlobalSplinePath(pathModel, pts,Color.white);
         return pts;
     }
 

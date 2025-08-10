@@ -27,6 +27,11 @@ public class GameManager : MonoBehaviour
 
     MoveCompletion lastSimRes;
 
+    [Header("Simulation")]
+    public bool UseSimulation = true;   // toggle sim on/off
+
+    private enum GameEndOutcome { None, Win, LoseWrongDepot, LosePrematureDepot }
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -118,8 +123,12 @@ public class GameManager : MonoBehaviour
 
             Debug.Log($"GO → T{selectedTrain.TrainId} to P{target.id} ({target.type}) color={selectedTrain.CurrentPointModel.colorIndex}");
 
+            if (UseSimulation)
+            {
+                lastSimRes = LevelVisualizer.Instance.SimAppInstance.StartLegFromPoints(selectedTrain.TrainId, target.id, worldPoints);
+            }
 
-            lastSimRes = LevelVisualizer.Instance.SimAppInstance.StartLegFromPoints(selectedTrain.TrainId, target.id, worldPoints);
+            
             
             // Start the move
             selectedTrain.MoveAlongPath(worldPoints);
@@ -149,7 +158,7 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("Path found with " + path.Traversals.Count + " steps, cost=" + path.TotalCost);
-        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>());
+        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>(),Utils.colors[selectedTrain.CurrentPointModel.colorIndex]);
 
         _lastTargetId = target.id;   // use ID for the second-click match
         _lastPath = path;
@@ -158,6 +167,12 @@ public class GameManager : MonoBehaviour
 
     internal void SelectTrain(TrainController trainController)
     {
+        LevelVisualizer.Instance.ClearGlobalPathRenderer();
+
+        if (selectedTrain != null)
+            selectedTrain.ShowHideTrainHighLight(false);
+
+
         selectedTrain = trainController;
         if (selectedTrain != null && !_carried.ContainsKey(selectedTrain))
             _carried[selectedTrain] = 0;
@@ -170,21 +185,50 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"DONE ← T{tc.TrainId} outcome={r.Outcome} blocker={r.BlockerId}");
 
-        //compare the sim and game results in here
-        CompareGameVsSim(r, lastSimRes, tc.TrainId, 0.05f);
+        // Per-leg compare (Arrived/Blocked + hit pos), only if sim is enabled
+        if (UseSimulation)
+            CompareGameVsSim(r, lastSimRes, tc.TrainId, 0.05f);
 
-
+        // ===== Lose by collision =====
         if (r.Outcome == MoveOutcome.Blocked)
         {
-            Debug.Log("[Game] LOSE (collision) train " + tc.TrainId + " vs " + r.BlockerId);
+            // Win/Lose compare for collision (treat as loss), only if sim is enabled
+            if (UseSimulation)
+            {
+                if (lastSimRes.Outcome == MoveOutcome.Blocked)
+                {
+                    float d = Vector3.Distance(r.HitPos, lastSimRes.HitPos);
+                    if (d <= 0.05f)
+                    {
+                        Debug.Log($"[CMP-WL] T{tc.TrainId} OK: Lose (collision). " +
+                                  $"gameBlk={r.BlockerId} simBlk={lastSimRes.BlockerId} " +
+                                  $"hitΔ={d:F3}m");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[CMP-WL] T{tc.TrainId} MISMATCH: Lose (collision) but hit pos differs. " +
+                                       $"gameBlk={r.BlockerId} simBlk={lastSimRes.BlockerId} " +
+                                       $"gameHit=({r.HitPos.x:F3},{r.HitPos.y:F3}) " +
+                                       $"simHit=({lastSimRes.HitPos.x:F3},{lastSimRes.HitPos.y:F3}) " +
+                                       $"hitΔ={d:F3}m");
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"[CMP-WL] T{tc.TrainId} MISMATCH: Game=Lose (collision) vs Sim={lastSimRes.Outcome}");
+                }
+            }
+
+            Debug.Log($"[Game] LOSE (collision). Train {tc.TrainId} vs {r.BlockerId}");
             _arrivalTarget = null;
             return;
         }
+
         if (r.Outcome != MoveOutcome.Arrived) return;
 
-        // Use the destination we stored at move start
+        // ===== Arrived =====
         var dest = _arrivalTarget;
-        _arrivalTarget = null; // clear for next move
+        _arrivalTarget = null;
         if (dest == null) return;
 
         int trainColor = (tc.CurrentPointModel != null) ? tc.CurrentPointModel.colorIndex : 0;
@@ -193,43 +237,55 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"PICKUP @S{dest.id}: before={dest.waitingPeople.Count} color={trainColor}");
 
-            // Pickup: remove head-streak of matching color from the STATION
             int removed = 0;
             while (dest.waitingPeople.Count > 0 && dest.waitingPeople[0] == trainColor)
             {
                 dest.waitingPeople.RemoveAt(0);
                 removed++;
-                tc.OnArrivedStation_AddCart(trainColor); // color-coded cart
+                tc.OnArrivedStation_AddCart(trainColor);
             }
 
             Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
-            // Update station visuals
             var sv = FindStationViewByPointId(dest.id);
             if (sv != null) sv.RemoveHeadPassengers(removed);
+            return; // no win/lose check on station arrival
         }
         else if (dest.type == GamePointType.Depot)
         {
-            // Wrong-color depot => lose
+            // --- Determine GAME outcome ---
+            GameEndOutcome gameOutcome;
             if (dest.colorIndex != trainColor)
             {
-                Debug.Log("[Game] LOSE (wrong depot). Train " + tc.TrainId + " at depot " + dest.id);
-                return;
+                gameOutcome = GameEndOutcome.LoseWrongDepot;
+                Debug.Log($"[Game] LOSE (wrong depot). Train {tc.TrainId} at depot {dest.id}");
             }
-
-            // Premature depot => lose if any station still has this color
-            if (AnyStationHasColor(trainColor))
+            else if (AnyStationHasColor(trainColor))
             {
-                Debug.Log("[Game] LOSE (premature depot). Train " + tc.TrainId + " at depot " + dest.id);
-                return;
+                gameOutcome = GameEndOutcome.LosePrematureDepot;
+                Debug.Log($"[Game] LOSE (premature depot). Train {tc.TrainId} at depot {dest.id}");
+            }
+            else if (AllStationsEmpty())
+            {
+                gameOutcome = GameEndOutcome.Win;
+                Debug.Log("[Game] WIN");
+            }
+            else
+            {
+                gameOutcome = GameEndOutcome.None;
             }
 
-
-
-            // All clear
-            if (AllStationsEmpty())
-                Debug.Log("[Game] WIN");
+            // --- Compare with SIM outcome (if enabled) ---
+            if (UseSimulation)
+            {
+                var simOutcome = LevelVisualizer.Instance.SimAppInstance
+                    .EvaluateDepotOutcome(tc.TrainId, dest.id);
+                CompareWinLose(gameOutcome, simOutcome, tc.TrainId, dest.id);
+            }
+            return;
         }
     }
+
+
 
     // === Helpers ===
 
@@ -240,14 +296,7 @@ public class GameManager : MonoBehaviour
         return fi != null ? (GamePoint)fi.GetValue(view) : null;
     }
 
-    private GamePoint FindPointById(int id)
-    {
-        if (level == null || level.gameData == null) return null;
-        var pts = level.gameData.points;
-        for (int i = 0; i < pts.Count; i++)
-            if (pts[i].id == id) return pts[i];
-        return null;
-    }
+   
 
     private StationView FindStationViewByPointId(int id)
     {
@@ -286,12 +335,6 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    private bool AllTrainsEmpty()
-    {
-        foreach (var kv in _carried)
-            if (kv.Value > 0) return false;
-        return true;
-    }
 
     public static TrainDir GetTrainDirectionAfterEntering(PlacedPartInstance part, int enteredExitPin)
     {
@@ -351,6 +394,25 @@ public class GameManager : MonoBehaviour
                            $"gameBlk={game.BlockerId}  simBlk={sim.BlockerId}  " +
                            $"gameHit={Fmt(game.HitPos)}  simHit={Fmt(sim.HitPos)}");
         }
+    }
+
+    private void CompareWinLose(GameEndOutcome game, SimApp.SimDepotResult sim, int trainId, int depotId)
+    {
+        string G(GameEndOutcome g) => g.ToString();
+        string S(SimApp.SimDepotResult s) => s.ToString();
+
+        // Perfect match
+        if ((game == GameEndOutcome.Win && sim == SimApp.SimDepotResult.Win) ||
+            (game == GameEndOutcome.LoseWrongDepot && sim == SimApp.SimDepotResult.LoseWrongDepot) ||
+            (game == GameEndOutcome.LosePrematureDepot && sim == SimApp.SimDepotResult.LosePrematureDepot) ||
+            (game == GameEndOutcome.None && sim == SimApp.SimDepotResult.None))
+        {
+            Debug.Log($"[CMP-WL] T{trainId}@D{depotId} OK: game={G(game)} sim={S(sim)}");
+            return;
+        }
+
+        // Mismatch
+        Debug.LogError($"[CMP-WL] T{trainId}@D{depotId} MISMATCH: game={G(game)} vs sim={S(sim)}");
     }
 
     private static string Fmt(Vector3 v) => $"({v.x:F3},{v.y:F3})";
