@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json;
-using RailSimCore;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class LevelVisualizer : MonoBehaviour
@@ -129,9 +126,14 @@ public class LevelVisualizer : MonoBehaviour
 
         // clear out any previously spawned parts
         for (int i = levelHolder.childCount - 1; i >= 0; i--)
-            DestroyImmediate(levelHolder.GetChild(i).gameObject);
+            Destroy(levelHolder.GetChild(i).gameObject);
 
         // compute grid bounds
+
+        minX = int.MaxValue;
+        minY = int.MaxValue;
+        maxX = int.MinValue;
+        maxY = int.MinValue;
 
 
         foreach (var inst in level.parts)
@@ -219,6 +221,18 @@ public class LevelVisualizer : MonoBehaviour
 
             // copy spline templates into the instance for the view
             TrackPart trackPart = partsLibrary.Find(x => x.partName == inst.partType);
+
+            if (trackPart == null)
+            {
+                Debug.LogError($"[Build] TrackPart '{inst.partType}' not found in library.");
+                inst.splines = new List<List<float[]>>(); // keep non-null
+            }
+            else
+            {
+                inst.splines = trackPart.splineTemplates;
+            }
+
+
             inst.splines = trackPart.splineTemplates;
 
             // hand off to view
@@ -228,9 +242,9 @@ public class LevelVisualizer : MonoBehaviour
             yield return new WaitForSeconds(tileDelay);
         }
        
+        GameManager.Instance.StartNewLevel(currLevel);
 
-
-        GameManager.Instance.level = currLevel;
+        SimAppInstance.Bootstrap(currLevel, cellSize, currLevel.gameData, worldOrigin, minX, minY, gridH, partsLibrary);
 
         StartCoroutine(BuildAndResetTest());
 
@@ -247,7 +261,7 @@ public class LevelVisualizer : MonoBehaviour
     private IEnumerator BuildAndResetTest()
     {
         // 1) Verify splines
-        SplineComparer.CompareAllSplines(currLevel, levelHolder, cellSize);
+        //SplineComparer.CompareAllSplines(currLevel, levelHolder, cellSize);
 
         // 2) Build the live dynamic content
         GenerateDynamic();
@@ -265,6 +279,8 @@ public class LevelVisualizer : MonoBehaviour
 
     public void GenerateDynamic()
     {
+        GamePoint.ResetIds(1);
+
         ScenarioModel scenarioModel = CloneScenarioModelFromScenario(orgScenarioModel);
 
         // 2) Overwrite the level’s live data with that clone
@@ -272,13 +288,14 @@ public class LevelVisualizer : MonoBehaviour
 
         // clear out any previously spawned parts
         for (int i = dynamicHolder.childCount - 1; i >= 0; i--)
-            DestroyImmediate(dynamicHolder.GetChild(i).gameObject);
+            Destroy(dynamicHolder.GetChild(i).gameObject);
 
         ClearGlobalPathRenderer();
 
         //GameManager.Instance.InitMirror(currLevel, cellSize);
 
-        SimAppInstance.Bootstrap(currLevel, cellSize, scenarioModel, worldOrigin, minX, minY, gridH,partsLibrary);
+        GameManager.Instance.ResetCurrLevel();
+        SimAppInstance.Reset(scenarioModel);
 
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
@@ -332,6 +349,7 @@ public class LevelVisualizer : MonoBehaviour
             trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
 
             trainController.AssignMirrorId(SimAppInstance.GetMirrorIdByPoint(p.id));
+
         }
 
         

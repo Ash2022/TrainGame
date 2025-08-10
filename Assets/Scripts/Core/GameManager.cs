@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
     private readonly Dictionary<TrainController, int> _carried = new Dictionary<TrainController, int>(); // carts onboard (unlimited cap)
     private readonly Dictionary<TrainController, Action<MoveCompletion>> _moveHandlers = new Dictionary<TrainController, Action<MoveCompletion>>();
 
+    MoveCompletion lastSimRes;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -116,13 +118,17 @@ public class GameManager : MonoBehaviour
 
             Debug.Log($"GO → T{selectedTrain.TrainId} to P{target.id} ({target.type}) color={selectedTrain.CurrentPointModel.colorIndex}");
 
+
+            lastSimRes = LevelVisualizer.Instance.SimAppInstance.StartLegFromPoints(selectedTrain.TrainId, target.id, worldPoints);
+            
             // Start the move
             selectedTrain.MoveAlongPath(worldPoints);
+
 
             //MirrorManager.Instance?.StartLeg(selectedTrain, worldPoints);          // your existing start-leg into sim
             //MirrorManager.Instance?.MarkActive(selectedTrain, selectedTrain.GetComponent<TrainMover>()?.moveSpeed ?? 1f);
 
-           // LevelVisualizer.Instance.SimAppInstance?.Game.StartLegFromPoint(selectedTrain.TrainId, target.id, worldPoints);
+            // LevelVisualizer.Instance.SimAppInstance?.Game.StartLegFromPoint(selectedTrain.TrainId, target.id, worldPoints);
 
             // Clear click state
             _lastTargetId = 0;
@@ -163,6 +169,10 @@ public class GameManager : MonoBehaviour
         if (tc == null) return;
 
         Debug.Log($"DONE ← T{tc.TrainId} outcome={r.Outcome} blocker={r.BlockerId}");
+
+        //compare the sim and game results in here
+        CompareGameVsSim(r, lastSimRes, tc.TrainId, 0.05f);
+
 
         if (r.Outcome == MoveOutcome.Blocked)
         {
@@ -304,5 +314,60 @@ public class GameManager : MonoBehaviour
         return facingDir;
     }
 
-    
+
+    // Compare game vs sim results with clear printouts
+    private void CompareGameVsSim(RailSimCore.Types.MoveCompletion game,
+                                  RailSimCore.Types.MoveCompletion sim,
+                                  int trainId,
+                                  float hitTolMeters = 0.05f)
+    {
+        // Outcome mismatch
+        if (game.Outcome != sim.Outcome)
+        {
+            Debug.LogError($"[CMP] T{trainId} MISMATCH: game={game.Outcome}, sim={sim.Outcome}  " +
+                           $"gameHit={Fmt(game.HitPos)}  simHit={Fmt(sim.HitPos)}  " +
+                           $"gameBlk={game.BlockerId}  simBlk={sim.BlockerId}");
+            return;
+        }
+
+        // Both Arrived
+        if (game.Outcome == RailSimCore.Types.MoveOutcome.Arrived)
+        {
+            Debug.Log($"[CMP] T{trainId} OK: Arrived matches.");
+            return;
+        }
+
+        // Both Blocked → compare hit position only (blocker id printed for context)
+        float d = Vector3.Distance(game.HitPos, sim.HitPos);
+        if (d <= hitTolMeters)
+        {
+            Debug.Log($"[CMP] T{trainId} OK: Blocked at same spot (d={d:F3}m ≤ {hitTolMeters:F2}).  " +
+                      $"gameBlk={game.BlockerId}  simBlk={sim.BlockerId}  " +
+                      $"gameHit={Fmt(game.HitPos)}  simHit={Fmt(sim.HitPos)}");
+        }
+        else
+        {
+            Debug.LogError($"[CMP] T{trainId} FAIL: Blocked positions differ (d={d:F3}m > {hitTolMeters:F2}).  " +
+                           $"gameBlk={game.BlockerId}  simBlk={sim.BlockerId}  " +
+                           $"gameHit={Fmt(game.HitPos)}  simHit={Fmt(sim.HitPos)}");
+        }
+    }
+
+    private static string Fmt(Vector3 v) => $"({v.x:F3},{v.y:F3})";
+
+    internal void StartNewLevel(LevelData currLevel)
+    {
+        ResetCurrLevel();
+
+        level = currLevel;
+    }
+
+    public void ResetCurrLevel()
+    {
+        trains.Clear();
+        _carried.Clear();
+        _moveHandlers.Clear();
+        selectedTrain = null;
+    }
+
 }

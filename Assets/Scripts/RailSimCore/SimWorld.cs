@@ -326,5 +326,22 @@ namespace RailSimCore
             tr.Sim.CommitAdvance(Mathf.Max(0f, allowed), out headPos, out headTan);
             // (No auto-consume here; Step(...) handles that when you run the full tick path.)
         }
+
+        /// <summary>Replace this train's cart-center offsets (meters behind head).</summary>
+        public void SetCartOffsets(int trainId, IList<float> offsets)
+        {
+            var tr = GetRecord(trainId);
+            tr.Sim.SetCartOffsets(offsets);
+        }
+
+        /// <summary>Ensure the back tape can be sampled at least this far behind the head.</summary>
+        public void EnsureBackPrefix(int trainId, float meters)
+        {
+            var tr = GetRecord(trainId);
+            tr.Sim.EnsureBackPrefix(Mathf.Max(0f, meters));
+        }
+
     }
+
+
 }

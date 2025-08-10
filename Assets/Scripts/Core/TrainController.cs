@@ -272,64 +272,6 @@ public class TrainController : MonoBehaviour
     }
 
 
-    // Already present; keep it public so others can read it
-    public float GetTrainLengthMeters()
-    {
-        if (cartCenterOffsets != null && cartCenterOffsets.Count > 0)
-            return cartCenterOffsets[cartCenterOffsets.Count - 1] + cartHalfLength; // head->tail
-        return headHalfLength; // no carts yet
-    }
 
-    /// <summary>
-    /// Sample a single point on this train's back tape at 'backDistance' meters behind the head.
-    /// Returns false if the tape isn't long enough yet (e.g., just spawned).
-    /// </summary>
-    public bool TryGetBackPoint(float backDistance, out Vector3 pos)
-    {
-        pos = default;
-        var mv = mover != null ? mover : GetComponent<TrainMover>();
-        if (mv == null) return false;
-
-        if (!mv.TryGetPoseAtBackDistance(Mathf.Max(0f, backDistance), out var p, out _))
-            return false;
-
-        pos = p;
-        return true;
-    }
-
-    /// <summary>
-    /// Build the occupied slice polyline for this (stationary) train:
-    /// the last (trainLength + safetyGap) meters of its back tape.
-    /// Returns false if the tape is shorter (e.g., very early in the level).
-    /// Points are in world space, ordered from nearest-to-head to farthest-back.
-    /// </summary>
-    public bool TryGetOccupiedBackSlice(float safetyGap, float sampleStep, out List<Vector3> points)
-    {
-        points = null;
-
-        var mv = mover != null ? mover : GetComponent<TrainMover>();
-        if (mv == null) return false;
-
-        float backLen = Mathf.Max(0f, GetTrainLengthMeters() + Mathf.Max(0f, safetyGap));
-        if (backLen <= 1e-6f) return false;
-
-        // Sample along the tape every ~sampleStep (include endpoints).
-        int count = Mathf.Max(2, Mathf.CeilToInt(backLen / Mathf.Max(1e-5f, sampleStep)) + 1);
-        float step = backLen / (count - 1);
-
-        var pts = new List<Vector3>(count);
-        for (int i = 0; i < count; i++)
-        {
-            float d = i * step; // 0..backLen behind head
-            if (!mv.TryGetPoseAtBackDistance(d, out var p, out _))
-            {
-                // Tape not long enough: abort (caller can treat as "no reliable data yet")
-                return false;
-            }
-            pts.Add(p);
-        }
-
-        points = pts;
-        return true;
-    }
+    
 }
