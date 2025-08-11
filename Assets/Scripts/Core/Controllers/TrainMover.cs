@@ -23,7 +23,7 @@ public class TrainMover : MonoBehaviour
 
     // Runtime state (adapter)
     private Coroutine moveCoroutine;
-    private bool isMoving;
+    public bool isMoving;
     private readonly SimpleTrainSim sim = new SimpleTrainSim();
 
     // Geometry/cache for adapter work

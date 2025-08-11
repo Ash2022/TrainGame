@@ -107,6 +107,12 @@ public class GameManager : MonoBehaviour
 
     private void HandleClick()
     {
+        if (AnyTrainIsMoving())
+        {
+            Debug.Log("[Input] Ignored click: a train is moving.");
+            return;
+        }
+
         var cam = Camera.main;
         var ray = cam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -127,6 +133,12 @@ public class GameManager : MonoBehaviour
 
     private void OnPointClicked(GamePoint target)
     {
+        if (AnyTrainIsMoving())
+        {
+            Debug.Log("[Input] Ignored click: a train is moving.");
+            return;
+        }
+
         if (target == null) { Debug.LogError("Clicked view has no GamePoint!"); return; }
         if (selectedTrain == null) { Debug.LogWarning("No train selected."); return; }
 
@@ -496,4 +508,13 @@ public class GameManager : MonoBehaviour
         return totalTrains > 0 && _parkedTrains.Count == totalTrains;
     }
 
+    private bool AnyTrainIsMoving()
+    {
+        for (int i = 0; i < trains.Count; i++)
+        {
+            var mv = trains[i] ? trains[i].GetComponent<TrainMover>() : null;
+            if (mv != null && mv.isMoving) return true;
+        }
+        return false;
+    }
 }
