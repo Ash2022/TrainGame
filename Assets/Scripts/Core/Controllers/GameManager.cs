@@ -21,8 +21,7 @@ public class GameManager : MonoBehaviour
 
     // --- Runtime state (pure game) ---
     private readonly Dictionary<TrainController, int> _carried = new Dictionary<TrainController, int>(); // carts onboard (unlimited cap)
-    private readonly Dictionary<TrainController, Action<MoveCompletion>> _moveHandlers = new Dictionary<TrainController, Action<MoveCompletion>>();
-
+    
     private readonly HashSet<int> _parkedTrains = new HashSet<int>();
 
     MoveCompletion lastSimRes;
@@ -85,14 +84,8 @@ public class GameManager : MonoBehaviour
         if (!trains.Contains(tc))
             trains.Add(tc);
 
-        // Unhook old handler (if any), then hook a new one that captures 'tc'
-        Action<MoveCompletion> h;
-        if (_moveHandlers.TryGetValue(tc, out h))
-            tc.OnMoveCompletedExternal -= h;
-
-        h = delegate (MoveCompletion r) { OnTrainMoveCompleted(tc, r); };
-        _moveHandlers[tc] = h;
-        tc.OnMoveCompletedExternal += h;
+        // One assignment replaces any previous callback safely.
+        tc.SetMoveCompletedCallback(r => OnTrainMoveCompleted(tc, r));
     }
 
     private void Update()
@@ -469,7 +462,6 @@ public class GameManager : MonoBehaviour
     {
         trains.Clear();
         _carried.Clear();
-        _moveHandlers.Clear();
         selectedTrain = null;
         _parkedTrains.Clear();
         if (gameOverView != null) 

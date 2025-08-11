@@ -414,133 +414,13 @@ public class LevelVisualizer : MonoBehaviour
         return (idx >= 0 && idx < partSprites.Count) ? partSprites[idx] : null;
     }
 
-    public void DrawGlobalSplinePath(PathModel pathModel,List<Vector3> worldPts,Color color)
+    public void DrawGlobalSplinePath(PathModel pathModel, List<Vector3> worldPts, Color color)
     {
-        for (int pi = 0; pi < pathModel.Traversals.Count; pi++)
-        {
-            var trav = pathModel.Traversals[pi];
-            var inst = currLevel.parts.First(p => p.partId == trav.partId);
-
-            // pick sub‑spline index (forward or reverse)
-            int splineIndex = -1;
-            int groupIndex = -1;
-            int pathIndex = -1;
-
-            if (inst.allowedPathsGroup?.Count > 0 && inst.worldSplines != null)
-            {
-                bool found = false;
-
-                for (int gi = 0; gi < inst.allowedPathsGroup.Count; gi++)
-                {
-                    var grp = inst.allowedPathsGroup[gi];
-                    int idx = grp.allowedPaths.FindIndex(ap =>
-                        (ap.entryConnectionId == trav.entryExit && ap.exitConnectionId == trav.exitExit) ||
-                        (ap.entryConnectionId == trav.exitExit && ap.exitConnectionId == trav.entryExit)
-                    );
-
-                    if (idx >= 0)
-                    {
-                        if (gi < inst.worldSplines.Count)
-                        {
-                            groupIndex = gi;
-                            pathIndex = idx;
-                            splineIndex = gi; // assuming 1:1 between groupIndex and splineIndex
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!found)
-                {
-                    if (inst.worldSplines.Count == 1)
-                    {
-                        splineIndex = 0;
-                    }
-                    else
-                    {
-                        continue; // skip drawing this traversal
-                    }
-                }
-            }
-            else
-            {
-                // simple part
-                splineIndex = 0;
-            }
-
-            var full = inst.worldSplines?[splineIndex] ?? new List<Vector3>();
-
-            bool simple = inst.exits.Count <= 2;
-            bool first = pi == 0;
-            bool last = pi == pathModel.Traversals.Count - 1;
-            float t0, t1;
-
-            if (simple)
-            {
-                if (!first && !last)
-                {
-                    t0 = 0f;
-                    t1 = 1f;
-                }
-                else
-                {
-                    //float te = trav.entryExit < 0 ? 0.5f : GetExitT(inst, trav.entryExit);
-                    //float tx = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
-
-                    t0 = trav.entryExit < 0 ? 0.5f : GetExitT(inst, trav.entryExit);
-                    t1 = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
-
-                    if (Mathf.Approximately(t0, t1))
-                    {
-                        const float eps = 0.001f;
-                        if (t1 + eps <= 1f) t1 += eps;
-                        else t0 = Mathf.Max(0f, t0 - eps);
-                    }
-                }
-            }
-            else
-            {
-                if (last)
-                {
-                    float tx = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
-
-                    t0 = Mathf.Min(0.5f, tx);
-                    t1 = Mathf.Max(0.5f, tx);
-
-                    if (Mathf.Approximately(t0, t1))
-                    {
-                        const float eps = 0.001f;
-                        if (t1 + eps <= 1f) t1 += eps;
-                        else t0 = Mathf.Max(0f, t0 - eps);
-                    }
-                }
-                else
-                {
-                    t0 = 0f;
-                    t1 = 1f;
-                }
-            }
-
-            var seg = ExtractSegmentWorld(full, t0, t1);
-
-            // reverse if entry is on the far side
-            if (groupIndex >= 0 && pathIndex >= 0)
-            {
-                var ap = inst.allowedPathsGroup[groupIndex].allowedPaths[pathIndex];
-                if (trav.entryExit != ap.entryConnectionId)
-                    seg.Reverse();
-            }
-
-            foreach (var w in seg)
-            {
-                if (worldPts.Count == 0 || worldPts[worldPts.Count - 1] != w)
-                    worldPts.Add(w);
-            }
-        }
+        worldPts.Clear();
+        var extracted = Utils.BuildPathWorldPolyline(currLevel, pathModel);
+        worldPts.AddRange(extracted);
 
         globalPathRenderer.material.color = color;
-
         globalPathRenderer.positionCount = worldPts.Count;
         globalPathRenderer.SetPositions(worldPts.ToArray());
     }
@@ -550,55 +430,7 @@ public class LevelVisualizer : MonoBehaviour
         globalPathRenderer.positionCount = 0;
     }
 
-    // maps exitIndex to normalized t along its simple spline
-    static float GetExitT(PlacedPartInstance part, int exitIndex)
-    {
-        var dir = part.exits.First(e => e.exitIndex == exitIndex).direction;
-        // Up/Right → t=0; Down/Left → t=1
-        return (dir == 2 || dir == 3) ? 1f : 0f;
-    }
-
-    // identical to your editor’s ExtractSegmentScreen but for Vector3 lists
-    static List<Vector3> ExtractSegmentWorld(List<Vector3> pts, float tStart, float tEnd)
-    {
-        int n = pts.Count;
-        if (n < 2) return new List<Vector3>(pts);
-
-        // build cumulative lengths
-        var cum = new float[n];
-        float total = 0f;
-        for (int i = 1; i < n; i++)
-        {
-            total += Vector3.Distance(pts[i - 1], pts[i]);
-            cum[i] = total;
-        }
-        if (total <= 0f) return new List<Vector3> { pts[0], pts[n - 1] };
-
-        float sLen = tStart * total;
-        float eLen = tEnd * total;
-
-        Vector3 PointAt(float d)
-        {
-            for (int i = 1; i < n; i++)
-            {
-                if (d <= cum[i])
-                {
-                    float u = Mathf.InverseLerp(cum[i - 1], cum[i], d);
-                    return Vector3.Lerp(pts[i - 1], pts[i], u);
-                }
-            }
-            return pts[n - 1];
-        }
-
-        var outPts = new List<Vector3>();
-        outPts.Add(PointAt(sLen));
-        for (int i = 1; i < n - 1; i++)
-            if (cum[i] > sLen && cum[i] < eLen)
-                outPts.Add(pts[i]);
-        outPts.Add(PointAt(eLen));
-        return outPts;
-    }
-
+   
     public List<Vector3> ExtractWorldPointsFromPath(PathModel pathModel)
     {
         var pts = new List<Vector3>();

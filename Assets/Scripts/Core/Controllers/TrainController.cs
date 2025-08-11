@@ -29,8 +29,9 @@ public class TrainController : MonoBehaviour
     [Header("Capacity")]
     public int reservedCartSlots = 20;
 
-    // inside TrainController class
-    public Action<MoveCompletion> OnMoveCompletedExternal;
+
+
+    private Action<MoveCompletion> _moveCompletedCb;
 
     // Quick facts (handy for logs/debug)
     public int TrainId => CurrentPointModel?.id ?? 0;
@@ -181,6 +182,11 @@ public class TrainController : MonoBehaviour
 
     }
 
+    public void SetMoveCompletedCallback(Action<MoveCompletion> cb)
+    {
+        _moveCompletedCb = cb;
+    }
+
     private void TrainWasClicked()
     {
         ShowHideTrainHighLight(true);
@@ -217,7 +223,7 @@ public class TrainController : MonoBehaviour
 
         // forward to engine
         r.SourceController = this;
-        if (OnMoveCompletedExternal != null) OnMoveCompletedExternal(r);
+        _moveCompletedCb?.Invoke(r);
     }
 
     public void OnArrivedStation_AddCart(int colorIndex)

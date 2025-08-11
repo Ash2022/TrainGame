@@ -33,6 +33,15 @@ public sealed class SimApp
     public int GetMirrorIdByPoint(int trainPointId) =>
         _trainPointIdToMirrorId.TryGetValue(trainPointId, out var id) ? id : -1;
 
+    // === Agent API: state access (NEW) ===
+
+    // Expose point lookup without changing existing FindPoint(...)
+    public GamePoint GetPointById(int id) => FindPoint(id);
+    public bool GetAnyStationHasColor(int colorIndex) => AnyStationHasColor(colorIndex);
+    public bool GetAllStationsEmpty() => AllStationsEmpty();
+    public bool GetAllTrainsParked() => AllTrainsParked();
+
+
     /* ============================================================
      * Bootstrap
      * ============================================================ */
@@ -384,5 +393,106 @@ public sealed class SimApp
         foreach (var p in _scenarioRef.points)
             if (p.type == GamePointType.Train) totalTrains++;
         return totalTrains > 0 && _parkedTrains.Count == totalTrains;
+    }
+
+
+    // === Agent API: path extraction & preview (NEW) ===
+
+    // Port your LevelVisualizer.ExtractWorldPointsFromPath here (headless).
+    // Use _level.parts[*].worldSplines built in Bootstrap by SimLevelBuilder.
+    public List<Vector3> ExtractWorldPointsFromPath(PathModel path)
+    {
+        return Utils.BuildPathWorldPolyline(_level, path);
+    }
+
+    public readonly struct PreviewResult
+    {
+        public readonly bool WouldBlock;   // true if block occurs before end-of-path
+        public readonly float FreeMeters;  // distance allowed before first block (<= path length)
+        public readonly int BlockerId;     // 0 if none
+        public PreviewResult(bool wouldBlock, float freeMeters, int blockerId)
+        { WouldBlock = wouldBlock; FreeMeters = freeMeters; BlockerId = blockerId; }
+    }
+
+    // Preview a candidate leg against current world state (no CommitAdvance)
+    public PreviewResult PreviewLegForTrain(int trainPointId, List<Vector3> worldPolyline)
+    {
+        if (worldPolyline == null || worldPolyline.Count < 2) return new PreviewResult(false, 0f, 0);
+        if (!_trainPointIdToMirrorId.TryGetValue(trainPointId, out int simId) || simId <= 0)
+            return new PreviewResult(false, 0f, 0);
+
+        var poly = new Polyline(worldPolyline);
+        _world.SetLegPolyline(simId, poly); // loads leg but doesn't move
+
+        float want = Mathf.Max(0.01f, poly.Length + SimTuning.SampleStep(_cellSize));
+        var res = _world.StepPreview(simId, want, otherTrainIds: null);
+
+        bool wouldBlock = (res.Kind == AdvanceResultKind.Blocked);
+        float free = Mathf.Max(0f, res.Allowed);
+        int blk = wouldBlock ? res.BlockerId : 0;
+        return new PreviewResult(wouldBlock, free, blk);
+    }
+
+    // Active = trains that are NOT parked
+    public IEnumerable<int> GetActiveTrainPointIds()
+    {
+        if (_scenarioRef == null) yield break;
+        foreach (var p in _scenarioRef.points)
+        {
+            if (p.type != GamePointType.Train) continue;
+            if (_parkedTrains.Contains(p.id)) continue;
+            yield return p.id;
+        }
+    }
+
+    // Enumerators for stations/depots
+    public IEnumerable<GamePoint> EnumerateStations()
+    {
+        if (_scenarioRef == null) yield break;
+        foreach (var p in _scenarioRef.points)
+            if (p.type == GamePointType.Station) yield return p;
+    }
+
+    public IEnumerable<GamePoint> EnumerateDepots()
+    {
+        if (_scenarioRef == null) yield break;
+        foreach (var p in _scenarioRef.points)
+            if (p.type == GamePointType.Depot) yield return p;
+    }
+
+    // Depot by color (for depot-mode targeting)
+    public GamePoint GetDepotForColor(int colorIndex)
+    {
+        if (_scenarioRef == null) return null;
+        foreach (var p in _scenarioRef.points)
+            if (p.type == GamePointType.Depot && p.colorIndex == colorIndex)
+                return p;
+        return null;
+    }
+
+    // Head-streak length (consecutive passengers of color at the head of the queue)
+    public int GetStationHeadStreak(int stationPointId, int colorIndex)
+    {
+        if (_stationPeople.TryGetValue(stationPointId, out var list) && list != null)
+        {
+            int cnt = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == colorIndex) cnt++; else break;
+            }
+            return cnt;
+        }
+
+        var gp = FindPoint(stationPointId);
+        if (gp != null && gp.type == GamePointType.Station && gp.waitingPeople != null)
+        {
+            int cnt = 0;
+            for (int i = 0; i < gp.waitingPeople.Count; i++)
+            {
+                if (gp.waitingPeople[i] == colorIndex) cnt++; else break;
+            }
+            return cnt;
+        }
+        return 0;
     }
 }
