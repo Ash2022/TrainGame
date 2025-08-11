@@ -1,0 +1,8 @@
+{
+  "levelName": "G1",
+  "generatedAtUtc": "2025-08-11T12:02:40.1184459Z",
+  "episodesPerCandidate": 100,
+  "bandMin": 0.35,
+  "bandMax": 1.0,
+  "scenarios": []
+}

@@ -31,16 +31,21 @@ public static class SimLevelBuilder
         foreach (var inst in level.parts)
         {
             // templates must exist
+            /*
             var splines = inst.splines;
             if (splines == null || splines.Count == 0)
             {
                 inst.worldSplines = new List<List<Vector3>>();
                 continue;
             }
-
+            */
             // half extents in GRID units from partsLibrary (fallback to occupyingCells)
             Vector2 half;
             var part = (partsLibrary != null) ? partsLibrary.Find(x => x.partName == inst.partType) : null;
+
+            inst.splines = part.splineTemplates;
+            //var splines = inst.splines;
+
             if (part != null && part.gridWidth > 0 && part.gridHeight > 0)
             {
                 half = new Vector2(part.gridWidth * 0.5f, part.gridHeight * 0.5f);
@@ -68,10 +73,10 @@ public static class SimLevelBuilder
             Quaternion rot = Quaternion.Euler(0f, 0f, -inst.rotation);
 
             // build world splines (EXACT local mapping)
-            var worldList = new List<List<Vector3>>(splines.Count);
-            for (int s = 0; s < splines.Count; s++)
+            var worldList = new List<List<Vector3>>(inst.splines.Count);
+            for (int s = 0; s < inst.splines.Count; s++)
             {
-                var tmpl = splines[s];
+                var tmpl = inst.splines[s];
                 var pts = new List<Vector3>(tmpl.Count);
                 for (int i = 0; i < tmpl.Count; i++)
                 {
