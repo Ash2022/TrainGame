@@ -1,12 +1,15 @@
 ﻿#if UNITY_EDITOR
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
 using Newtonsoft.Json;
 using RailSimCore; // SimApp, SimLevelBuilder, SimTuning
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using Unity.EditorCoroutines.Editor;
+
 // Uses your existing types: LevelData, ScenarioModel, GamePoint, TrackPart, PathService, Utils, converters
 
 public class ScenarioSearchWindow : EditorWindow
@@ -31,7 +34,11 @@ public class ScenarioSearchWindow : EditorWindow
 
     [Header("Randomization")]
     [Tooltip("For each candidate: choose uniformly a fraction in [0.25, 0.75] and populate that many stations.")]
-    [SerializeField] bool use25to75PercentStations = true;
+
+    // Station selection % (0..1). Defaults match old hardcoded 25%–75%
+    float stationPercentMin = 0.25f;
+    float stationPercentMax = 0.75f;
+
     [Tooltip("Per populated station: maximum queue length (min=1).")]
     [SerializeField] int maxQueueLenPerStation = 5;           // slider (2..10 suggested)
 
@@ -44,6 +51,20 @@ public class ScenarioSearchWindow : EditorWindow
 
     Vector2 _scroll;
     System.Random _rng;
+
+    // --- runner state ---
+    private IEnumerator _runnerEnum;
+    private bool _isRunning;
+    private bool _cancelRequested;
+    private float _progress;           // 0..1
+    private string _status = "";       // shown in window
+    private System.Diagnostics.Stopwatch _sw;
+
+    private int attemptsPerLevel = 100;   // default
+
+    private EditorCoroutine _searchRoutine;
+
+
 
     [MenuItem("Tools/Scenario Search")]
     public static void Open() => GetWindow<ScenarioSearchWindow>("Scenario Search");
@@ -94,6 +115,7 @@ public class ScenarioSearchWindow : EditorWindow
         bandMinWinRate = Mathf.Clamp01(EditorGUILayout.Slider("Band Min Win-Rate", bandMinWinRate, 0f, 1f));
         bandMaxWinRate = Mathf.Clamp01(EditorGUILayout.Slider("Band Max Win-Rate", bandMaxWinRate, 0f, 1f));
         maxAcceptedPerLevel = Mathf.Clamp(EditorGUILayout.IntField("Keep Top Scenarios", maxAcceptedPerLevel), 1, 10);
+        attemptsPerLevel = EditorGUILayout.IntSlider("Attempts per level", attemptsPerLevel, 1, 1000);
 
         EditorGUILayout.Space(6);
         EditorGUILayout.LabelField("Agent Runtime Caps", EditorStyles.boldLabel);
@@ -103,7 +125,17 @@ public class ScenarioSearchWindow : EditorWindow
 
         EditorGUILayout.Space(6);
         EditorGUILayout.LabelField("Randomization", EditorStyles.boldLabel);
-        use25to75PercentStations = EditorGUILayout.Toggle("Populate 25–75% stations", use25to75PercentStations);
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Stations % Range", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        stationPercentMin = EditorGUILayout.Slider("Min stations %", stationPercentMin, 0f, 1f);
+        stationPercentMax = EditorGUILayout.Slider("Max stations %", stationPercentMax, 0f, 1f);
+        EditorGUI.indentLevel--;
+
+        // Keep min ≤ max
+        if (stationPercentMax < stationPercentMin)
+            stationPercentMax = stationPercentMin;
+
         maxQueueLenPerStation = Mathf.Clamp(EditorGUILayout.IntSlider("Max Queue Length / Station", maxQueueLenPerStation, 2, 10), 2, 10);
         limitToThreeRuns = EditorGUILayout.Toggle("≤ 3 color-runs / station", limitToThreeRuns);
 
@@ -114,17 +146,25 @@ public class ScenarioSearchWindow : EditorWindow
         EditorGUILayout.Space(10);
         globalSeed = EditorGUILayout.IntField("Global RNG Seed", globalSeed);
 
-        EditorGUILayout.Space(12);
-        if (GUILayout.Button("Run Search"))
+        // Inside OnGUI()
+        GUILayout.Space(6);
+        using (new EditorGUILayout.HorizontalScope())
         {
-            try
+            if (!_isRunning)
             {
-                RunSearch();
+                if (GUILayout.Button("Run Search", GUILayout.Height(28)))
+                    RunSearch();
             }
-            catch (Exception ex)
+            else
             {
-                Debug.LogError(ex);
+                if (GUILayout.Button("Stop", GUILayout.Height(28)))
+                    _cancelRequested = true;
             }
+        }
+        if (_isRunning)
+        {
+            GUILayout.Label($"Status: {_status}");
+            GUILayout.Label($"Progress: {Mathf.RoundToInt(_progress * 100f)}%   Elapsed: {(_sw?.Elapsed.ToString(@"mm\:ss"))}");
         }
 
         EditorGUILayout.Space(12);
@@ -134,8 +174,24 @@ public class ScenarioSearchWindow : EditorWindow
 
     // ---------------- Core batch driver ----------------
 
-    void RunSearch()
+    private void EnsurePartsJson()
     {
+        if (partsJson == null)
+            partsJson = Resources.Load<TextAsset>("parts"); // looks for Assets/Resources/parts.json
+    }
+
+    private void RunSearch()  // kicks off the coroutine
+    {
+        if (_searchRoutine != null)
+            EditorCoroutineUtility.StopCoroutine(_searchRoutine);
+
+        _searchRoutine = EditorCoroutineUtility.StartCoroutineOwnerless(RunSearchCoroutine());
+    }
+
+    private IEnumerator RunSearchCoroutine()
+    {
+        EnsurePartsJson();
+
         if (partsJson == null) throw new InvalidOperationException("Parts JSON is required.");
         var partsLibrary = JsonConvert.DeserializeObject<List<TrackPart>>(partsJson.text);
 
@@ -144,122 +200,134 @@ public class ScenarioSearchWindow : EditorWindow
 
         _rng = new System.Random(globalSeed);
 
-        foreach (var levelTA in levels)
+        for (int li = 0; li < levels.Count; li++)
         {
+            var levelTA = levels[li];
             var levelName = levelTA.name;
+
             var reportDir = Path.Combine(Application.dataPath, "AgentReports", levelName);
             Directory.CreateDirectory(reportDir);
 
             var logPath = Path.Combine(reportDir, $"search_{DateTime.Now:yyyyMMdd_HHmmss}.log");
-            using var log = new StreamWriter(logPath);
-
-            LogBoth(log, $"=== Level: {levelName} ===");
-
-            var level = DeserializeLevel(levelTA.text);
-            var gb = SimLevelBuilder.ComputeGridBounds(level);
-            // Build world splines once
-            float cellSize = 1f; // headless, consistent scale
-            var worldOrigin = Vector2.zero;
-            SimLevelBuilder.BuildWorldFromData(level, worldOrigin, gb.minX, gb.minY, gb.gridH, cellSize, partsLibrary);
-
-            // Train colors set
-            var trainPoints = level.gameData.points.Where(p => p.type == GamePointType.Train).ToList();
-            var trainColors = trainPoints.Select(p => p.colorIndex).Distinct().ToList();
-
-            if (trainPoints.Count == 0)
+            using (var log = new StreamWriter(logPath))
             {
-                LogBoth(log, "No trains in level — skipping.");
-                continue;
-            }
+                LogBoth(log, $"=== Level: {levelName} ===");
+                Repaint();
+                yield return null; // let UI breathe
 
-            var stationPoints = level.gameData.points.Where(p => p.type == GamePointType.Station).ToList();
-            if (stationPoints.Count == 0)
-            {
-                LogBoth(log, "No stations in level — skipping.");
-                continue;
-            }
+                var level = DeserializeLevel(levelTA.text);
+                var gb = SimLevelBuilder.ComputeGridBounds(level);
 
-            var accepted = new List<CandidateSummary>();
-            var seenScenarios = new HashSet<string>(); // dedupe by hash of queues
+                // Build world splines once
+                float cellSize = 1f; // headless, consistent scale
+                var worldOrigin = Vector2.zero;
+                SimLevelBuilder.BuildWorldFromData(level, worldOrigin, gb.minX, gb.minY, gb.gridH, cellSize, partsLibrary);
 
-            int attempts = 0;
-            while (accepted.Count < maxAcceptedPerLevel && attempts < maxCandidatesPerLevel)
-            {
-                attempts++;
-                var scenario = MakeRandomScenario(level, trainColors);
-                var sig = ScenarioSignature(scenario);
-                if (seenScenarios.Contains(sig))
+                // Train colors set
+                var trainPoints = level.gameData.points.Where(p => p.type == GamePointType.Train).ToList();
+                var trainColors = trainPoints.Select(p => p.colorIndex).Distinct().ToList();
+
+                if (trainPoints.Count == 0)
                 {
-                    LogBoth(log, $"[Attempt {attempts}] Duplicate scenario; skipping.");
+                    LogBoth(log, "No trains in level — skipping.");
                     continue;
                 }
 
-                var sim = new SimApp();
-                sim.Bootstrap(level, cellSize, scenario, worldOrigin, gb.minX, gb.minY, gb.gridH, partsLibrary);
-
-                if (level.routeModelData == null /* or empty */)
+                var stationPoints = level.gameData.points.Where(p => p.type == GamePointType.Station).ToList();
+                if (stationPoints.Count == 0)
                 {
-                    // Use your project’s actual API here:
-                    // Examples (pick the one your codebase has):
-                    // new RouteModelBuilder(level).Build();
-                    // level.routeModelData = RouteModelBuilder.Build(level);
-                    // RouteModelBuilder.BuildInto(level);
-
-                    level.routeModelData = RouteModelBuilder.Build(level.parts);
-
-                    Debug.Log("[Route] Built routing graph for agent runs.");
+                    LogBoth(log, "No stations in level — skipping.");
+                    continue;
                 }
 
+                var accepted = new List<CandidateSummary>();
+                var seenScenarios = new HashSet<string>(); // dedupe by hash of queues
 
-                var summary = EvaluateCandidate(level, scenario, sim, trainColors, cellSize, worldOrigin, gb, partsLibrary, attempts, log);
-                seenScenarios.Add(sig);
-
-                LogBoth(log, $"[Attempt {attempts}] WINRATE = {summary.WinRate:P1}  Wins={summary.Wins}/{summary.EpisodesEvaluated}  AvgMoves={summary.AvgMoves:F1}  CollRate={summary.CollisionRate:P1}");
-
-
-                if (summary.WinRate >= bandMinWinRate && summary.WinRate <= bandMaxWinRate)
+                int attempts = 0;
+                while (accepted.Count < maxAcceptedPerLevel && attempts < maxCandidatesPerLevel)
                 {
-                    accepted.Add(summary);
-                    // Keep best 5 near band midpoint
-                    float mid = 0.5f * (bandMinWinRate + bandMaxWinRate);
-                    accepted = accepted
-                        .OrderBy(a => Mathf.Abs(a.WinRate - mid))
-                        .ThenBy(a => a.CollisionRate)
-                        .ThenBy(a => a.AvgMoves)
-                        .Take(maxAcceptedPerLevel)
-                        .ToList();
+                    attempts++;
 
-                    LogBoth(log, $"   → ACCEPTED (now {accepted.Count}/{maxAcceptedPerLevel})");
+                    // Create random scenario
+                    var scenario = MakeRandomScenario(level, trainColors);
+                    var sig = ScenarioSignature(scenario);
+                    if (seenScenarios.Contains(sig))
+                    {
+                        LogBoth(log, $"[Attempt {attempts}] Duplicate scenario; skipping.");
+                        if ((attempts % 3) == 0) { Repaint(); yield return null; }
+                        continue;
+                    }
+                    seenScenarios.Add(sig);
+
+                    // Build / reset sim
+                    var sim = new SimApp();
+                    sim.Bootstrap(level, cellSize, scenario, worldOrigin, gb.minX, gb.minY, gb.gridH, partsLibrary);
+
+                    // Ensure routing model exists (project-specific)
+                    if (level.routeModelData == null)
+                    {
+                        level.routeModelData = RouteModelBuilder.Build(level.parts);
+                        Debug.Log("[Route] Built routing graph for agent runs.");
+                        yield return null;
+                    }
+
+                    // Evaluate this candidate (runs episodes)
+                    var summary = EvaluateCandidate(level, scenario, sim, trainColors, cellSize, worldOrigin, gb, partsLibrary, attempts, log);
+
+                    LogBoth(log, $"[Attempt {attempts}] WINRATE = {summary.WinRate:P1}  Wins={summary.Wins}/{summary.EpisodesEvaluated}  AvgMoves={summary.AvgMoves:F1}  CollRate={summary.CollisionRate:P1}");
+
+                    // Accept if in band
+                    if (summary.WinRate >= bandMinWinRate && summary.WinRate <= bandMaxWinRate)
+                    {
+                        accepted.Add(summary);
+                        float mid = 0.5f * (bandMinWinRate + bandMaxWinRate);
+                        accepted = accepted
+                            .OrderBy(a => Mathf.Abs(a.WinRate - mid))
+                            .ThenBy(a => a.CollisionRate)
+                            .ThenBy(a => a.AvgMoves)
+                            .Take(maxAcceptedPerLevel)
+                            .ToList();
+
+                        LogBoth(log, $"   → ACCEPTED (now {accepted.Count}/{maxAcceptedPerLevel})");
+                    }
+
+                    // Small yield so the Editor stays responsive
+                    if ((attempts % 2) == 0) { Repaint(); yield return null; }
                 }
+
+                // Save accepted to parallel file
+                var outPath = GetParallelScenarioPath(levelTA);
+                var payload = new ScenarioBank
+                {
+                    levelName = levelName,
+                    generatedAtUtc = DateTime.UtcNow,
+                    episodesPerCandidate = episodesPerCandidate,
+                    bandMin = bandMinWinRate,
+                    bandMax = bandMaxWinRate,
+                    scenarios = accepted.Select(a => new ScenarioEntry
+                    {
+                        scenario = a.Scenario,
+                        winRate = a.WinRate,
+                        avgMoves = a.AvgMoves,
+                        collisionRate = a.CollisionRate,
+                        attemptsTried = a.AttemptIndex
+                    }).ToList()
+                };
+
+                var json = JsonConvert.SerializeObject(payload, MakeJsonSettings());
+                File.WriteAllText(outPath, json);
+
+                LogBoth(log, $"Saved {payload.scenarios.Count} scenario(s) → {outPath}");
             }
 
-            // Save accepted to parallel file
-            var outPath = GetParallelScenarioPath(levelTA);
-            var payload = new ScenarioBank
-            {
-                levelName = levelName,
-                generatedAtUtc = DateTime.UtcNow,
-                episodesPerCandidate = episodesPerCandidate,
-                bandMin = bandMinWinRate,
-                bandMax = bandMaxWinRate,
-                scenarios = accepted.Select(a => new ScenarioEntry
-                {
-                    scenario = a.Scenario,
-                    winRate = a.WinRate,
-                    avgMoves = a.AvgMoves,
-                    collisionRate = a.CollisionRate,
-                    attemptsTried = a.AttemptIndex
-                }).ToList()
-            };
-
-            File.WriteAllText(outPath, JsonConvert.SerializeObject(payload, Formatting.Indented));
-            LogBoth(log, $"Saved {payload.scenarios.Count} scenario(s) → {outPath}");
             AssetDatabase.Refresh();
-
-            LogBoth(log, $"=== Done {levelName}. Attempts={attempts}, Accepted={accepted.Count} ===");
+            LogBoth(null, $"=== Done {levelName}. ==="); // console only
+            Repaint();
+            yield return null;
         }
 
         Debug.Log("Scenario search finished.");
+        _searchRoutine = null;
     }
 
     // ---------------- Candidate generation & evaluation ----------------
@@ -277,8 +345,10 @@ public class ScenarioSearchWindow : EditorWindow
         // Choose subset size
         var stations = scenario.points.Where(p => p.type == GamePointType.Station).ToList();
         int totalStations = stations.Count;
-        int minCount = Mathf.Max(1, Mathf.FloorToInt(totalStations * 0.25f));
-        int maxCount = Mathf.Max(minCount, Mathf.CeilToInt(totalStations * 0.75f));
+        // Convert % → counts (at least 1, at most total)
+        int minCount = Mathf.Clamp(Mathf.RoundToInt(totalStations * stationPercentMin), 1, totalStations);
+        int maxCount = Mathf.Clamp(Mathf.RoundToInt(totalStations * stationPercentMax), minCount, totalStations);
+
         int pickCount = _rng.Next(minCount, maxCount + 1);
 
         // Shuffle stations and take first pickCount
@@ -464,6 +534,11 @@ public class ScenarioSearchWindow : EditorWindow
                 // stations
                 foreach (var st in scenarioCopy.points.Where(p => p.type == GamePointType.Station))
                 {
+
+                    // Skip degenerate requests (same part/cell)
+                    if (SamePlacedPart(train, st) || SameCell(train, st))
+                        continue;
+
                     int streak = GetHeadStreakLocal(scenarioCopy, st.id, train.colorIndex);
                     if (streak <= 0) continue;
 
@@ -501,6 +576,10 @@ public class ScenarioSearchWindow : EditorWindow
                     var depot = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Depot && p.colorIndex == train.colorIndex);
                     if (depot != null)
                     {
+                        // Skip degenerate requests (same part/cell)
+                        if (SamePlacedPart(train, depot) || SameCell(train, depot))
+                            continue;
+
                         var path = PathService.FindPath(level, train, depot);
                         if (!path.Success)
                         {
@@ -549,6 +628,13 @@ public class ScenarioSearchWindow : EditorWindow
 
                     if (t != null && s != null)
                     {
+                        if (SamePlacedPart(t, s) || SameCell(t, s))
+                        {
+                            // skip this fallback target
+                            continue;
+                        }
+
+
                         var pth = PathService.FindPath(level, t, s);
                         Debug.Log($"[Ep] fallback path T{t.id}->S{s.id} success={pth.Success}");
                         if (pth.Success)
@@ -641,6 +727,42 @@ public class ScenarioSearchWindow : EditorWindow
 
     // ---------------- Small helpers ----------------
 
+    // Prevent degenerate requests like "Start: X  End: X"
+    static bool SamePlacedPart(GamePoint a, GamePoint b)
+    {
+        if (a == null || b == null) return false;
+
+        bool aAnchored = a.anchor.exitPin >= 0 && !string.IsNullOrEmpty(a.anchor.partId);
+        bool bAnchored = b.anchor.exitPin >= 0 && !string.IsNullOrEmpty(b.anchor.partId);
+        if (!aAnchored || !bAnchored) return false;
+
+        // same placed instance if partId matches
+        return a.anchor.partId == b.anchor.partId;
+    }
+
+    static bool SameCell(GamePoint a, GamePoint b)
+    {
+        return a != null && b != null &&
+               a.gridX == b.gridX && a.gridY == b.gridY;
+    }
+
+    static JsonSerializerSettings MakeJsonSettings()
+    {
+        return new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            // (optional) keeps it simple; your custom converters do the real work
+            Converters = new List<JsonConverter>
+        {
+            new Vector2Converter(),
+            new Vector2IntConverter(),
+            new Vector3Converter()
+        }
+        };
+    }
+
+    
     static LevelData DeserializeLevel(string json)
     {
         return JsonConvert.DeserializeObject<LevelData>(json, new JsonSerializerSettings
@@ -665,10 +787,10 @@ public class ScenarioSearchWindow : EditorWindow
         return outPath.Replace("\\", "/");
     }
 
-    static void LogBoth(StreamWriter log, string msg)
+    private void LogBoth(StreamWriter log, string msg)
     {
         Debug.Log(msg);
-        if (log != null) log.WriteLine(msg);
+        if (log != null) { log.WriteLine(msg); log.Flush(); }
     }
 
     static void Shuffle<T>(List<T> list, System.Random rng)

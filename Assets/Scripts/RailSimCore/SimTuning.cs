@@ -4,6 +4,8 @@ namespace RailSimCore
 {
     public static class SimTuning
     {
+        public const float LateralTolFracOfCell = 1f / 15f; // ~0.05m when cell=0.75      
+
         // Fractions of cell size
         public const float CartLenFracOfCell = 1f / 3f;   // cart length along path
         public const float GapFracOfCell = 1f / 10f;  // gap between carts
@@ -21,5 +23,7 @@ namespace RailSimCore
         public static float CartHalfLen(float cell) => CartLen(cell) * 0.5f;
         public static float SampleStep(float cell) => Mathf.Max(1e-5f, cell * SampleStepFracOfCell);
         public static float Eps(float cell) => Mathf.Max(1e-5f, cell * EpsFracOfCell);
+
+        public static float LateralTol(float cell) => Mathf.Max(1e-5f, cell * LateralTolFracOfCell);
     }
 }

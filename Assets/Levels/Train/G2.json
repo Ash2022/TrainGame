@@ -2500,94 +2500,6 @@
       ]
     },
     {
-      "partType": "Straight",
-      "partId": "Straight_56",
-      "position": {
-        "x": 10,
-        "y": 10
-      },
-      "rotation": 0,
-      "splines": [],
-      "worldSplines": [
-        [
-          {
-            "x": 9.0,
-            "y": 0.220000267,
-            "z": 0.0
-          },
-          {
-            "x": 9.0,
-            "y": -0.779999733,
-            "z": 0.0
-          }
-        ]
-      ],
-      "exits": [
-        {
-          "exitIndex": 0,
-          "localCell": {
-            "x": 0,
-            "y": 0
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 0
-          },
-          "worldCell": {
-            "x": 10,
-            "y": 10
-          },
-          "direction": 0,
-          "neighborCell": {
-            "x": 10,
-            "y": 9
-          }
-        },
-        {
-          "exitIndex": 1,
-          "localCell": {
-            "x": 0,
-            "y": 0
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 0
-          },
-          "worldCell": {
-            "x": 10,
-            "y": 10
-          },
-          "direction": 2,
-          "neighborCell": {
-            "x": 10,
-            "y": 11
-          }
-        }
-      ],
-      "occupyingCells": [
-        {
-          "x": 10,
-          "y": 10
-        }
-      ],
-      "allowedPathsGroup": [
-        {
-          "allowedPaths": [
-            {
-              "entryConnectionId": 0,
-              "exitConnectionId": 1,
-              "length": 1.0
-            },
-            {
-              "entryConnectionId": 1,
-              "exitConnectionId": 0,
-              "length": 1.0
-            }
-          ]
-        }
-      ]
-    },
-    {
       "partType": "CurveRight",
       "partId": "CurveRight_60",
       "position": {
@@ -3088,242 +3000,6 @@
       ]
     },
     {
-      "partType": "ThreeWay_Mirrored",
-      "partId": "ThreeWay_Mirrored_66",
-      "position": {
-        "x": 8,
-        "y": 10
-      },
-      "rotation": 180,
-      "splines": [],
-      "worldSplines": [
-        [
-          {
-            "x": 7.0,
-            "y": -1.77999973,
-            "z": 0.0
-          },
-          {
-            "x": 7.0,
-            "y": 0.220000267,
-            "z": 0.0
-          }
-        ],
-        [
-          {
-            "x": 7.5,
-            "y": -1.27999973,
-            "z": 0.0
-          },
-          {
-            "x": 7.0078125,
-            "y": -0.881562233,
-            "z": 0.0
-          },
-          {
-            "x": 7.0,
-            "y": 0.220000267,
-            "z": 0.0
-          }
-        ]
-      ],
-      "exits": [
-        {
-          "exitIndex": 0,
-          "localCell": {
-            "x": 0,
-            "y": 1
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 0
-          },
-          "worldCell": {
-            "x": 8,
-            "y": 10
-          },
-          "direction": 0,
-          "neighborCell": {
-            "x": 8,
-            "y": 9
-          }
-        },
-        {
-          "exitIndex": 1,
-          "localCell": {
-            "x": 0,
-            "y": 0
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 1
-          },
-          "worldCell": {
-            "x": 8,
-            "y": 11
-          },
-          "direction": 2,
-          "neighborCell": {
-            "x": 8,
-            "y": 12
-          }
-        },
-        {
-          "exitIndex": 2,
-          "localCell": {
-            "x": 0,
-            "y": 0
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 1
-          },
-          "worldCell": {
-            "x": 8,
-            "y": 11
-          },
-          "direction": 1,
-          "neighborCell": {
-            "x": 9,
-            "y": 11
-          }
-        }
-      ],
-      "occupyingCells": [
-        {
-          "x": 8,
-          "y": 11
-        },
-        {
-          "x": 8,
-          "y": 10
-        }
-      ],
-      "allowedPathsGroup": [
-        {
-          "allowedPaths": [
-            {
-              "entryConnectionId": 1,
-              "exitConnectionId": 0,
-              "length": 2.0
-            },
-            {
-              "entryConnectionId": 0,
-              "exitConnectionId": 1,
-              "length": 2.0
-            }
-          ]
-        },
-        {
-          "allowedPaths": [
-            {
-              "entryConnectionId": 2,
-              "exitConnectionId": 0,
-              "length": 1.73483658
-            },
-            {
-              "entryConnectionId": 0,
-              "exitConnectionId": 2,
-              "length": 1.73483658
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "partType": "CurveRight",
-      "partId": "CurveRight_67",
-      "position": {
-        "x": 10,
-        "y": 11
-      },
-      "rotation": 180,
-      "splines": [],
-      "worldSplines": [
-        [
-          {
-            "x": 9.0,
-            "y": -0.779999733,
-            "z": 0.0
-          },
-          {
-            "x": 8.8359375,
-            "y": -1.11593723,
-            "z": 0.0
-          },
-          {
-            "x": 8.5,
-            "y": -1.27999973,
-            "z": 0.0
-          }
-        ]
-      ],
-      "exits": [
-        {
-          "exitIndex": 0,
-          "localCell": {
-            "x": 0,
-            "y": 0
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 0
-          },
-          "worldCell": {
-            "x": 10,
-            "y": 11
-          },
-          "direction": 0,
-          "neighborCell": {
-            "x": 10,
-            "y": 10
-          }
-        },
-        {
-          "exitIndex": 1,
-          "localCell": {
-            "x": 0,
-            "y": 0
-          },
-          "rotatedCell": {
-            "x": 0,
-            "y": 0
-          },
-          "worldCell": {
-            "x": 10,
-            "y": 11
-          },
-          "direction": 3,
-          "neighborCell": {
-            "x": 9,
-            "y": 11
-          }
-        }
-      ],
-      "occupyingCells": [
-        {
-          "x": 10,
-          "y": 11
-        }
-      ],
-      "allowedPathsGroup": [
-        {
-          "allowedPaths": [
-            {
-              "entryConnectionId": 0,
-              "exitConnectionId": 1,
-              "length": 0.747717857
-            },
-            {
-              "entryConnectionId": 1,
-              "exitConnectionId": 0,
-              "length": 0.747717857
-            }
-          ]
-        }
-      ]
-    },
-    {
       "partType": "Straight",
       "partId": "Straight_68",
       "position": {
@@ -3415,7 +3091,7 @@
       "partType": "Straight",
       "partId": "Straight_69",
       "position": {
-        "x": 8,
+        "x": 10,
         "y": 12
       },
       "rotation": 0,
@@ -3423,12 +3099,12 @@
       "worldSplines": [
         [
           {
-            "x": 7.0,
+            "x": 9.0,
             "y": -1.77999973,
             "z": 0.0
           },
           {
-            "x": 7.0,
+            "x": 9.0,
             "y": -2.78000069,
             "z": 0.0
           }
@@ -3446,12 +3122,12 @@
             "y": 0
           },
           "worldCell": {
-            "x": 8,
+            "x": 10,
             "y": 12
           },
           "direction": 0,
           "neighborCell": {
-            "x": 8,
+            "x": 10,
             "y": 11
           }
         },
@@ -3466,19 +3142,19 @@
             "y": 0
           },
           "worldCell": {
-            "x": 8,
+            "x": 10,
             "y": 12
           },
           "direction": 2,
           "neighborCell": {
-            "x": 8,
+            "x": 10,
             "y": 13
           }
         }
       ],
       "occupyingCells": [
         {
-          "x": 8,
+          "x": 10,
           "y": 12
         }
       ],
@@ -3503,7 +3179,7 @@
       "partType": "Straight",
       "partId": "Straight_70",
       "position": {
-        "x": 8,
+        "x": 10,
         "y": 13
       },
       "rotation": 0,
@@ -3511,12 +3187,12 @@
       "worldSplines": [
         [
           {
-            "x": 7.0,
+            "x": 9.0,
             "y": -2.78000069,
             "z": 0.0
           },
           {
-            "x": 7.0,
+            "x": 9.0,
             "y": -3.78000069,
             "z": 0.0
           }
@@ -3534,12 +3210,12 @@
             "y": 0
           },
           "worldCell": {
-            "x": 8,
+            "x": 10,
             "y": 13
           },
           "direction": 0,
           "neighborCell": {
-            "x": 8,
+            "x": 10,
             "y": 12
           }
         },
@@ -3554,20 +3230,344 @@
             "y": 0
           },
           "worldCell": {
-            "x": 8,
+            "x": 10,
             "y": 13
           },
           "direction": 2,
           "neighborCell": {
-            "x": 8,
+            "x": 10,
             "y": 14
           }
         }
       ],
       "occupyingCells": [
         {
-          "x": 8,
+          "x": 10,
           "y": 13
+        }
+      ],
+      "allowedPathsGroup": [
+        {
+          "allowedPaths": [
+            {
+              "entryConnectionId": 0,
+              "exitConnectionId": 1,
+              "length": 1.0
+            },
+            {
+              "entryConnectionId": 1,
+              "exitConnectionId": 0,
+              "length": 1.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "partType": "ThreeWay",
+      "partId": "ThreeWay_71",
+      "position": {
+        "x": 10,
+        "y": 10
+      },
+      "rotation": 180,
+      "splines": [],
+      "worldSplines": [
+        [
+          {
+            "x": 9.0,
+            "y": -1.77999973,
+            "z": 0.0
+          },
+          {
+            "x": 9.0,
+            "y": 0.220000267,
+            "z": 0.0
+          }
+        ],
+        [
+          {
+            "x": 8.5,
+            "y": -1.27999973,
+            "z": 0.0
+          },
+          {
+            "x": 8.979688,
+            "y": -0.9190626,
+            "z": 0.0
+          },
+          {
+            "x": 9.0,
+            "y": 0.220000267,
+            "z": 0.0
+          }
+        ]
+      ],
+      "exits": [
+        {
+          "exitIndex": 0,
+          "localCell": {
+            "x": 0,
+            "y": 1
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0
+          },
+          "worldCell": {
+            "x": 10,
+            "y": 10
+          },
+          "direction": 0,
+          "neighborCell": {
+            "x": 10,
+            "y": 9
+          }
+        },
+        {
+          "exitIndex": 1,
+          "localCell": {
+            "x": 0,
+            "y": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 1
+          },
+          "worldCell": {
+            "x": 10,
+            "y": 11
+          },
+          "direction": 2,
+          "neighborCell": {
+            "x": 10,
+            "y": 12
+          }
+        },
+        {
+          "exitIndex": 2,
+          "localCell": {
+            "x": 0,
+            "y": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 1
+          },
+          "worldCell": {
+            "x": 10,
+            "y": 11
+          },
+          "direction": 3,
+          "neighborCell": {
+            "x": 9,
+            "y": 11
+          }
+        }
+      ],
+      "occupyingCells": [
+        {
+          "x": 10,
+          "y": 11
+        },
+        {
+          "x": 10,
+          "y": 10
+        }
+      ],
+      "allowedPathsGroup": [
+        {
+          "allowedPaths": [
+            {
+              "entryConnectionId": 1,
+              "exitConnectionId": 0,
+              "length": 2.0
+            },
+            {
+              "entryConnectionId": 0,
+              "exitConnectionId": 1,
+              "length": 2.0
+            }
+          ]
+        },
+        {
+          "allowedPaths": [
+            {
+              "entryConnectionId": 2,
+              "exitConnectionId": 0,
+              "length": 1.739557
+            },
+            {
+              "entryConnectionId": 0,
+              "exitConnectionId": 2,
+              "length": 1.739557
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_72",
+      "position": {
+        "x": 8,
+        "y": 11
+      },
+      "rotation": 270,
+      "splines": [],
+      "worldSplines": [
+        [
+          {
+            "x": 7.5,
+            "y": -1.27999973,
+            "z": 0.0
+          },
+          {
+            "x": 7.1640625,
+            "y": -1.11593723,
+            "z": 0.0
+          },
+          {
+            "x": 7.0,
+            "y": -0.779999733,
+            "z": 0.0
+          }
+        ]
+      ],
+      "exits": [
+        {
+          "exitIndex": 0,
+          "localCell": {
+            "x": 0,
+            "y": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0
+          },
+          "worldCell": {
+            "x": 8,
+            "y": 11
+          },
+          "direction": 1,
+          "neighborCell": {
+            "x": 9,
+            "y": 11
+          }
+        },
+        {
+          "exitIndex": 1,
+          "localCell": {
+            "x": 0,
+            "y": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0
+          },
+          "worldCell": {
+            "x": 8,
+            "y": 11
+          },
+          "direction": 0,
+          "neighborCell": {
+            "x": 8,
+            "y": 10
+          }
+        }
+      ],
+      "occupyingCells": [
+        {
+          "x": 8,
+          "y": 11
+        }
+      ],
+      "allowedPathsGroup": [
+        {
+          "allowedPaths": [
+            {
+              "entryConnectionId": 0,
+              "exitConnectionId": 1,
+              "length": 0.747717857
+            },
+            {
+              "entryConnectionId": 1,
+              "exitConnectionId": 0,
+              "length": 0.747717857
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_73",
+      "position": {
+        "x": 8,
+        "y": 10
+      },
+      "rotation": 0,
+      "splines": [],
+      "worldSplines": [
+        [
+          {
+            "x": 7.0,
+            "y": 0.220000267,
+            "z": 0.0
+          },
+          {
+            "x": 7.0,
+            "y": -0.779999733,
+            "z": 0.0
+          }
+        ]
+      ],
+      "exits": [
+        {
+          "exitIndex": 0,
+          "localCell": {
+            "x": 0,
+            "y": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0
+          },
+          "worldCell": {
+            "x": 8,
+            "y": 10
+          },
+          "direction": 0,
+          "neighborCell": {
+            "x": 8,
+            "y": 9
+          }
+        },
+        {
+          "exitIndex": 1,
+          "localCell": {
+            "x": 0,
+            "y": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0
+          },
+          "worldCell": {
+            "x": 8,
+            "y": 10
+          },
+          "direction": 2,
+          "neighborCell": {
+            "x": 8,
+            "y": 11
+          }
+        }
+      ],
+      "occupyingCells": [
+        {
+          "x": 8,
+          "y": 10
         }
       ],
       "allowedPathsGroup": [
@@ -4035,112 +4035,6 @@
         "direction": 3,
         "Letter": "S",
         "HasWaitingPeople": true
-      },
-      {
-        "gridX": 8,
-        "gridY": 13,
-        "type": 1,
-        "colorIndex": 1,
-        "id": 6,
-        "part": {
-          "partType": "Straight",
-          "partId": "Straight_70",
-          "position": {
-            "x": 8,
-            "y": 13
-          },
-          "rotation": 0,
-          "splines": [],
-          "worldSplines": [
-            [
-              {
-                "x": 7.0,
-                "y": -2.78000069,
-                "z": 0.0
-              },
-              {
-                "x": 7.0,
-                "y": -3.78000069,
-                "z": 0.0
-              }
-            ]
-          ],
-          "exits": [
-            {
-              "exitIndex": 0,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 8,
-                "y": 13
-              },
-              "direction": 0,
-              "neighborCell": {
-                "x": 8,
-                "y": 12
-              }
-            },
-            {
-              "exitIndex": 1,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 8,
-                "y": 13
-              },
-              "direction": 2,
-              "neighborCell": {
-                "x": 8,
-                "y": 14
-              }
-            }
-          ],
-          "occupyingCells": [
-            {
-              "x": 8,
-              "y": 13
-            }
-          ],
-          "allowedPathsGroup": [
-            {
-              "allowedPaths": [
-                {
-                  "entryConnectionId": 0,
-                  "exitConnectionId": 1,
-                  "length": 1.0
-                },
-                {
-                  "entryConnectionId": 1,
-                  "exitConnectionId": 0,
-                  "length": 1.0
-                }
-              ]
-            }
-          ]
-        },
-        "anchor": {
-          "partId": "Straight_70",
-          "exitPin": 0,
-          "splineIndex": -1,
-          "t": 0.0
-        },
-        "waitingPeople": [],
-        "initialCarts": [],
-        "direction": 3,
-        "Letter": "D",
-        "HasWaitingPeople": false
       },
       {
         "gridX": 4,
@@ -4677,6 +4571,112 @@
         "direction": 3,
         "Letter": "S",
         "HasWaitingPeople": true
+      },
+      {
+        "gridX": 10,
+        "gridY": 13,
+        "type": 1,
+        "colorIndex": 1,
+        "id": 21,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_70",
+          "position": {
+            "x": 10,
+            "y": 13
+          },
+          "rotation": 0,
+          "splines": [],
+          "worldSplines": [
+            [
+              {
+                "x": 9.0,
+                "y": -2.78000069,
+                "z": 0.0
+              },
+              {
+                "x": 9.0,
+                "y": -3.78000069,
+                "z": 0.0
+              }
+            ]
+          ],
+          "exits": [
+            {
+              "exitIndex": 0,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 10,
+                "y": 13
+              },
+              "direction": 0,
+              "neighborCell": {
+                "x": 10,
+                "y": 12
+              }
+            },
+            {
+              "exitIndex": 1,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 10,
+                "y": 13
+              },
+              "direction": 2,
+              "neighborCell": {
+                "x": 10,
+                "y": 14
+              }
+            }
+          ],
+          "occupyingCells": [
+            {
+              "x": 10,
+              "y": 13
+            }
+          ],
+          "allowedPathsGroup": [
+            {
+              "allowedPaths": [
+                {
+                  "entryConnectionId": 0,
+                  "exitConnectionId": 1,
+                  "length": 1.0
+                },
+                {
+                  "entryConnectionId": 1,
+                  "exitConnectionId": 0,
+                  "length": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        "anchor": {
+          "partId": "Straight_70",
+          "exitPin": 0,
+          "splineIndex": -1,
+          "t": 0.0
+        },
+        "waitingPeople": [],
+        "initialCarts": [],
+        "direction": 3,
+        "Letter": "D",
+        "HasWaitingPeople": false
       }
     ]
   },
@@ -7356,7 +7356,7 @@
         },
         "neighborByExit": {
           "0": {
-            "neighborPartId": "ThreeWay_Mirrored_66",
+            "neighborPartId": "Straight_73",
             "neighborPin": 0,
             "externalLen": 1.0
           },
@@ -8098,129 +8098,7 @@
             "externalLen": 1.0
           },
           "1": {
-            "neighborPartId": "Straight_56",
-            "neighborPin": 0,
-            "externalLen": 1.0
-          }
-        }
-      },
-      "Straight_56": {
-        "part": {
-          "partType": "Straight",
-          "partId": "Straight_56",
-          "position": {
-            "x": 10,
-            "y": 10
-          },
-          "rotation": 0,
-          "splines": [],
-          "worldSplines": [
-            [
-              {
-                "x": 9.0,
-                "y": 0.220000267,
-                "z": 0.0
-              },
-              {
-                "x": 9.0,
-                "y": -0.779999733,
-                "z": 0.0
-              }
-            ]
-          ],
-          "exits": [
-            {
-              "exitIndex": 0,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 10,
-                "y": 10
-              },
-              "direction": 0,
-              "neighborCell": {
-                "x": 10,
-                "y": 9
-              }
-            },
-            {
-              "exitIndex": 1,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 10,
-                "y": 10
-              },
-              "direction": 2,
-              "neighborCell": {
-                "x": 10,
-                "y": 11
-              }
-            }
-          ],
-          "occupyingCells": [
-            {
-              "x": 10,
-              "y": 10
-            }
-          ],
-          "allowedPathsGroup": [
-            {
-              "allowedPaths": [
-                {
-                  "entryConnectionId": 0,
-                  "exitConnectionId": 1,
-                  "length": 1.0
-                },
-                {
-                  "entryConnectionId": 1,
-                  "exitConnectionId": 0,
-                  "length": 1.0
-                }
-              ]
-            }
-          ]
-        },
-        "allowed": {
-          "0": [
-            {
-              "exitPin": 1,
-              "internalLen": 1.0,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ],
-          "1": [
-            {
-              "exitPin": 0,
-              "internalLen": 1.0,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ]
-        },
-        "neighborByExit": {
-          "0": {
-            "neighborPartId": "Straight_55",
-            "neighborPin": 1,
-            "externalLen": 1.0
-          },
-          "1": {
-            "neighborPartId": "CurveRight_67",
+            "neighborPartId": "ThreeWay_71",
             "neighborPin": 0,
             "externalLen": 1.0
           }
@@ -8912,331 +8790,6 @@
           }
         }
       },
-      "ThreeWay_Mirrored_66": {
-        "part": {
-          "partType": "ThreeWay_Mirrored",
-          "partId": "ThreeWay_Mirrored_66",
-          "position": {
-            "x": 8,
-            "y": 10
-          },
-          "rotation": 180,
-          "splines": [],
-          "worldSplines": [
-            [
-              {
-                "x": 7.0,
-                "y": -1.77999973,
-                "z": 0.0
-              },
-              {
-                "x": 7.0,
-                "y": 0.220000267,
-                "z": 0.0
-              }
-            ],
-            [
-              {
-                "x": 7.5,
-                "y": -1.27999973,
-                "z": 0.0
-              },
-              {
-                "x": 7.0078125,
-                "y": -0.881562233,
-                "z": 0.0
-              },
-              {
-                "x": 7.0,
-                "y": 0.220000267,
-                "z": 0.0
-              }
-            ]
-          ],
-          "exits": [
-            {
-              "exitIndex": 0,
-              "localCell": {
-                "x": 0,
-                "y": 1
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 8,
-                "y": 10
-              },
-              "direction": 0,
-              "neighborCell": {
-                "x": 8,
-                "y": 9
-              }
-            },
-            {
-              "exitIndex": 1,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 1
-              },
-              "worldCell": {
-                "x": 8,
-                "y": 11
-              },
-              "direction": 2,
-              "neighborCell": {
-                "x": 8,
-                "y": 12
-              }
-            },
-            {
-              "exitIndex": 2,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 1
-              },
-              "worldCell": {
-                "x": 8,
-                "y": 11
-              },
-              "direction": 1,
-              "neighborCell": {
-                "x": 9,
-                "y": 11
-              }
-            }
-          ],
-          "occupyingCells": [
-            {
-              "x": 8,
-              "y": 11
-            },
-            {
-              "x": 8,
-              "y": 10
-            }
-          ],
-          "allowedPathsGroup": [
-            {
-              "allowedPaths": [
-                {
-                  "entryConnectionId": 1,
-                  "exitConnectionId": 0,
-                  "length": 2.0
-                },
-                {
-                  "entryConnectionId": 0,
-                  "exitConnectionId": 1,
-                  "length": 2.0
-                }
-              ]
-            },
-            {
-              "allowedPaths": [
-                {
-                  "entryConnectionId": 2,
-                  "exitConnectionId": 0,
-                  "length": 1.73483658
-                },
-                {
-                  "entryConnectionId": 0,
-                  "exitConnectionId": 2,
-                  "length": 1.73483658
-                }
-              ]
-            }
-          ]
-        },
-        "allowed": {
-          "1": [
-            {
-              "exitPin": 0,
-              "internalLen": 2.0,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ],
-          "0": [
-            {
-              "exitPin": 1,
-              "internalLen": 2.0,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            },
-            {
-              "exitPin": 2,
-              "internalLen": 1.73483658,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ],
-          "2": [
-            {
-              "exitPin": 0,
-              "internalLen": 1.73483658,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ]
-        },
-        "neighborByExit": {
-          "0": {
-            "neighborPartId": "ThreeWay_Mirrored_46",
-            "neighborPin": 0,
-            "externalLen": 1.0
-          },
-          "1": {
-            "neighborPartId": "Straight_69",
-            "neighborPin": 0,
-            "externalLen": 1.0
-          },
-          "2": {
-            "neighborPartId": "Straight_68",
-            "neighborPin": 1,
-            "externalLen": 1.0
-          }
-        }
-      },
-      "CurveRight_67": {
-        "part": {
-          "partType": "CurveRight",
-          "partId": "CurveRight_67",
-          "position": {
-            "x": 10,
-            "y": 11
-          },
-          "rotation": 180,
-          "splines": [],
-          "worldSplines": [
-            [
-              {
-                "x": 9.0,
-                "y": -0.779999733,
-                "z": 0.0
-              },
-              {
-                "x": 8.8359375,
-                "y": -1.11593723,
-                "z": 0.0
-              },
-              {
-                "x": 8.5,
-                "y": -1.27999973,
-                "z": 0.0
-              }
-            ]
-          ],
-          "exits": [
-            {
-              "exitIndex": 0,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 10,
-                "y": 11
-              },
-              "direction": 0,
-              "neighborCell": {
-                "x": 10,
-                "y": 10
-              }
-            },
-            {
-              "exitIndex": 1,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 10,
-                "y": 11
-              },
-              "direction": 3,
-              "neighborCell": {
-                "x": 9,
-                "y": 11
-              }
-            }
-          ],
-          "occupyingCells": [
-            {
-              "x": 10,
-              "y": 11
-            }
-          ],
-          "allowedPathsGroup": [
-            {
-              "allowedPaths": [
-                {
-                  "entryConnectionId": 0,
-                  "exitConnectionId": 1,
-                  "length": 0.747717857
-                },
-                {
-                  "entryConnectionId": 1,
-                  "exitConnectionId": 0,
-                  "length": 0.747717857
-                }
-              ]
-            }
-          ]
-        },
-        "allowed": {
-          "0": [
-            {
-              "exitPin": 1,
-              "internalLen": 0.747717857,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ],
-          "1": [
-            {
-              "exitPin": 0,
-              "internalLen": 0.747717857,
-              "splineIndex": 0,
-              "t0": 0.0,
-              "t1": 1.0
-            }
-          ]
-        },
-        "neighborByExit": {
-          "0": {
-            "neighborPartId": "Straight_56",
-            "neighborPin": 1,
-            "externalLen": 1.0
-          },
-          "1": {
-            "neighborPartId": "Straight_68",
-            "neighborPin": 0,
-            "externalLen": 1.0
-          }
-        }
-      },
       "Straight_68": {
         "part": {
           "partType": "Straight",
@@ -9348,13 +8901,13 @@
         },
         "neighborByExit": {
           "0": {
-            "neighborPartId": "CurveRight_67",
-            "neighborPin": 1,
+            "neighborPartId": "ThreeWay_71",
+            "neighborPin": 2,
             "externalLen": 1.0
           },
           "1": {
-            "neighborPartId": "ThreeWay_Mirrored_66",
-            "neighborPin": 2,
+            "neighborPartId": "CurveRight_72",
+            "neighborPin": 0,
             "externalLen": 1.0
           }
         }
@@ -9364,7 +8917,7 @@
           "partType": "Straight",
           "partId": "Straight_69",
           "position": {
-            "x": 8,
+            "x": 10,
             "y": 12
           },
           "rotation": 0,
@@ -9372,12 +8925,12 @@
           "worldSplines": [
             [
               {
-                "x": 7.0,
+                "x": 9.0,
                 "y": -1.77999973,
                 "z": 0.0
               },
               {
-                "x": 7.0,
+                "x": 9.0,
                 "y": -2.78000069,
                 "z": 0.0
               }
@@ -9395,12 +8948,12 @@
                 "y": 0
               },
               "worldCell": {
-                "x": 8,
+                "x": 10,
                 "y": 12
               },
               "direction": 0,
               "neighborCell": {
-                "x": 8,
+                "x": 10,
                 "y": 11
               }
             },
@@ -9415,19 +8968,19 @@
                 "y": 0
               },
               "worldCell": {
-                "x": 8,
+                "x": 10,
                 "y": 12
               },
               "direction": 2,
               "neighborCell": {
-                "x": 8,
+                "x": 10,
                 "y": 13
               }
             }
           ],
           "occupyingCells": [
             {
-              "x": 8,
+              "x": 10,
               "y": 12
             }
           ],
@@ -9470,7 +9023,7 @@
         },
         "neighborByExit": {
           "0": {
-            "neighborPartId": "ThreeWay_Mirrored_66",
+            "neighborPartId": "ThreeWay_71",
             "neighborPin": 1,
             "externalLen": 1.0
           },
@@ -9486,7 +9039,7 @@
           "partType": "Straight",
           "partId": "Straight_70",
           "position": {
-            "x": 8,
+            "x": 10,
             "y": 13
           },
           "rotation": 0,
@@ -9494,12 +9047,12 @@
           "worldSplines": [
             [
               {
-                "x": 7.0,
+                "x": 9.0,
                 "y": -2.78000069,
                 "z": 0.0
               },
               {
-                "x": 7.0,
+                "x": 9.0,
                 "y": -3.78000069,
                 "z": 0.0
               }
@@ -9517,12 +9070,12 @@
                 "y": 0
               },
               "worldCell": {
-                "x": 8,
+                "x": 10,
                 "y": 13
               },
               "direction": 0,
               "neighborCell": {
-                "x": 8,
+                "x": 10,
                 "y": 12
               }
             },
@@ -9537,19 +9090,19 @@
                 "y": 0
               },
               "worldCell": {
-                "x": 8,
+                "x": 10,
                 "y": 13
               },
               "direction": 2,
               "neighborCell": {
-                "x": 8,
+                "x": 10,
                 "y": 14
               }
             }
           ],
           "occupyingCells": [
             {
-              "x": 8,
+              "x": 10,
               "y": 13
             }
           ],
@@ -9593,6 +9146,453 @@
         "neighborByExit": {
           "0": {
             "neighborPartId": "Straight_69",
+            "neighborPin": 1,
+            "externalLen": 1.0
+          }
+        }
+      },
+      "ThreeWay_71": {
+        "part": {
+          "partType": "ThreeWay",
+          "partId": "ThreeWay_71",
+          "position": {
+            "x": 10,
+            "y": 10
+          },
+          "rotation": 180,
+          "splines": [],
+          "worldSplines": [
+            [
+              {
+                "x": 9.0,
+                "y": -1.77999973,
+                "z": 0.0
+              },
+              {
+                "x": 9.0,
+                "y": 0.220000267,
+                "z": 0.0
+              }
+            ],
+            [
+              {
+                "x": 8.5,
+                "y": -1.27999973,
+                "z": 0.0
+              },
+              {
+                "x": 8.979688,
+                "y": -0.9190626,
+                "z": 0.0
+              },
+              {
+                "x": 9.0,
+                "y": 0.220000267,
+                "z": 0.0
+              }
+            ]
+          ],
+          "exits": [
+            {
+              "exitIndex": 0,
+              "localCell": {
+                "x": 0,
+                "y": 1
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 10,
+                "y": 10
+              },
+              "direction": 0,
+              "neighborCell": {
+                "x": 10,
+                "y": 9
+              }
+            },
+            {
+              "exitIndex": 1,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 1
+              },
+              "worldCell": {
+                "x": 10,
+                "y": 11
+              },
+              "direction": 2,
+              "neighborCell": {
+                "x": 10,
+                "y": 12
+              }
+            },
+            {
+              "exitIndex": 2,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 1
+              },
+              "worldCell": {
+                "x": 10,
+                "y": 11
+              },
+              "direction": 3,
+              "neighborCell": {
+                "x": 9,
+                "y": 11
+              }
+            }
+          ],
+          "occupyingCells": [
+            {
+              "x": 10,
+              "y": 11
+            },
+            {
+              "x": 10,
+              "y": 10
+            }
+          ],
+          "allowedPathsGroup": [
+            {
+              "allowedPaths": [
+                {
+                  "entryConnectionId": 1,
+                  "exitConnectionId": 0,
+                  "length": 2.0
+                },
+                {
+                  "entryConnectionId": 0,
+                  "exitConnectionId": 1,
+                  "length": 2.0
+                }
+              ]
+            },
+            {
+              "allowedPaths": [
+                {
+                  "entryConnectionId": 2,
+                  "exitConnectionId": 0,
+                  "length": 1.739557
+                },
+                {
+                  "entryConnectionId": 0,
+                  "exitConnectionId": 2,
+                  "length": 1.739557
+                }
+              ]
+            }
+          ]
+        },
+        "allowed": {
+          "1": [
+            {
+              "exitPin": 0,
+              "internalLen": 2.0,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ],
+          "0": [
+            {
+              "exitPin": 1,
+              "internalLen": 2.0,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            },
+            {
+              "exitPin": 2,
+              "internalLen": 1.739557,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ],
+          "2": [
+            {
+              "exitPin": 0,
+              "internalLen": 1.739557,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ]
+        },
+        "neighborByExit": {
+          "0": {
+            "neighborPartId": "Straight_55",
+            "neighborPin": 1,
+            "externalLen": 1.0
+          },
+          "1": {
+            "neighborPartId": "Straight_69",
+            "neighborPin": 0,
+            "externalLen": 1.0
+          },
+          "2": {
+            "neighborPartId": "Straight_68",
+            "neighborPin": 0,
+            "externalLen": 1.0
+          }
+        }
+      },
+      "CurveRight_72": {
+        "part": {
+          "partType": "CurveRight",
+          "partId": "CurveRight_72",
+          "position": {
+            "x": 8,
+            "y": 11
+          },
+          "rotation": 270,
+          "splines": [],
+          "worldSplines": [
+            [
+              {
+                "x": 7.5,
+                "y": -1.27999973,
+                "z": 0.0
+              },
+              {
+                "x": 7.1640625,
+                "y": -1.11593723,
+                "z": 0.0
+              },
+              {
+                "x": 7.0,
+                "y": -0.779999733,
+                "z": 0.0
+              }
+            ]
+          ],
+          "exits": [
+            {
+              "exitIndex": 0,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 8,
+                "y": 11
+              },
+              "direction": 1,
+              "neighborCell": {
+                "x": 9,
+                "y": 11
+              }
+            },
+            {
+              "exitIndex": 1,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 8,
+                "y": 11
+              },
+              "direction": 0,
+              "neighborCell": {
+                "x": 8,
+                "y": 10
+              }
+            }
+          ],
+          "occupyingCells": [
+            {
+              "x": 8,
+              "y": 11
+            }
+          ],
+          "allowedPathsGroup": [
+            {
+              "allowedPaths": [
+                {
+                  "entryConnectionId": 0,
+                  "exitConnectionId": 1,
+                  "length": 0.747717857
+                },
+                {
+                  "entryConnectionId": 1,
+                  "exitConnectionId": 0,
+                  "length": 0.747717857
+                }
+              ]
+            }
+          ]
+        },
+        "allowed": {
+          "0": [
+            {
+              "exitPin": 1,
+              "internalLen": 0.747717857,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ],
+          "1": [
+            {
+              "exitPin": 0,
+              "internalLen": 0.747717857,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ]
+        },
+        "neighborByExit": {
+          "0": {
+            "neighborPartId": "Straight_68",
+            "neighborPin": 1,
+            "externalLen": 1.0
+          },
+          "1": {
+            "neighborPartId": "Straight_73",
+            "neighborPin": 1,
+            "externalLen": 1.0
+          }
+        }
+      },
+      "Straight_73": {
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_73",
+          "position": {
+            "x": 8,
+            "y": 10
+          },
+          "rotation": 0,
+          "splines": [],
+          "worldSplines": [
+            [
+              {
+                "x": 7.0,
+                "y": 0.220000267,
+                "z": 0.0
+              },
+              {
+                "x": 7.0,
+                "y": -0.779999733,
+                "z": 0.0
+              }
+            ]
+          ],
+          "exits": [
+            {
+              "exitIndex": 0,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 8,
+                "y": 10
+              },
+              "direction": 0,
+              "neighborCell": {
+                "x": 8,
+                "y": 9
+              }
+            },
+            {
+              "exitIndex": 1,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 8,
+                "y": 10
+              },
+              "direction": 2,
+              "neighborCell": {
+                "x": 8,
+                "y": 11
+              }
+            }
+          ],
+          "occupyingCells": [
+            {
+              "x": 8,
+              "y": 10
+            }
+          ],
+          "allowedPathsGroup": [
+            {
+              "allowedPaths": [
+                {
+                  "entryConnectionId": 0,
+                  "exitConnectionId": 1,
+                  "length": 1.0
+                },
+                {
+                  "entryConnectionId": 1,
+                  "exitConnectionId": 0,
+                  "length": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        "allowed": {
+          "0": [
+            {
+              "exitPin": 1,
+              "internalLen": 1.0,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ],
+          "1": [
+            {
+              "exitPin": 0,
+              "internalLen": 1.0,
+              "splineIndex": 0,
+              "t0": 0.0,
+              "t1": 1.0
+            }
+          ]
+        },
+        "neighborByExit": {
+          "0": {
+            "neighborPartId": "ThreeWay_Mirrored_46",
+            "neighborPin": 0,
+            "externalLen": 1.0
+          },
+          "1": {
+            "neighborPartId": "CurveRight_72",
             "neighborPin": 1,
             "externalLen": 1.0
           }

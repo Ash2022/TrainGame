@@ -42,6 +42,11 @@ public class LevelVisualizer : MonoBehaviour
     bool useSimulation;
     SimApp SimAppInstance;
 
+    [Header("Path Debug Overlay")]
+    [SerializeField] private LineRenderer simPathRenderer;
+    [SerializeField] private Color simPathColor = new Color(1f, 0f, 1f, 1f);
+    [SerializeField] private bool drawSimPathOverlay = true;
+
     Coroutine levelBuildRoutine;
     Coroutine dynamicBuildRoutine;
 
@@ -423,11 +428,44 @@ public class LevelVisualizer : MonoBehaviour
         globalPathRenderer.material.color = color;
         globalPathRenderer.positionCount = worldPts.Count;
         globalPathRenderer.SetPositions(worldPts.ToArray());
+
+
+        if (drawSimPathOverlay)
+        {
+            var simPts = Utils.BuildPathWorldPolylineFromTemplates(currLevel, pathModel, worldOrigin, minX, minY, gridH, cellSize, partsLibrary);
+
+            if (simPts != null && simPts.Count >= 2)
+            {
+                if (simPathRenderer == null)
+                {
+                    var go = new GameObject("SimPathOverlay");
+                    go.transform.SetParent(globalPathRenderer.transform.parent, false);
+                    simPathRenderer = go.AddComponent<LineRenderer>();
+                    simPathRenderer.widthMultiplier = globalPathRenderer.widthMultiplier;
+                    simPathRenderer.numCapVertices = globalPathRenderer.numCapVertices;
+                    simPathRenderer.alignment = LineAlignment.View;
+                    // reuse material so it always shows
+                    simPathRenderer.material = new Material(globalPathRenderer.material);
+                }
+
+                simPathRenderer.material.color = simPathColor;
+                simPathRenderer.positionCount = simPts.Count;
+                simPathRenderer.SetPositions(simPts.ToArray());
+            }
+            else if (simPathRenderer != null)
+            {
+                simPathRenderer.positionCount = 0;
+            }
+        }
+
     }
 
     public void ClearGlobalPathRenderer()
     {
         globalPathRenderer.positionCount = 0;
+
+        if (drawSimPathOverlay)
+            simPathRenderer.positionCount = 0;
     }
 
    

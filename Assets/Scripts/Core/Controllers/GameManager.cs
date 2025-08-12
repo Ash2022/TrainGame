@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RailSimCore;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static RailSimCore.Types;
@@ -221,7 +222,10 @@ public class GameManager : MonoBehaviour
 
         // Per-leg compare (Arrived/Blocked + hit pos), only if sim is enabled
         if (UseSimulation)
-            CompareGameVsSim(r, lastSimRes, tc.TrainId, 0.05f);
+        {
+            float cell = LevelVisualizer.Instance != null ? LevelVisualizer.Instance.CellSize : 1f;
+            CompareGameVsSim(r, lastSimRes, tc.TrainId, SimTuning.LateralTol(cell));
+        }
 
         // === Lose by collision ===
         if (r.Outcome == MoveOutcome.Blocked)

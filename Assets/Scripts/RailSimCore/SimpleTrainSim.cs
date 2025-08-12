@@ -177,7 +177,7 @@ namespace RailSimCore
 
                 if (!noseLogged)
                     {
-                    Debug.Log($"[SimpleTrainSim] headHalfLen (nose) = {nose:F3}m");
+                    //Debug.Log($"[SimpleTrainSim] headHalfLen (nose) = {nose:F3}m");
                     noseLogged = true;
                     }
                 var movingSlice = BuildForwardSlice(SHead + advanced + nose,SHead + advanced + nose + iter,SampleStep);
@@ -199,7 +199,7 @@ namespace RailSimCore
                             continue;
 
                         
-                        if (IntersectPolylines(movingSlice, occupiedSlice, Eps,0.05f, out float alongMoving, out Vector3 hitPos))
+                        if (IntersectPolylines(movingSlice, occupiedSlice, Eps, SimTuning.LateralTol(CellSize), out float alongMoving, out Vector3 hitPos))
                         {
                             cap = Mathf.Min(cap, Mathf.Max(0f, alongMoving));
                             blocked = true;

@@ -10,7 +10,7 @@ public class StationView : MonoBehaviour
     [SerializeField] Transform exits;
 
     // fraction of cellSize used as passenger size/spacing
-    [SerializeField] float verticalSpacingFactor = 0.5f;
+    [SerializeField] float passengerDepth = 0.25f;
     [SerializeField] bool clearExistingOnInit = true;
 
     // computed once per Initialize
@@ -39,7 +39,7 @@ public class StationView : MonoBehaviour
         }
 
         // compute spacing = size of one passenger
-        _spacing = Mathf.Max(0.01f, cellSize * verticalSpacingFactor);
+        _spacing = Mathf.Max(0.01f, passengerDepth);
 
         int count = _pointModel.waitingPeople.Count;
         // draw in reverse: last in list at stackIdx=0, then backward

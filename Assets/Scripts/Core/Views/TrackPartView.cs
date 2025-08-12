@@ -8,6 +8,8 @@ public class TrackPartView : MonoBehaviour
     [SerializeField]LineRenderer lineRenderer1;
     [SerializeField] LineRenderer lineRenderer2;
 
+    PlacedPartInstance modelData;
+
     public SpriteRenderer MainPartImage { get => mainPartImage; set => mainPartImage = value; }
 
     /// <summary>
@@ -15,6 +17,8 @@ public class TrackPartView : MonoBehaviour
     /// </summary>
     public void Setup(PlacedPartInstance model)
     {
+        modelData = model;
+
         // 1) pick the correct sprite
         var sprite = LevelVisualizer.Instance.GetSpriteFor(model.partType);
         if (sprite != null)
@@ -68,4 +72,5 @@ public class TrackPartView : MonoBehaviour
 
         return result;
     }
+
 }

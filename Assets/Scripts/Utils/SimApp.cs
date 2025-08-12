@@ -124,7 +124,7 @@ public sealed class SimApp
      * ============================================================ */
     public MoveCompletion StartLegFromPoints(int trainPointId, int targetPointId, List<Vector3> worldPoints)
     {
-        Debug.Log($"[RUN/SIM ] cell={_cellSize:F3} headHalf={SimTuning.HeadHalfLen(_cellSize):F3}");
+        //Debug.Log($"[RUN/SIM ] cell={_cellSize:F3} headHalf={SimTuning.HeadHalfLen(_cellSize):F3}");
 
         var mc = new MoveCompletion
         {
