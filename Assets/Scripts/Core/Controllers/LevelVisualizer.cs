@@ -12,7 +12,7 @@ public class LevelVisualizer : MonoBehaviour
     private List<TrackPart> partsLibrary;
     [SerializeField] public List<Sprite> partSprites;  // must match partsLibrary order
 
-    
+    [SerializeField] public List<GameObject> partObjects;  // must match partsLibrary order
 
     [Header("Data")]
     [SerializeField] private TextAsset levelJson;
@@ -418,6 +418,16 @@ public class LevelVisualizer : MonoBehaviour
         int idx = partsLibrary.FindIndex(p => p.partName == partType);
         return (idx >= 0 && idx < partSprites.Count) ? partSprites[idx] : null;
     }
+
+    /// <summary>  
+    /// Returns the Object for the given partType, or null if not found.  
+    /// </summary>
+    public GameObject GetGameObjectFor(string partType)
+    {
+        int idx = partsLibrary.FindIndex(p => p.partName == partType);
+        return (idx >= 0 && idx < partObjects.Count) ? partObjects[idx] : null;
+    }
+
 
     public void DrawGlobalSplinePath(PathModel pathModel, List<Vector3> worldPts, Color color)
     {

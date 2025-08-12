@@ -5,6 +5,7 @@ using UnityEngine;
 public class TrackPartView : MonoBehaviour
 {
     [SerializeField] SpriteRenderer mainPartImage;
+    [SerializeField] Transform objectHolder;
     [SerializeField]LineRenderer lineRenderer1;
     [SerializeField] LineRenderer lineRenderer2;
 
@@ -25,6 +26,12 @@ public class TrackPartView : MonoBehaviour
             mainPartImage.sprite = sprite;
         else
             Debug.Log($"No sprite for partType '{model.partType}'");
+
+
+        GameObject partObject = Instantiate(LevelVisualizer.Instance.GetGameObjectFor(model.partType), objectHolder);
+        partObject.transform.localPosition = Vector3.zero;
+        partObject.transform.localEulerAngles = Vector3.zero;
+
 
         // 2) size so that 1 grid-cell = CellSize world units
         //    our sprites import at 100px = 1 unit, and a 2×1 part is 200×100 px → 2×1 world units.

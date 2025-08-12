@@ -636,10 +636,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelJsons:
+  - {fileID: 4900000, guid: caf2fb2c60b22be41a8fe878c257e8df, type: 3}
   - {fileID: 4900000, guid: 9754d0882de52f14f8dcb43ed01eb878, type: 3}
   - {fileID: 4900000, guid: 986517217493f2b45a94794daf6fe1b2, type: 3}
   - {fileID: 4900000, guid: 623460b55a7827243924b478f9b67772, type: 3}
-  - {fileID: 4900000, guid: caf2fb2c60b22be41a8fe878c257e8df, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1426,8 +1426,21 @@ MonoBehaviour:
   - {fileID: 21300000, guid: edebcb435cf9dce499703ed0ac419bb6, type: 3}
   - {fileID: 21300000, guid: a7500bacc2d708948824ce5b46c06954, type: 3}
   - {fileID: 21300000, guid: 139f17c4916e67a4ca7fae210286d4a9, type: 3}
+  partObjects:
+  - {fileID: 919132149155446097, guid: af4ab9fa591b96e408ede8ba5dc1d905, type: 3}
+  - {fileID: 919132149155446097, guid: 91dbd87f12580ba44a1d74a98786698b, type: 3}
+  - {fileID: 919132149155446097, guid: 632ef1c6aee956440815d490af051f5b, type: 3}
+  - {fileID: 919132149155446097, guid: 92c370fe72d0d3443ab3af2acda21586, type: 3}
+  - {fileID: 919132149155446097, guid: 4d9e2c537c26bbf43811439cfd4ec4f1, type: 3}
+  - {fileID: 919132149155446097, guid: c8fe893a1696a264fb87d38759873a04, type: 3}
+  - {fileID: 919132149155446097, guid: 7468ee4902c372143bbb2f9d8703adcf, type: 3}
+  - {fileID: 919132149155446097, guid: e03a2c98e5f754d4fac292d4e4a0933d, type: 3}
+  - {fileID: 919132149155446097, guid: 8fb3a739d680d4341bab55f71398f2e2, type: 3}
+  - {fileID: 919132149155446097, guid: ba2982a7e81cec74d91ae6b508ab8a65, type: 3}
+  - {fileID: 919132149155446097, guid: 2e12831f602d5db419d8f4d91a1a619c, type: 3}
+  - {fileID: 919132149155446097, guid: 2f2076fe21813154c9e8dd14aa8ca58e, type: 3}
   levelJson: {fileID: 4900000, guid: c4840fb7b89eeb2469dc6fbacfb5ac92, type: 3}
-  partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}
+  partPrefab: {fileID: 1678834536405887873, guid: deb8077e9204fc14eb35b86bfd7c71b7, type: 3}
   stationPrefab: {fileID: 7225796874260481156, guid: 5e9e9912989ad5d4c989134b6a52f358, type: 3}
   depotPrefab: {fileID: 7225796874260481156, guid: 4e96a27e8624f7a49be5ac10cec29fd8, type: 3}
   passengerPrefab: {fileID: 1267055530054662668, guid: d2ce050b7ff97e24da6c6ca354a55ea2, type: 3}
