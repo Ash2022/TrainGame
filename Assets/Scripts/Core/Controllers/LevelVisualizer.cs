@@ -18,7 +18,9 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] private TextAsset levelJson;
 
     [Header("Prefabs & Parents")]
+    [SerializeField] private Material partsMaterial;
     [SerializeField] private GameObject partPrefab;
+    [SerializeField] private GameObject emptyPartPrefab;
     [SerializeField] private GameObject stationPrefab;
     [SerializeField] private GameObject depotPrefab;
     [SerializeField] private GameObject passengerPrefab;
@@ -154,7 +156,8 @@ public class LevelVisualizer : MonoBehaviour
         // worldOrigin is the world position of grid cell (0,0)
         worldOrigin = new Vector2(frameMin.x + marginX,
                                   frameMin.y + marginY);
-        
+
+        var occupied = new HashSet<Vector2Int>();
 
         foreach (var inst in level.parts)
         {
@@ -167,6 +170,8 @@ public class LevelVisualizer : MonoBehaviour
                 minCY = Mathf.Min(minCY, c.y);
                 maxCX = Mathf.Max(maxCX, c.x);
                 maxCY = Mathf.Max(maxCY, c.y);
+
+                occupied.Add(new Vector2Int(c.x, c.y)); // ADD: mark cell as occupied
             }
 
             // 2) compute the true geometric center of that box (cells are inclusive)
@@ -208,11 +213,59 @@ public class LevelVisualizer : MonoBehaviour
 
             // hand off to view
             if (go.TryGetComponent<TrackPartView>(out var view))
-                view.Setup(inst);
+                view.Setup(inst, partsMaterial);
 
             yield return new WaitForSeconds(tileDelay);
         }
-       
+
+        bool addedEmptyHolder = false;
+        GameObject emptyHolder = null;
+
+        // ADD: fill gaps with empties
+        for (int x = minX; x <= maxX; x++)
+        {
+            for (int y = minY; y <= maxY; y++)
+            {
+                if (occupied.Contains(new Vector2Int(x, y))) continue;
+
+                
+                if (addedEmptyHolder == false)
+                {
+                    addedEmptyHolder = true;
+                    emptyHolder = new GameObject();
+                    emptyHolder.name = "EmptyHolder";
+                    emptyHolder.transform.SetParent(levelHolder);
+
+                }
+
+                // center of this grid cell
+                float cx = (x - minX) + 0.5f;
+                float cy = (y - minY) + 0.5f;
+
+                // flip Y like the parts placement
+                Vector2 flipped = new Vector2(cx, gridH - cy);
+
+                // world position
+                Vector3 pos = new Vector3(
+                    worldOrigin.x + flipped.x * cellSize,
+                    worldOrigin.y + flipped.y * cellSize,
+                    0f
+                );
+
+                var go = Instantiate(emptyPartPrefab, emptyHolder.transform);
+                go.name = $"Empty_{x}_{y}";
+                go.transform.position = pos;
+                go.transform.rotation = Quaternion.identity;
+
+                if (go.TryGetComponent<EmptyTrackPartView>(out var emptyView))
+                    emptyView.Setup(partsMaterial); // adjust args/method name if your script differs
+
+                // optional: throttle UI if grid is huge
+                // if (((x - minX) * gridH + (y - minY)) % 100 == 0) yield return null;
+            }
+        }
+
+
         GameManager.Instance.StartNewLevel(currLevel);
 
         //create and bootstrap the sim app (no scene refs)

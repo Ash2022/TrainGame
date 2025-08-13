@@ -63,6 +63,9 @@ public class ScenarioSearchWindow : EditorWindow
     private System.Diagnostics.Stopwatch _sw;
 
     private int attemptsPerLevel = 100;   // default
+    private int _logScenAtt;  // scenario attempt index
+    private int _logCndNbr;   // candidate number (use same as attempt if you want)
+    private int _logAttempt;   // current episode index within this scenario
 
     private EditorCoroutine _searchRoutine;
 
@@ -203,6 +206,10 @@ public class ScenarioSearchWindow : EditorWindow
 
         _rng = new System.Random(globalSeed);
 
+        // helper to append tags
+        void LogTagged(StreamWriter log, string msg, int scenAtt, int cndNbr, int attPerLvl)
+            => LogBoth(log, $"{msg} [ScenAtt={scenAtt} CndNbr={cndNbr} AttPerLvl={attPerLvl}]");
+
         for (int li = 0; li < levels.Count; li++)
         {
             var levelTA = levels[li];
@@ -216,13 +223,13 @@ public class ScenarioSearchWindow : EditorWindow
             {
                 LogBoth(log, $"=== Level: {levelName} ===");
                 Repaint();
-                yield return null; // let UI breathe
+                yield return null;
 
                 var level = DeserializeLevel(levelTA.text);
                 var gb = SimLevelBuilder.ComputeGridBounds(level);
 
                 // Build world splines once
-                float cellSize = 1f; // headless, consistent scale
+                float cellSize = 1f;
                 var worldOrigin = Vector2.zero;
                 SimLevelBuilder.BuildWorldFromData(level, worldOrigin, gb.minX, gb.minY, gb.gridH, cellSize, partsLibrary);
 
@@ -244,71 +251,98 @@ public class ScenarioSearchWindow : EditorWindow
                 }
 
                 var accepted = new List<CandidateSummary>();
-                var seenScenarios = new HashSet<string>(); // dedupe by hash of queues
+                var seenScenarios = new HashSet<string>(); // dedupe only for randomized path
 
-                int attempts = 0;
-                while (accepted.Count < maxAcceptedPerLevel && attempts < maxCandidatesPerLevel)
+                // Ensure routing model exists (project-specific)
+                if (level.routeModelData == null)
                 {
-                    attempts++;
+                    level.routeModelData = RouteModelBuilder.Build(level.parts);
+                    Debug.Log("[Route] Built routing graph for agent runs.");
+                    yield return null;
+                }
 
-                    ScenarioModel scenario;
-                    string sig;
-                    if (useLevelScenario)
-                    {
-                        scenario = CloneScenario(level.gameData);   // or whatever your author/baseline scenario lives on
-                        sig = "LEVEL_SCENARIO";                     // stable signature to bypass dedupe
-                        LogBoth(log, "[Debug] Using level's authored scenario (no randomization).");
-                    }
-                    else
-                    {
-                        // Create random scenario
-                        scenario = MakeRandomScenario(level, trainColors);
-                        sig = ScenarioSignature(scenario);
-                    }
+                if (useLevelScenario)
+                {
+                    // Evaluate the authored scenario once with Attempts-per-level episodes
+                    int scenAtt = 1;
+                    int cndNbr = 1;
+                    int attPerLvl = Math.Max(1, attemptsPerLevel);
 
-                    
-                    if (seenScenarios.Contains(sig))
-                    {
-                        LogBoth(log, $"[Attempt {attempts}] Duplicate scenario; skipping.");
-                        if ((attempts % 3) == 0) { Repaint(); yield return null; }
-                        continue;
-                    }
-                    seenScenarios.Add(sig);
+                    LogTagged(log, "[Debug] Using level's authored scenario (no randomization).", scenAtt, cndNbr, attPerLvl);
 
-                    // Build / reset sim
+                    var scenario = CloneScenario(level.gameData);
+
+                    // Build/reset sim
                     var sim = new SimApp();
                     sim.Bootstrap(level, cellSize, scenario, worldOrigin, gb.minX, gb.minY, gb.gridH, partsLibrary);
 
-                    // Ensure routing model exists (project-specific)
-                    if (level.routeModelData == null)
-                    {
-                        level.routeModelData = RouteModelBuilder.Build(level.parts);
-                        Debug.Log("[Route] Built routing graph for agent runs.");
-                        yield return null;
-                    }
+                    // Temporarily run attemptsPerLevel episodes for this scenario
+                    int prevEpisodesPerCandidate = episodesPerCandidate;
+                    episodesPerCandidate = attPerLvl;
 
-                    // Evaluate this candidate (runs episodes)
-                    var summary = EvaluateCandidate(level, scenario, sim, trainColors, cellSize, worldOrigin, gb, partsLibrary, attempts, log);
+                    var summary = EvaluateCandidate(level, scenario, sim, trainColors, cellSize, worldOrigin, gb, partsLibrary, scenAtt, log);
+                    LogTagged(log, $"[Attempt {scenAtt}] WINRATE = {summary.WinRate:P1}  Wins={summary.Wins}/{summary.EpisodesEvaluated}  AvgMoves={summary.AvgMoves:F1}  CollRate={summary.CollisionRate:P1}",
+                              scenAtt, cndNbr, attPerLvl);
 
-                    LogBoth(log, $"[Attempt {attempts}] WINRATE = {summary.WinRate:P1}  Wins={summary.Wins}/{summary.EpisodesEvaluated}  AvgMoves={summary.AvgMoves:F1}  CollRate={summary.CollisionRate:P1}");
-
-                    // Accept if in band
                     if (summary.WinRate >= bandMinWinRate && summary.WinRate <= bandMaxWinRate)
                     {
                         accepted.Add(summary);
-                        float mid = 0.5f * (bandMinWinRate + bandMaxWinRate);
-                        accepted = accepted
-                            .OrderBy(a => Mathf.Abs(a.WinRate - mid))
-                            .ThenBy(a => a.CollisionRate)
-                            .ThenBy(a => a.AvgMoves)
-                            .Take(maxAcceptedPerLevel)
-                            .ToList();
-
-                        LogBoth(log, $"   → ACCEPTED (now {accepted.Count}/{maxAcceptedPerLevel})");
+                        LogTagged(log, $"   → ACCEPTED (now {accepted.Count}/{maxAcceptedPerLevel})",
+                                  scenAtt, cndNbr, attPerLvl);
                     }
 
-                    // Small yield so the Editor stays responsive
-                    if ((attempts % 2) == 0) { Repaint(); yield return null; }
+                    // restore
+                    episodesPerCandidate = prevEpisodesPerCandidate;
+                }
+                else
+                {
+                    int attempts = 0;
+                    while (accepted.Count < maxAcceptedPerLevel && attempts < maxCandidatesPerLevel)
+                    {
+                        attempts++;
+                        int scenAtt = attempts;                 // scenario attempt index
+                        int cndNbr = attempts;                  // candidate number == attempt index here
+                        int attPerLvl = Math.Max(1, episodesPerCandidate);
+
+                        // Create random scenario
+                        var scenario = MakeRandomScenario(level, trainColors);
+                        var sig = ScenarioSignature(scenario);
+
+                        // dedupe only for randomized scenarios
+                        if (seenScenarios.Contains(sig))
+                        {
+                            LogTagged(log, $"[Attempt {attempts}] Duplicate scenario; skipping.",
+                                      scenAtt, cndNbr, attPerLvl);
+                            if ((attempts % 3) == 0) { Repaint(); yield return null; }
+                            continue;
+                        }
+                        seenScenarios.Add(sig);
+
+                        // Build / reset sim
+                        var sim = new SimApp();
+                        sim.Bootstrap(level, cellSize, scenario, worldOrigin, gb.minX, gb.minY, gb.gridH, partsLibrary);
+
+                        var summary = EvaluateCandidate(level, scenario, sim, trainColors, cellSize, worldOrigin, gb, partsLibrary, attempts, log);
+                        LogTagged(log, $"[Attempt {attempts}] WINRATE = {summary.WinRate:P1}  Wins={summary.Wins}/{summary.EpisodesEvaluated}  AvgMoves={summary.AvgMoves:F1}  CollRate={summary.CollisionRate:P1}",
+                                  scenAtt, cndNbr, attPerLvl);
+
+                        if (summary.WinRate >= bandMinWinRate && summary.WinRate <= bandMaxWinRate)
+                        {
+                            accepted.Add(summary);
+                            float mid = 0.5f * (bandMinWinRate + bandMaxWinRate);
+                            accepted = accepted
+                                .OrderBy(a => Mathf.Abs(a.WinRate - mid))
+                                .ThenBy(a => a.CollisionRate)
+                                .ThenBy(a => a.AvgMoves)
+                                .Take(maxAcceptedPerLevel)
+                                .ToList();
+
+                            LogTagged(log, $"   → ACCEPTED (now {accepted.Count}/{maxAcceptedPerLevel})",
+                                      scenAtt, cndNbr, attPerLvl);
+                        }
+
+                        if ((attempts % 2) == 0) { Repaint(); yield return null; }
+                    }
                 }
 
                 // Save accepted to parallel file
@@ -333,11 +367,14 @@ public class ScenarioSearchWindow : EditorWindow
                 var json = JsonConvert.SerializeObject(payload, MakeJsonSettings());
                 File.WriteAllText(outPath, json);
 
-                LogBoth(log, $"Saved {payload.scenarios.Count} scenario(s) → {outPath}");
+                // For save line, use zeros (context-less) but include AttPerLvl inferred from mode
+                int saveAttPerLvl = useLevelScenario ? Math.Max(1, attemptsPerLevel) : Math.Max(1, episodesPerCandidate);
+                LogTagged(log, $"Saved {payload.scenarios.Count} scenario(s) → {outPath}",
+                          0, 0, saveAttPerLvl);
             }
 
             AssetDatabase.Refresh();
-            LogBoth(null, $"=== Done {levelName}. ==="); // console only
+            LogBoth(null, $"=== Done {levelName}. ===");
             Repaint();
             yield return null;
         }
@@ -345,6 +382,7 @@ public class ScenarioSearchWindow : EditorWindow
         Debug.Log("Scenario search finished.");
         _searchRoutine = null;
     }
+
 
     // ---------------- Candidate generation & evaluation ----------------
 
@@ -399,6 +437,8 @@ public class ScenarioSearchWindow : EditorWindow
     {
         /// log candidate
 
+        _logAttempt = 0;  // reset for this scenario
+
         var stations = scenario.points.Where(p => p.type == GamePointType.Station).ToList();
         int totalStations = stations.Count;
         var selectedStations = stations
@@ -450,6 +490,10 @@ public class ScenarioSearchWindow : EditorWindow
 
         for (ep = 0; ep < episodesPerCandidate; ep++)
         {
+            _logScenAtt = attemptIdx;   // you already pass `attempts` into EvaluateCandidate
+            _logCndNbr = attemptIdx;   // or whatever you prefer
+            _logAttempt++;
+
             var epRes = RunEpisode(level, scenario, sim, cellSize, worldOrigin, gb, partsLib);
             wins += epRes.Won ? 1 : 0;
             collisions += epRes.Collisions;
@@ -497,264 +541,267 @@ public class ScenarioSearchWindow : EditorWindow
 
     EpisodeRes RunEpisode(LevelData level, ScenarioModel scenario, SimApp sim,
                   float cellSize, Vector2 worldOrigin, SimLevelBuilder.GridBounds gb, List<TrackPart> partsLib)
+{
+    var _log = new System.Text.StringBuilder(2048);
+    void LG(string s) => _log.AppendLine(s);
+    void FLUSH() => Debug.Log(_log.ToString());
+
+    // per-episode RNG (derived from existing _rng); exploration params
+    var epRng = new System.Random(_rng.Next());
+    const int TOP_K = 3;
+    const double EPSILON = 0.25;
+
+    if (level.parts == null || level.parts.Count == 0 ||
+        level.parts.Exists(p => p.worldSplines == null || p.worldSplines.Count == 0))
     {
-        var _log = new System.Text.StringBuilder(2048);
-        void LG(string s) => _log.AppendLine(s);
-        void FLUSH() => Debug.Log(_log.ToString());
+        LG("[Ep] worldSplines not built; polyline extraction will fail.");
+    }
 
-        // per-episode RNG (derived from existing _rng); exploration params
-        var epRng = new System.Random(_rng.Next());
-        const int TOP_K = 3;
-        const double EPSILON = 0.25;
+    // Fresh copy + reset sim
+    var scenarioCopy = CloneScenario(scenario);
+    sim.Reset(scenarioCopy);
 
-        if (level.parts == null || level.parts.Count == 0 ||
-            level.parts.Exists(p => p.worldSplines == null || p.worldSplines.Count == 0))
-        {
-            LG("[Ep] worldSplines not built; polyline extraction will fail.");
-        }
+    var trains = scenarioCopy.points
+        .Where(p => p.type == GamePointType.Train)
+        .Select(p => p.id)
+        .ToList();
 
-        // Fresh copy + reset sim
-        var scenarioCopy = CloneScenario(scenario);
-        sim.Reset(scenarioCopy);
+    var res = new EpisodeRes();
+    float elapsed = 0f;
+    int moves = 0;
+    int stepIndex = 0;
 
-        var trains = scenarioCopy.points
-            .Where(p => p.type == GamePointType.Train)
-            .Select(p => p.id)
-            .ToList();
-
-        var res = new EpisodeRes();
-        float elapsed = 0f;
-        int moves = 0;
-        int stepIndex = 0;
+    int attPerLvl = useLevelScenario ? Math.Max(1, attemptsPerLevel) : Math.Max(1, episodesPerCandidate);
+    LG($"[Ep] START [Att={_logAttempt} ScenAtt={_logScenAtt} CndNbr={_logCndNbr} AttPerLvl={attPerLvl}]");
 
         bool emptyAtStart = sim.GetAllStationsEmpty();
-        bool allParkedAtStart = sim.GetAllTrainsParked();
-        if (emptyAtStart || allParkedAtStart)
-            LG($"[Ep] start state: stationsEmpty={emptyAtStart} allParked={allParkedAtStart}");
+    bool allParkedAtStart = sim.GetAllTrainsParked();
+    if (emptyAtStart || allParkedAtStart)
+        LG($"[Ep] start state: stationsEmpty={emptyAtStart} allParked={allParkedAtStart}");
 
-        while (elapsed < perEpisodeTimeLimitSec && moves < perEpisodeMaxMoves)
+    while (elapsed < perEpisodeTimeLimitSec && moves < perEpisodeMaxMoves)
+    {
+        // Win check (sim is source of truth)
+        if (sim.GetAllStationsEmpty() && sim.GetAllTrainsParked())
         {
-            // Win check (sim is source of truth)
-            if (sim.GetAllStationsEmpty() && sim.GetAllTrainsParked())
+            res.Won = true;
+            res.Moves = moves;
+            LG("[Ep] WIN");
+            FLUSH();
+            return res;
+        }
+
+        // ---------- build candidates ----------
+        var cands = new List<Cand>(32);
+
+        foreach (int tid in trains)
+        {
+            var train = GetPointById(scenarioCopy, tid);
+            if (train == null) continue;
+
+            // stations
+            foreach (var st in scenarioCopy.points.Where(p => p.type == GamePointType.Station))
             {
-                res.Won = true;
-                res.Moves = moves;
-                LG("[Ep] WIN");
-                FLUSH();
-                return res;
-            }
+                if (SamePlacedPart(train, st) || SameCell(train, st))
+                    continue;
 
-            // ---------- build candidates ----------
-            var cands = new List<Cand>(32);
+                int streak = GetHeadStreakLocal(scenarioCopy, st.id, train.colorIndex);
+                if (streak <= 0) continue;
 
-            foreach (int tid in trains)
-            {
-                var train = GetPointById(scenarioCopy, tid);
-                if (train == null) continue;
-
-                // stations
-                foreach (var st in scenarioCopy.points.Where(p => p.type == GamePointType.Station))
+                var path = PathService.FindPath(level, train, st);
+                if (!path.Success)
                 {
-                    if (SamePlacedPart(train, st) || SameCell(train, st))
-                        continue;
-
-                    int streak = GetHeadStreakLocal(scenarioCopy, st.id, train.colorIndex);
-                    if (streak <= 0) continue;
-
-                    var path = PathService.FindPath(level, train, st);
-                    if (!path.Success)
-                    {
-                        LG($"[Try] T{tid}->S{st.id} PATH=NO");
-                        continue;
-                    }
-
-                    var poly = Utils.BuildPathWorldPolyline(level, path);
-                    if (poly == null || poly.Count < 2)
-                    {
-                        LG($"[Try] T{tid}->S{st.id} PATH=NO");
-                        continue;
-                    }
-
-                    float len = TotalLen(poly);
-                    float score = streak * 100f - len; // removed tiny noise
-
-                    cands.Add(new Cand
-                    {
-                        TrainPid = tid,
-                        TargetPid = st.id,
-                        Path = path,
-                        Poly = poly,
-                        Score = score,
-                        EstSeconds = len / Mathf.Max(0.01f, agentMoveSpeed)
-                    });
+                    LG($"[Try] T{tid}->S{st.id} PATH=NO");
+                    continue;
                 }
 
-                // depot if color cleared
-                if (!AnyStationHasColorLocal(scenarioCopy, train.colorIndex))
+                var poly = Utils.BuildPathWorldPolyline(level, path);
+                if (poly == null || poly.Count < 2)
                 {
-                    var depot = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Depot && p.colorIndex == train.colorIndex);
-                    if (depot != null)
-                    {
-                        if (SamePlacedPart(train, depot) || SameCell(train, depot))
-                            continue;
+                    LG($"[Try] T{tid}->S{st.id} PATH=NO");
+                    continue;
+                }
 
-                        var path = PathService.FindPath(level, train, depot);
-                        if (!path.Success)
+                float len = TotalLen(poly);
+                float score = streak * 100f - len; // removed tiny noise
+
+                cands.Add(new Cand
+                {
+                    TrainPid = tid,
+                    TargetPid = st.id,
+                    Path = path,
+                    Poly = poly,
+                    Score = score,
+                    EstSeconds = len / Mathf.Max(0.01f, agentMoveSpeed)
+                });
+            }
+
+            // depot if color cleared
+            if (!AnyStationHasColorLocal(scenarioCopy, train.colorIndex))
+            {
+                var depot = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Depot && p.colorIndex == train.colorIndex);
+                if (depot != null)
+                {
+                    if (SamePlacedPart(train, depot) || SameCell(train, depot))
+                        continue;
+
+                    var path = PathService.FindPath(level, train, depot);
+                    if (!path.Success)
+                    {
+                        LG($"[Try] T{tid}->D{depot.id} PATH=NO");
+                    }
+                    else
+                    {
+                        var poly = Utils.BuildPathWorldPolyline(level, path);
+                        if (poly == null || poly.Count < 2)
                         {
                             LG($"[Try] T{tid}->D{depot.id} PATH=NO");
                         }
                         else
                         {
-                            var poly = Utils.BuildPathWorldPolyline(level, path);
-                            if (poly == null || poly.Count < 2)
-                            {
-                                LG($"[Try] T{tid}->D{depot.id} PATH=NO");
-                            }
-                            else
-                            {
-                                float len = TotalLen(poly);
-                                float score = 1_000_000f - len; // no noise
+                            float len = TotalLen(poly);
+                            float score = 1_000_000f - len; // no noise
 
-                                cands.Add(new Cand
-                                {
-                                    TrainPid = tid,
-                                    TargetPid = depot.id,
-                                    Path = path,
-                                    Poly = poly,
-                                    Score = score,
-                                    EstSeconds = len / Mathf.Max(0.01f, agentMoveSpeed)
-                                });
-                            }
+                            cands.Add(new Cand
+                            {
+                                TrainPid = tid,
+                                TargetPid = depot.id,
+                                Path = path,
+                                Poly = poly,
+                                Score = score,
+                                EstSeconds = len / Mathf.Max(0.01f, agentMoveSpeed)
+                            });
                         }
                     }
                 }
             }
+        }
 
-            // ---------- selection & execution with per-decision retries (Top-K ε-greedy) ----------
-            if (cands.Count == 0)
+        // ---------- selection & execution with per-decision retries (Top-K ε-greedy) ----------
+        if (cands.Count == 0)
+        {
+            // one-shot fallback on step 0
+            if (stepIndex == 0)
             {
-                // one-shot fallback on step 0
-                if (stepIndex == 0)
-                {
-                    var t = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Train);
-                    var s = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Station && p.waitingPeople != null && p.waitingPeople.Count > 0);
+                var t = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Train);
+                var s = scenarioCopy.points.FirstOrDefault(p => p.type == GamePointType.Station && p.waitingPeople != null && p.waitingPeople.Count > 0);
 
-                    if (t != null && s != null && !(SamePlacedPart(t, s) || SameCell(t, s)))
+                if (t != null && s != null && !(SamePlacedPart(t, s) || SameCell(t, s)))
+                {
+                    var pth = PathService.FindPath(level, t, s);
+                    if (!pth.Success)
                     {
-                        var pth = PathService.FindPath(level, t, s);
-                        if (!pth.Success)
+                        LG($"[Fallback] T{t.id}->S{s.id} PATH=NO");
+                    }
+                    else
+                    {
+                        var poly = Utils.BuildPathWorldPolyline(level, pth);
+                        if (poly != null && poly.Count >= 2)
                         {
-                            LG($"[Fallback] T{t.id}->S{s.id} PATH=NO");
+                            LG($"[Move] T{t.id}->S{s.id}");
+                            var before = GetPointById(scenarioCopy, s.id);
+                            int beforeCnt = (before?.waitingPeople != null) ? before.waitingPeople.Count : -1;
+
+                            var mcFallback = sim.StartLegFromPoints(t.id, s.id, poly);
+                            moves++;
+
+                            if (mcFallback.Outcome == RailSimCore.Types.MoveOutcome.Blocked)
+                            {
+                                LG($"[Result] T{t.id}->S{s.id} BLOCKED");
+                            }
+                            else
+                            {
+                                ApplyArrivalEffectsToScenarioCopy(scenarioCopy, new Cand { TrainPid = t.id, TargetPid = s.id, Path = pth, Poly = poly, EstSeconds = TotalLen(poly) / Mathf.Max(0.01f, agentMoveSpeed) });
+                                var after = GetPointById(scenarioCopy, s.id);
+                                int afterCnt = (after?.waitingPeople != null) ? after.waitingPeople.Count : -1;
+                                int picked = (beforeCnt >= 0 && afterCnt >= 0) ? System.Math.Max(0, beforeCnt - afterCnt) : 0;
+                                LG($"[Result] T{t.id}->S{s.id} ARRIVED picked={picked}");
+                            }
                         }
                         else
                         {
-                            var poly = Utils.BuildPathWorldPolyline(level, pth);
-                            if (poly != null && poly.Count >= 2)
-                            {
-                                LG($"[Move] T{t.id}->S{s.id}");
-                                var before = GetPointById(scenarioCopy, s.id);
-                                int beforeCnt = (before?.waitingPeople != null) ? before.waitingPeople.Count : -1;
-
-                                var mcFallback = sim.StartLegFromPoints(t.id, s.id, poly);
-                                moves++;
-
-                                if (mcFallback.Outcome == RailSimCore.Types.MoveOutcome.Blocked)
-                                {
-                                    LG($"[Result] T{t.id}->S{s.id} BLOCKED");
-                                }
-                                else
-                                {
-                                    ApplyArrivalEffectsToScenarioCopy(scenarioCopy, new Cand { TrainPid = t.id, TargetPid = s.id, Path = pth, Poly = poly, EstSeconds = TotalLen(poly) / Mathf.Max(0.01f, agentMoveSpeed) });
-                                    var after = GetPointById(scenarioCopy, s.id);
-                                    int afterCnt = (after?.waitingPeople != null) ? after.waitingPeople.Count : -1;
-                                    int picked = (beforeCnt >= 0 && afterCnt >= 0) ? System.Math.Max(0, beforeCnt - afterCnt) : 0;
-                                    LG($"[Result] T{t.id}->S{s.id} ARRIVED picked={picked}");
-                                }
-                            }
-                            else
-                            {
-                                LG($"[Fallback] T{t.id}->S{s.id} PATH=NO");
-                            }
+                            LG($"[Fallback] T{t.id}->S{s.id} PATH=NO");
                         }
                     }
                 }
-
-                res.Won = (sim.GetAllStationsEmpty() && sim.GetAllTrainsParked());
-                res.Moves = moves;
-                LG(res.Won ? "[Ep] WIN" : "[Ep] NO MOVE");
-                FLUSH();
-                return res;
             }
-            else
+
+            res.Won = (sim.GetAllStationsEmpty() && sim.GetAllTrainsParked());
+            res.Moves = moves;
+            LG(res.Won ? "[Ep] WIN" : "[Ep] NO MOVE");
+            FLUSH();
+            return res;
+        }
+        else
+        {
+            var blockedThisDecision = new HashSet<(int train, int target)>();
+            bool arrivedThisDecision = false;
+
+            // Pre-order once by score
+            var ordered = cands.OrderByDescending(c => c.Score).ToList();
+
+            while (true)
             {
-                var blockedThisDecision = new HashSet<(int train, int target)>();
-                bool arrivedThisDecision = false;
+                var available = ordered.Where(c => !blockedThisDecision.Contains((c.TrainPid, c.TargetPid))).ToList();
+                if (available.Count == 0) break;
 
-                // Pre-order once by score
-                var ordered = cands.OrderByDescending(c => c.Score).ToList();
+                Cand next;
+                int k = Math.Min(TOP_K, available.Count);
+                bool explore = epRng.NextDouble() < EPSILON;
+                if (explore)
+                    next = available[epRng.Next(0, k)];
+                else
+                    next = available[0];
 
-                while (true)
+                var tgt = GetPointById(scenarioCopy, next.TargetPid);
+                var tgtLabel = (tgt?.type == GamePointType.Station) ? $"S{next.TargetPid}" :
+                               (tgt?.type == GamePointType.Depot) ? $"D{next.TargetPid}" :
+                               $"P{next.TargetPid}";
+                LG($"[Move] T{next.TrainPid}->{tgtLabel}");
+
+                var beforeStation = (tgt?.type == GamePointType.Station) ? GetPointById(scenarioCopy, next.TargetPid) : null;
+                int beforeCount = (beforeStation?.waitingPeople != null) ? beforeStation.waitingPeople.Count : -1;
+
+                var mc = sim.StartLegFromPoints(next.TrainPid, next.TargetPid, next.Poly);
+                moves++;
+                elapsed += next.EstSeconds;
+
+                if (mc.Outcome == RailSimCore.Types.MoveOutcome.Blocked)
                 {
-                    var available = ordered.Where(c => !blockedThisDecision.Contains((c.TrainPid, c.TargetPid))).ToList();
-                    if (available.Count == 0) break;
-
-                    Cand next;
-                    int k = Math.Min(TOP_K, available.Count);
-                    bool explore = epRng.NextDouble() < EPSILON;
-                    if (explore)
-                        next = available[epRng.Next(0, k)];
-                    else
-                        next = available[0];
-
-                    var tgt = GetPointById(scenarioCopy, next.TargetPid);
-                    var tgtLabel = (tgt?.type == GamePointType.Station) ? $"S{next.TargetPid}" :
-                                   (tgt?.type == GamePointType.Depot) ? $"D{next.TargetPid}" :
-                                   $"P{next.TargetPid}";
-                    LG($"[Move] T{next.TrainPid}->{tgtLabel}");
-
-                    var beforeStation = (tgt?.type == GamePointType.Station) ? GetPointById(scenarioCopy, next.TargetPid) : null;
-                    int beforeCount = (beforeStation?.waitingPeople != null) ? beforeStation.waitingPeople.Count : -1;
-
-                    var mc = sim.StartLegFromPoints(next.TrainPid, next.TargetPid, next.Poly);
-                    moves++;
-                    elapsed += next.EstSeconds;
-
-                    if (mc.Outcome == RailSimCore.Types.MoveOutcome.Blocked)
-                    {
-                        LG($"[Result] T{next.TrainPid}->{tgtLabel} BLOCKED");
-                        res.Collisions += 1;
-                        elapsed += Mathf.Min(2f, next.EstSeconds * 0.25f);
-                        blockedThisDecision.Add((next.TrainPid, next.TargetPid));
-                        continue; // try next-best candidate this same step
-                    }
-                    else
-                    {
-                        ApplyArrivalEffectsToScenarioCopy(scenarioCopy, next);
-                        int picked = 0;
-                        if (tgt?.type == GamePointType.Station)
-                        {
-                            var afterStation = GetPointById(scenarioCopy, next.TargetPid);
-                            int afterCount = (afterStation?.waitingPeople != null) ? afterStation.waitingPeople.Count : -1;
-                            picked = (beforeCount >= 0 && afterCount >= 0) ? System.Math.Max(0, beforeCount - afterCount) : 0;
-                        }
-                        LG($"[Result] T{next.TrainPid}->{tgtLabel} ARRIVED picked={picked}");
-                        arrivedThisDecision = true;
-                        break; // end decision on first successful arrival
-                    }
+                    LG($"[Result] T{next.TrainPid}->{tgtLabel} BLOCKED");
+                    res.Collisions += 1;
+                    elapsed += Mathf.Min(2f, next.EstSeconds * 0.25f);
+                    blockedThisDecision.Add((next.TrainPid, next.TargetPid));
+                    continue; // try next-best candidate this same step
                 }
-
-                // If none arrived this decision, proceed; logs already show BLOCKED attempts
+                else
+                {
+                    ApplyArrivalEffectsToScenarioCopy(scenarioCopy, next);
+                    int picked = 0;
+                    if (tgt?.type == GamePointType.Station)
+                    {
+                        var afterStation = GetPointById(scenarioCopy, next.TargetPid);
+                        int afterCount = (afterStation?.waitingPeople != null) ? afterStation.waitingPeople.Count : -1;
+                        picked = (beforeCount >= 0 && afterCount >= 0) ? System.Math.Max(0, beforeCount - afterCount) : 0;
+                    }
+                    LG($"[Result] T{next.TrainPid}->{tgtLabel} ARRIVED picked={picked}");
+                    arrivedThisDecision = true;
+                    break; // end decision on first successful arrival
+                }
             }
 
-            stepIndex++;
+            // If none arrived this decision, proceed; logs already show BLOCKED attempts
         }
 
-        res.Won = (sim.GetAllStationsEmpty() && sim.GetAllTrainsParked());
-        res.Moves = moves;
-        LG(res.Won ? "[Ep] WIN" : "[Ep] LIMIT");
-        FLUSH();
-        return res;
+        stepIndex++;
     }
+
+    res.Won = (sim.GetAllStationsEmpty() && sim.GetAllTrainsParked());
+    res.Moves = moves;
+    LG(res.Won ? "[Ep] WIN" : "[Ep] LIMIT");
+    FLUSH();
+    return res;
+}
 
 
 
