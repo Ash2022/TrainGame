@@ -49,6 +49,8 @@ public class ScenarioSearchWindow : EditorWindow
     [Tooltip("Prefer stations with longer head-streak for the train's color; prefer shorter paths.")]
     [SerializeField] bool preferNoCollision = false; // set true if you add sim-preview later
 
+    [SerializeField] private bool useLevelScenario = false;
+
     Vector2 _scroll;
     System.Random _rng;
 
@@ -116,6 +118,7 @@ public class ScenarioSearchWindow : EditorWindow
         bandMaxWinRate = Mathf.Clamp01(EditorGUILayout.Slider("Band Max Win-Rate", bandMaxWinRate, 0f, 1f));
         maxAcceptedPerLevel = Mathf.Clamp(EditorGUILayout.IntField("Keep Top Scenarios", maxAcceptedPerLevel), 1, 10);
         attemptsPerLevel = EditorGUILayout.IntSlider("Attempts per level", attemptsPerLevel, 1, 1000);
+        useLevelScenario = EditorGUILayout.ToggleLeft("Debug: use level's scenario (no randomization)", useLevelScenario);
 
         EditorGUILayout.Space(6);
         EditorGUILayout.LabelField("Agent Runtime Caps", EditorStyles.boldLabel);
@@ -248,9 +251,22 @@ public class ScenarioSearchWindow : EditorWindow
                 {
                     attempts++;
 
-                    // Create random scenario
-                    var scenario = MakeRandomScenario(level, trainColors);
-                    var sig = ScenarioSignature(scenario);
+                    ScenarioModel scenario;
+                    string sig;
+                    if (useLevelScenario)
+                    {
+                        scenario = CloneScenario(level.gameData);   // or whatever your author/baseline scenario lives on
+                        sig = "LEVEL_SCENARIO";                     // stable signature to bypass dedupe
+                        LogBoth(log, "[Debug] Using level's authored scenario (no randomization).");
+                    }
+                    else
+                    {
+                        // Create random scenario
+                        scenario = MakeRandomScenario(level, trainColors);
+                        sig = ScenarioSignature(scenario);
+                    }
+
+                    
                     if (seenScenarios.Contains(sig))
                     {
                         LogBoth(log, $"[Attempt {attempts}] Duplicate scenario; skipping.");
@@ -528,6 +544,11 @@ public class ScenarioSearchWindow : EditorWindow
 
             foreach (int tid in trains)
             {
+                int headMatchCount = 0;
+                int samePartFiltered = 0;
+                int pathFails = 0;
+                int candsAddedTrain = 0;
+
                 var train = GetPointById(scenarioCopy, tid);
                 if (train == null) continue;
 
@@ -537,14 +558,23 @@ public class ScenarioSearchWindow : EditorWindow
 
                     // Skip degenerate requests (same part/cell)
                     if (SamePlacedPart(train, st) || SameCell(train, st))
+                    {
+                        samePartFiltered++;
                         continue;
+                    }
 
                     int streak = GetHeadStreakLocal(scenarioCopy, st.id, train.colorIndex);
-                    if (streak <= 0) continue;
+
+                    if (streak <= 0) 
+                        continue;
+                    else
+                        headMatchCount++;
+
 
                     var path = PathService.FindPath(level, train, st);
                     if (!path.Success)
                     {
+                        candsAddedTrain++;
                         if (stepIndex == 0) Debug.Log($"[Ep] drop(noPath) T{tid}->S{st.id}");
                         continue;
                     }
@@ -610,7 +640,11 @@ public class ScenarioSearchWindow : EditorWindow
                         }
                     }
                 }
+
+                Debug.Log($"[Ep] T{tid} headMatches={headMatchCount} samePartFiltered={samePartFiltered} pathFails={pathFails} candsAdded={candsAddedTrain}");
             }
+
+            Debug.Log($"[Ep] step{moves}: totalCandidates={cands.Count}");
 
             if (stepIndex == 0)
             {
