@@ -73,7 +73,7 @@ public class TrackPartView : MonoBehaviour
             // center pt (0..W, 0..H) around (0,0):
             Vector3 local = new Vector3(
                 spline[i][0] - half.x, half.y-spline[i][1],-0.05f);
-            lineRenderer.SetPosition(i, local);
+            //lineRenderer.SetPosition(i, local);
 
             result.Add(transform.TransformPoint(local));
         }

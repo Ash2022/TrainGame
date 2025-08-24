@@ -13,6 +13,9 @@ public class TrainController : MonoBehaviour
     [SerializeField] Renderer trainRenderer;
     [SerializeField] TrainClickView trainClickView;
     [SerializeField] GameObject trainSelectedHighLight;
+    [SerializeField] Transform particleSystem;
+    Transform lastCartTransform=null;
+    
 
     List<float> cartCenterOffsets; // lag of each cart center behind the head center (meters)
     Vector3 initialForward; // world forward at spawn (from p.direction)
@@ -42,10 +45,14 @@ public class TrainController : MonoBehaviour
 
     public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize, GameObject cartPrefab)
     {
+        lastCartTransform = null;
+        SetParticles(trainVisuals, 0.5f);
+
         currCellSize = cellSize;
         currCarts.Clear();
 
-        trainRenderer.material.color = Utils.colors[p.colorIndex];
+        trainRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(p.colorIndex);
+        trainSelectedHighLight.GetComponent<SpriteRenderer>().color = LevelVisualizer.Instance.GetColorByIndex(p.colorIndex);
 
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Clear();
@@ -140,6 +147,8 @@ public class TrainController : MonoBehaviour
             // Keep world pose but make them siblings (matches your previous setup)
             cartGO.transform.SetParent(transform.parent, true);
 
+            lastCartTransform = cartGO.transform;
+
             currCarts.Add(cartGO);
             cartCenterOffsets.Add(offset);
         }
@@ -189,9 +198,9 @@ public class TrainController : MonoBehaviour
 
     private void TrainWasClicked()
     {
-        ShowHideTrainHighLight(true);
-
         GameManager.Instance.SelectTrain(this);
+
+        ShowHideTrainHighLight(true);
     }
 
     public void ShowHideTrainHighLight(bool showHighlight)
@@ -203,6 +212,13 @@ public class TrainController : MonoBehaviour
     {
         if (mover != null)
         {
+
+            ShowHideTrainHighLight(false);
+            LevelVisualizer.Instance.ClearGlobalPathRenderer();
+
+            if(lastCartTransform!=null)
+                SetParticles(lastCartTransform, 0.25f);
+
             Debug.Log($"[CartCtrOff] canonical=[{string.Join(", ", cartCenterOffsets.Select(o => o.ToString("F2")))}]");
             mover.MoveAlongPath(cartCenterOffsets,worldPoints, currCarts, currCellSize, OnMoveCompleted);
         }
@@ -212,9 +228,12 @@ public class TrainController : MonoBehaviour
     {
         LevelVisualizer.Instance.ClearGlobalPathRenderer();
 
+
         if (r.Outcome == MoveOutcome.Arrived)
         {
             // no local game logic here
+            if(GameManager.Instance.selectedTrain == this)
+                ShowHideTrainHighLight(true );
         }
         else if (r.Outcome == MoveOutcome.Blocked)
         {
@@ -275,6 +294,8 @@ public class TrainController : MonoBehaviour
         cart.transform.localScale = Vector3.one * cartLen;
         cart.GetComponent<CartView>()?.SetCartColor(colorIndex);
 
+        lastCartTransform = cart.transform;
+
         // record it
         currCarts.Add(cart);
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
@@ -283,6 +304,15 @@ public class TrainController : MonoBehaviour
         // finally, let the mover drive it on the next leg
         mv.AddCartOffset(newOffset);
     }
+
+    private void SetParticles(Transform newParent,float offsetX)
+    {
+        particleSystem.SetParent(newParent);
+        particleSystem.localPosition = new Vector3(offsetX, 0, 0);
+        particleSystem.localEulerAngles = Vector3.zero;
+        particleSystem.localScale = Vector3.one;
+    }
+
 
     public void ClearAllCarts()
     {

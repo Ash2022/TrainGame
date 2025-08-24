@@ -53,7 +53,15 @@ public class GameManager : MonoBehaviour
         if (UseSimulation)
             simApp = new SimApp(); // single sim instance for the app
 
-     
+        //fix aspect
+        float currentAspect = (float)Screen.width / Screen.height;
+        float refRad = 60f * Mathf.Deg2Rad * 0.5f;
+        float refHorizRad = Mathf.Atan(Mathf.Tan(refRad) * 9f/16f);
+
+        float newVertRad = Mathf.Atan(Mathf.Tan(refHorizRad) / currentAspect);
+        Camera.main.fieldOfView = newVertRad * 2f * Mathf.Rad2Deg;
+
+
         LoadCurrentLevel();
     }
 
@@ -139,7 +147,10 @@ public class GameManager : MonoBehaviour
         // --- Second click on same target -> start move ---
         if (_lastTargetId == target.id && _lastPath != null && _lastPath.Success)
         {
-            var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath);
+            Color pathColor = LevelVisualizer.Instance.GetColorByIndex(selectedTrain.CurrentPointModel.colorIndex);
+
+            var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath, pathColor);
+
 
             // Precompute willTake if destination is a Station
             int willTake = 0;
@@ -193,7 +204,7 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("Path found with " + path.Traversals.Count + " steps, cost=" + path.TotalCost);
-        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>(),Utils.colors[selectedTrain.CurrentPointModel.colorIndex]);
+        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>(), LevelVisualizer.Instance.GetColorByIndex(selectedTrain.CurrentPointModel.colorIndex));
 
         _lastTargetId = target.id;   // use ID for the second-click match
         _lastPath = path;

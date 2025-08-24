@@ -13,7 +13,7 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] public List<Sprite> partSprites;  // must match partsLibrary order
 
     [SerializeField] public List<GameObject> partObjects;  // must match partsLibrary order
-
+    [SerializeField] List<Color> colors = new List<Color>();
     [Header("Data")]
     [SerializeField] private TextAsset levelJson;
 
@@ -228,6 +228,7 @@ public class LevelVisualizer : MonoBehaviour
             {
                 if (occupied.Contains(new Vector2Int(x, y))) continue;
 
+
                 
                 if (addedEmptyHolder == false)
                 {
@@ -262,6 +263,51 @@ public class LevelVisualizer : MonoBehaviour
 
                 // optional: throttle UI if grid is huge
                 // if (((x - minX) * gridH + (y - minY)) % 100 == 0) yield return null;
+            }
+        }
+
+        // ADD: configurable borders
+        int borderX = 4;
+        int borderTopY = 4;
+        int borderBottomY = 10; // example, can be different
+
+        for (int x = minX - borderX; x <= maxX + borderX; x++)
+        {
+            for (int y = minY - borderBottomY; y <= maxY + borderTopY; y++)
+            {
+                // skip the original playable grid area
+                if (x >= minX && x <= maxX && y >= minY && y <= maxY)
+                    continue;
+
+                if (addedEmptyHolder == false)
+                {
+                    addedEmptyHolder = true;
+                    emptyHolder = new GameObject();
+                    emptyHolder.name = "EmptyHolder";
+                    emptyHolder.transform.SetParent(levelHolder);
+                }
+
+                // center of this grid cell
+                float cx = (x - minX) + 0.5f;
+                float cy = (y - minY) + 0.5f;
+
+                // flip Y like before
+                Vector2 flipped = new Vector2(cx, gridH - cy);
+
+                // world position
+                Vector3 pos = new Vector3(
+                    worldOrigin.x + flipped.x * cellSize,
+                    worldOrigin.y + flipped.y * cellSize,
+                    0f
+                );
+
+                var go = Instantiate(emptyPartPrefab, emptyHolder.transform);
+                go.name = $"EmptyBorder_{x}_{y}";
+                go.transform.position = pos;
+                go.transform.rotation = Quaternion.identity;
+
+                if (go.TryGetComponent<EmptyTrackPartView>(out var emptyView))
+                    emptyView.Setup(partsMaterial);
             }
         }
 
@@ -532,10 +578,10 @@ public class LevelVisualizer : MonoBehaviour
     }
 
    
-    public List<Vector3> ExtractWorldPointsFromPath(PathModel pathModel)
+    public List<Vector3> ExtractWorldPointsFromPath(PathModel pathModel,Color color)
     {
         var pts = new List<Vector3>();
-        DrawGlobalSplinePath(pathModel, pts,Color.white);
+        DrawGlobalSplinePath(pathModel, pts, color);
         return pts;
     }
 
@@ -652,6 +698,9 @@ public class LevelVisualizer : MonoBehaviour
         }
     }
 
-
+    public Color GetColorByIndex(int colorIndex)
+    {
+        return colors[colorIndex];
+    }
 }
 

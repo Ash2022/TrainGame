@@ -7,6 +7,7 @@ public sealed class ModelManager : MonoBehaviour
 {
     [Header("Levels (JSON)")]
     [SerializeField] private TextAsset[] levelJsons;
+    
 
     private readonly List<LevelData> _levels = new List<LevelData>();
     private JsonSerializerSettings _settings;
@@ -59,4 +60,6 @@ public sealed class ModelManager : MonoBehaviour
         var json = JsonConvert.SerializeObject(src, _settings);
         return JsonConvert.DeserializeObject<LevelData>(json, _settings);
     }
+
+    
 }

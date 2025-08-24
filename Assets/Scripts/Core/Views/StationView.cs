@@ -39,7 +39,7 @@ public class StationView : MonoBehaviour
         }
 
         // compute spacing = size of one passenger
-        _spacing = Mathf.Max(0.01f, passengerDepth);
+        _spacing = Mathf.Max(0.01f, passengerDepth)+passengerDepth/5f;
 
         int count = _pointModel.waitingPeople.Count;
         // draw in reverse: last in list at stackIdx=0, then backward

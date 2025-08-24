@@ -495,12 +495,12 @@
           },
           {
             "x": 1.21860659,
-            "y": 5.47162151,
+            "y": 5.19037151,
             "z": 0.0
           },
           {
             "x": 1.996875,
-            "y": 5.16374969,
+            "y": 4.89812469,
             "z": 0.0
           },
           {
@@ -584,6 +584,10 @@
         {
           "x": 1,
           "y": 6
+        },
+        {
+          "x": 1,
+          "y": 7
         }
       ],
       "allowedPathsGroup": [
@@ -606,12 +610,12 @@
             {
               "entryConnectionId": 2,
               "exitConnectionId": 1,
-              "length": 2.56035948
+              "length": 2.56204224
             },
             {
               "entryConnectionId": 1,
               "exitConnectionId": 2,
-              "length": 2.56035948
+              "length": 2.56204224
             }
           ]
         }
@@ -2114,12 +2118,12 @@
           },
           {
             "x": 5.21860647,
-            "y": -1.52837944,
+            "y": -1.80962944,
             "z": 0.0
           },
           {
             "x": 5.996875,
-            "y": -1.83625031,
+            "y": -2.10187531,
             "z": 0.0
           },
           {
@@ -2203,6 +2207,10 @@
         {
           "x": 5,
           "y": 13
+        },
+        {
+          "x": 5,
+          "y": 14
         }
       ],
       "allowedPathsGroup": [
@@ -2225,12 +2233,12 @@
             {
               "entryConnectionId": 2,
               "exitConnectionId": 1,
-              "length": 2.56035948
+              "length": 2.56204224
             },
             {
               "entryConnectionId": 1,
               "exitConnectionId": 2,
-              "length": 2.56035948
+              "length": 2.56204224
             }
           ]
         }
@@ -4916,12 +4924,12 @@
               },
               {
                 "x": 1.21860659,
-                "y": 5.47162151,
+                "y": 5.19037151,
                 "z": 0.0
               },
               {
                 "x": 1.996875,
-                "y": 5.16374969,
+                "y": 4.89812469,
                 "z": 0.0
               },
               {
@@ -5005,6 +5013,10 @@
             {
               "x": 1,
               "y": 6
+            },
+            {
+              "x": 1,
+              "y": 7
             }
           ],
           "allowedPathsGroup": [
@@ -5027,12 +5039,12 @@
                 {
                   "entryConnectionId": 2,
                   "exitConnectionId": 1,
-                  "length": 2.56035948
+                  "length": 2.56204224
                 },
                 {
                   "entryConnectionId": 1,
                   "exitConnectionId": 2,
-                  "length": 2.56035948
+                  "length": 2.56204224
                 }
               ]
             }
@@ -5058,7 +5070,7 @@
             },
             {
               "exitPin": 2,
-              "internalLen": 2.56035948,
+              "internalLen": 2.56204224,
               "splineIndex": 0,
               "t0": 0.0,
               "t1": 1.0
@@ -5067,7 +5079,7 @@
           "2": [
             {
               "exitPin": 1,
-              "internalLen": 2.56035948,
+              "internalLen": 2.56204224,
               "splineIndex": 0,
               "t0": 0.0,
               "t1": 1.0
@@ -7121,12 +7133,12 @@
               },
               {
                 "x": 5.21860647,
-                "y": -1.52837944,
+                "y": -1.80962944,
                 "z": 0.0
               },
               {
                 "x": 5.996875,
-                "y": -1.83625031,
+                "y": -2.10187531,
                 "z": 0.0
               },
               {
@@ -7210,6 +7222,10 @@
             {
               "x": 5,
               "y": 13
+            },
+            {
+              "x": 5,
+              "y": 14
             }
           ],
           "allowedPathsGroup": [
@@ -7232,12 +7248,12 @@
                 {
                   "entryConnectionId": 2,
                   "exitConnectionId": 1,
-                  "length": 2.56035948
+                  "length": 2.56204224
                 },
                 {
                   "entryConnectionId": 1,
                   "exitConnectionId": 2,
-                  "length": 2.56035948
+                  "length": 2.56204224
                 }
               ]
             }
@@ -7263,7 +7279,7 @@
             },
             {
               "exitPin": 2,
-              "internalLen": 2.56035948,
+              "internalLen": 2.56204224,
               "splineIndex": 0,
               "t0": 0.0,
               "t1": 1.0
@@ -7272,7 +7288,7 @@
           "2": [
             {
               "exitPin": 1,
-              "internalLen": 2.56035948,
+              "internalLen": 2.56204224,
               "splineIndex": 0,
               "t0": 0.0,
               "t1": 1.0

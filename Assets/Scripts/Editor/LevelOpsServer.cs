@@ -6,10 +6,12 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Collections.Specialized;
+using System.IO;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Specialized;
+
 public static class LevelOpsServer
 {
     // ---- Config ----
@@ -73,7 +75,31 @@ public static class LevelOpsServer
             try
             {
                 var path = ctx.Request.Url.AbsolutePath.Trim('/').ToLowerInvariant();
-                NameValueCollection q = ctx.Request.QueryString ?? new NameValueCollection();
+
+                // Merge query params + optional JSON body into a single bag
+                var q = new NameValueCollection();
+                if (ctx.Request.QueryString != null) q.Add(ctx.Request.QueryString);
+
+                if (ctx.Request.HasEntityBody)
+                {
+                    using (var sr = new StreamReader(ctx.Request.InputStream, ctx.Request.ContentEncoding ?? Encoding.UTF8))
+                    {
+                        var body = sr.ReadToEnd();
+                        if (!string.IsNullOrWhiteSpace(body))
+                        {
+                            try
+                            {
+                                var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(body);
+                                if (dict != null)
+                                {
+                                    foreach (var kv in dict)
+                                        q[kv.Key] = kv.Value?.ToString();
+                                }
+                            }
+                            catch { /* ignore malformed body; query-only still works */ }
+                        }
+                    }
+                }
 
                 string json = Handle(path, q);
                 WriteResponse(ctx, 200, json);
@@ -90,11 +116,12 @@ public static class LevelOpsServer
     }
 
     // ===== Endpoint router =====
-    static string Handle(string path, System.Collections.Specialized.NameValueCollection q)
+    static string Handle(string path, NameValueCollection q)
     {
         switch (path)
         {
-            case "ping": return JsonOk(new { pong = true });
+            case "ping":
+                return JsonOk(new { pong = true });
 
             case "new_level":
                 RunOnMainThread(() => LevelOpsService.NewLevel());
@@ -117,13 +144,14 @@ public static class LevelOpsServer
             case "list_parts":
                 {
                     var parts = RunOnMainThread(() => LevelOpsService.ListParts()
-                        .Select(t => new { t.partName, t.gridWidth, t.gridHeight }).ToList());
+                        .Select(t => new { name = t.partName, partType = t.partName, t.gridWidth, t.gridHeight }).ToList());
                     return JsonOk(new { parts });
                 }
 
             case "place_part":
                 {
-                    var name = Require(q, "name");
+                    // accept both "name" and "partType"
+                    var name = Require(q, "name", "partType");
                     int x = Int(q, "x");
                     int y = Int(q, "y");
                     int rot = Int(q, "rot", 0);
@@ -159,8 +187,10 @@ public static class LevelOpsServer
                 {
                     int x = Int(q, "x");
                     int y = Int(q, "y");
-                    var typeStr = Require(q, "type");
-                    int color = Int(q, "color", 0);
+                    // accept "type" or "pointType"
+                    var typeStr = Require(q, "type", "pointType");
+                    // accept "color" or "colorIndex"
+                    int color = Int(q, "color", Int(q, "colorIndex", 0));
                     var type = ParsePointType(typeStr);
                     RunOnMainThread(() => LevelOpsService.AddPoint(x, y, type, color));
                     return JsonOk();
@@ -169,7 +199,7 @@ public static class LevelOpsServer
             case "set_point_color":
                 {
                     int id = Int(q, "id");
-                    int color = Int(q, "color");
+                    int color = Int(q, "color", Int(q, "colorIndex", 0));
                     RunOnMainThread(() => LevelOpsService.SetPointColor(id, color));
                     return JsonOk();
                 }
@@ -206,11 +236,11 @@ public static class LevelOpsServer
                     var state = RunOnMainThread(() =>
                     {
                         var ld = LevelOpsService.GetLevelData();
-                        // bounds
+
                         int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
                         foreach (var inst in ld.parts)
                         {
-                            inst.RecomputeOccupancy(null); // safe; uses internal data if present
+                            inst.RecomputeOccupancy(null); // safe if instance caches what it needs
                             foreach (var c in inst.occupyingCells)
                             {
                                 minX = Math.Min(minX, c.x);
@@ -275,14 +305,16 @@ public static class LevelOpsServer
     }
 
     // ===== Helpers =====
-    static string Require(System.Collections.Specialized.NameValueCollection q, string key)
+    static string Require(NameValueCollection q, string key, string altKey = null, string altKey2 = null)
     {
         var v = q[key];
+        if (string.IsNullOrEmpty(v) && !string.IsNullOrEmpty(altKey)) v = q[altKey];
+        if (string.IsNullOrEmpty(v) && !string.IsNullOrEmpty(altKey2)) v = q[altKey2];
         if (string.IsNullOrEmpty(v)) throw new HandledHttpError(400, $"Missing '{key}'");
         return v;
     }
 
-    static int Int(System.Collections.Specialized.NameValueCollection q, string key, int def = 0)
+    static int Int(NameValueCollection q, string key, int def = 0)
     {
         var v = q[key];
         return int.TryParse(v, out var i) ? i : def;
