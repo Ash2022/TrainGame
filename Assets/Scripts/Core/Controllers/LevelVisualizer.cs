@@ -18,7 +18,7 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] private TextAsset levelJson;
 
     [Header("Prefabs & Parents")]
-    [SerializeField] private Material partsMaterial;
+    //[SerializeField] private Material partsMaterial;
     [SerializeField] private GameObject partPrefab;
     [SerializeField] private GameObject emptyPartPrefab;
     [SerializeField] private GameObject stationPrefab;
@@ -213,7 +213,7 @@ public class LevelVisualizer : MonoBehaviour
 
             // hand off to view
             if (go.TryGetComponent<TrackPartView>(out var view))
-                view.Setup(inst, partsMaterial);
+                view.Setup(inst);//, partsMaterial);
 
             yield return new WaitForSeconds(tileDelay);
         }
@@ -259,7 +259,7 @@ public class LevelVisualizer : MonoBehaviour
                 go.transform.rotation = Quaternion.identity;
 
                 if (go.TryGetComponent<EmptyTrackPartView>(out var emptyView))
-                    emptyView.Setup(partsMaterial); // adjust args/method name if your script differs
+                    emptyView.Setup();// partsMaterial); // adjust args/method name if your script differs
 
                 // optional: throttle UI if grid is huge
                 // if (((x - minX) * gridH + (y - minY)) % 100 == 0) yield return null;
@@ -307,7 +307,7 @@ public class LevelVisualizer : MonoBehaviour
                 go.transform.rotation = Quaternion.identity;
 
                 if (go.TryGetComponent<EmptyTrackPartView>(out var emptyView))
-                    emptyView.Setup(partsMaterial);
+                    emptyView.Setup();// partsMaterial);
             }
         }
 
