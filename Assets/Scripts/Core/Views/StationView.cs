@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using DG.Tweening;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 [RequireComponent(typeof(Collider))]
 public class StationView : MonoBehaviour
@@ -15,13 +18,14 @@ public class StationView : MonoBehaviour
 
     // computed once per Initialize
     private float _spacing;
+    Coroutine buildRoutine;
 
     public GamePoint PointModel { get => _pointModel; set => _pointModel = value; }
 
     /// <summary>
     /// Call this right after Instantiate to wire up the model.
     /// </summary>
-    public void Initialize(GamePoint point, PlacedPartInstance part, float cellSize, GameObject passengerPrefab)
+    public void Initialize(GamePoint point, PlacedPartInstance part, float cellSize, GameObject passengerPrefab,float delay)
     {
         _pointModel = point;
 
@@ -38,8 +42,16 @@ public class StationView : MonoBehaviour
                 Destroy(passengersHolder.GetChild(i).gameObject);
         }
 
+        buildRoutine = StartCoroutine(BuildPassengers(passengerPrefab,delay));
+    }
+
+
+    private IEnumerator BuildPassengers(GameObject passengerPrefab,float StartDelay)
+    {
+        yield return new WaitForSeconds(StartDelay);
+
         // compute spacing = size of one passenger
-        _spacing = Mathf.Max(0.01f, passengerDepth)+passengerDepth/5f;
+        _spacing = Mathf.Max(0.01f, passengerDepth) + passengerDepth / 5f;
 
         int count = _pointModel.waitingPeople.Count;
         // draw in reverse: last in list at stackIdx=0, then backward
@@ -53,13 +65,23 @@ public class StationView : MonoBehaviour
 
             // position at -(0.5 + stackIdx) * spacing along local -Z
             float z = -(0.5f + stackIdx) * _spacing;
-            go.transform.localPosition = new Vector3(0f, 0f, z);
+            go.transform.localPosition = new Vector3(0f, 0f, z + 2);
             go.transform.localRotation = Quaternion.identity;
 
             // init color
             PassengerView pv = go.GetComponent<PassengerView>();
             if (pv != null) pv.Initialize(colorIndex);
             else Debug.LogWarning("PassengerView missing on passenger prefab.");
+
+            go.transform.localScale = Vector3.zero;
+
+            go.transform.DOScale(Vector3.one*passengerDepth, 0.1f);
+            go.transform.DOLocalMove(new Vector3(0f, 0f, z), 0.2f);
+
+            yield return new WaitForSeconds(0.2f);
+
+
+
         }
     }
 
@@ -81,9 +103,14 @@ public class StationView : MonoBehaviour
             victims.Add(passengersHolder.GetChild(idx));
         }
 
+        int counter = 0;
+        float delay = 0.25f;
         // 2) Destroy them (Destroy is deferred, but we’ve already captured them)
         foreach (var t in victims)
-            Destroy(t.gameObject);
+        {
+            Destroy(t.gameObject,delay*counter);
+            counter++;
+        }
 
         // 3) Restack what’s left at the same offsets
         int rem = passengersHolder.childCount;

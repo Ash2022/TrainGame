@@ -1,7 +1,9 @@
-﻿using RailSimCore;
+﻿using DG.Tweening;
+using RailSimCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TreeEditor;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -43,7 +45,7 @@ public class TrainController : MonoBehaviour
     public int MirrorId { get; private set; }
     public void AssignMirrorId(int id) { MirrorId = id; }
 
-    public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize, GameObject cartPrefab)
+    public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize, GameObject cartPrefab,float startDelay,float animTime)
     {
         lastCartTransform = null;
         SetParticles(trainVisuals, 0.5f);
@@ -71,6 +73,13 @@ public class TrainController : MonoBehaviour
         Vector3 centerPos = new Vector3(worldOrigin.x + flipped.x * cellSize,
                                         worldOrigin.y + flipped.y * cellSize, 0f);
         transform.position = centerPos;
+
+        if(animTime > 0)
+        {
+            transform.position = new Vector3(centerPos.x, centerPos.y, centerPos.z-10f);
+            transform.DOMove(centerPos,animTime).SetEase(Ease.OutBounce).SetDelay(startDelay);
+        }
+
 
         // 3) Apply rotation based on direction
         float angleZ = p.direction switch
@@ -102,6 +111,12 @@ public class TrainController : MonoBehaviour
                     trainVisuals.localScale = new Vector3(scaleX, scaleY, scaleZ);
                 }
             }
+        }
+
+        if(animTime>0)
+        {
+            transform.localScale = Vector3.zero;
+            transform.DOScale(Vector3.one, animTime/3f).SetDelay(startDelay);
         }
 
         // 4) Carts
@@ -245,7 +260,7 @@ public class TrainController : MonoBehaviour
         _moveCompletedCb?.Invoke(r);
     }
 
-    public void OnArrivedStation_AddCart(int colorIndex)
+    public void OnArrivedStation_AddCart(int colorIndex,int counter)
     {
         var mv = mover ?? GetComponent<TrainMover>();
         if (mv == null)
@@ -295,6 +310,10 @@ public class TrainController : MonoBehaviour
         cart.GetComponent<CartView>()?.SetCartColor(colorIndex);
 
         lastCartTransform = cart.transform;
+
+        cart.transform.localScale = Vector3.zero;
+
+        cart.transform.DOScale(Vector3.one * cartLen, 0.25f).SetDelay(0.25f * counter);
 
         // record it
         currCarts.Add(cart);

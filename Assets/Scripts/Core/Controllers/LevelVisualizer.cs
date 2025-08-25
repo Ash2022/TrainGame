@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DG.Tweening;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ public class LevelVisualizer : MonoBehaviour
 
     [Header("Frame & Build Settings")]
     [SerializeField] private SpriteRenderer frameRenderer;
-    [SerializeField] private float tileDelay = 0.05f;
+    [SerializeField] private float tileDelay = 0.025f;
 
     [SerializeField] LineRenderer globalPathRenderer;
 
@@ -378,6 +379,10 @@ public class LevelVisualizer : MonoBehaviour
         if (useSimulation && SimAppInstance != null)
             SimAppInstance.Reset(scenarioModel);
 
+        float animTime = 0.35f;
+        float stationDelay = 0.35f;
+        int counter = 0;
+
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
         {
             float cellX = pt.gridX - minX + 0.5f;
@@ -391,12 +396,19 @@ public class LevelVisualizer : MonoBehaviour
 
             var go = Instantiate(stationPrefab, dynamicHolder);
             go.name = $"Station_{pt.id}";
-            go.transform.position = worldPos;
+            go.transform.position = new Vector3(worldPos.x,worldPos.y,worldPos.z-6f);
+
+            go.transform.localScale = Vector3.zero;
+
+            go.transform.DOScale(Vector3.one, animTime/3f).SetDelay(stationDelay * counter);
+            go.transform.DOMove(worldPos, animTime).SetDelay(stationDelay * counter).SetEase(Ease.InQuad);
 
             var stationView = go.GetComponent<StationView>();
 
             var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
-            stationView.Initialize(pt, part, cellSize,passengerPrefab);
+            stationView.Initialize(pt, part, cellSize,passengerPrefab,stationDelay*counter+ animTime);
+
+            counter++;
         }
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Depot))
@@ -412,12 +424,19 @@ public class LevelVisualizer : MonoBehaviour
 
             var go = Instantiate(depotPrefab, dynamicHolder);
             go.name = $"Depot_{pt.id}";
-            go.transform.position = worldPos;
+            go.transform.position = new Vector3(worldPos.x,worldPos.y,worldPos.z-6f);
+
+            go.transform.localScale = Vector3.zero;
+
+            go.transform.DOScale(Vector3.one, animTime / 3f).SetDelay(stationDelay * counter);
+            go.transform.DOMove(worldPos, animTime).SetDelay(stationDelay * counter).SetEase(Ease.InQuad);
 
             var depotView = go.GetComponent<DepotView>();
 
             var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
             depotView.Initialize(pt, part, cellSize);
+
+            counter++;
         }
 
         foreach (var p in scenarioModel.points.Where(x => x.type == GamePointType.Train))
@@ -426,7 +445,7 @@ public class LevelVisualizer : MonoBehaviour
             trainGO.name = $"Train_{p.id}";
 
             var trainController = trainGO.GetComponent<TrainController>();
-            trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
+            trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab, stationDelay * counter,animTime);
 
             // SAFE mirror id assignment (works with or without sim)
             int mirrorId = -1;
@@ -434,6 +453,8 @@ public class LevelVisualizer : MonoBehaviour
                 mirrorId = SimAppInstance.GetMirrorIdByPoint(p.id);
 
             trainController.AssignMirrorId(mirrorId);
+
+            counter++;
 
         }
 
@@ -477,7 +498,7 @@ public class LevelVisualizer : MonoBehaviour
             go.name = $"Station_{pt.id}";
             go.transform.position = worldPos;
             var part = currLevel.parts.First(p2 => p2.partId == pt.anchor.partId);
-            go.GetComponent<StationView>()?.Initialize(pt, part, cellSize, passengerPrefab);
+            go.GetComponent<StationView>()?.Initialize(pt, part, cellSize, passengerPrefab,0);
         }
 
         // 4) Instantiate depots under rawHolder
@@ -504,7 +525,7 @@ public class LevelVisualizer : MonoBehaviour
             var trainGO = Instantiate(trainPrefab, rawHolder);
             trainGO.name = $"Train_{pt.id}";
             var trainController = trainGO.GetComponent<TrainController>();
-            trainController.Init(pt, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
+            trainController.Init(pt, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab,0,0);
         }
     }
 

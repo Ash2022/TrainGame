@@ -265,7 +265,7 @@ public class GameManager : MonoBehaviour
             {
                 dest.waitingPeople.RemoveAt(0);
                 removed++;
-                tc.OnArrivedStation_AddCart(trainColor);
+                tc.OnArrivedStation_AddCart(trainColor,removed);
             }
 
             Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
