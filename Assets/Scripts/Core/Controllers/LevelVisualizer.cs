@@ -15,6 +15,12 @@ public class LevelVisualizer : MonoBehaviour
 
     [SerializeField] public List<GameObject> partObjects;  // must match partsLibrary order
     [SerializeField] List<Color> colors = new List<Color>();
+
+    [SerializeField]List<Material> boatMaterials = new List<Material>();
+    [SerializeField] List<Material> depotMaterials = new List<Material>();
+    [SerializeField] List<Material> passengersMaterials = new List<Material>();
+
+
     [Header("Data")]
     [SerializeField] private TextAsset levelJson;
 
@@ -555,9 +561,14 @@ public class LevelVisualizer : MonoBehaviour
         var extracted = Utils.BuildPathWorldPolyline(currLevel, pathModel);
         worldPts.AddRange(extracted);
 
+        //draw the preview under the boats
+        for (int i = 0; i < extracted.Count; i++)
+            extracted[i] = new Vector3(extracted[i].x, extracted[i].y, 0.25f);
+        
+
         globalPathRenderer.material.color = color;
-        globalPathRenderer.positionCount = worldPts.Count;
-        globalPathRenderer.SetPositions(worldPts.ToArray());
+        globalPathRenderer.positionCount = extracted.Count;
+        globalPathRenderer.SetPositions(extracted.ToArray());
 
 
         if (drawSimPathOverlay)
@@ -722,6 +733,21 @@ public class LevelVisualizer : MonoBehaviour
     public Color GetColorByIndex(int colorIndex)
     {
         return colors[colorIndex];
+    }
+
+    public Material GetBoatMaterialByIndex(int colorIndex)
+    {
+        return boatMaterials[colorIndex];
+    }
+
+    public Material GetDepotMaterialByIndex(int colorIndex)
+    {
+        return depotMaterials[colorIndex];
+    }
+
+    public Material GetPassengersMaterialByIndex(int colorIndex)
+    {
+        return passengersMaterials[colorIndex];
     }
 }
 

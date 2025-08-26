@@ -1,0 +1,1089 @@
+{
+  "levelName": "G2",
+  "generatedAtUtc": "2025-08-12T12:18:35.9249862Z",
+  "episodesPerCandidate": 100,
+  "bandMin": 0.35,
+  "bandMax": 0.6,
+  "scenarios": [
+    {
+      "scenario": {
+        "points": [
+          {
+            "gridX": 10,
+            "gridY": 5,
+            "type": 0,
+            "colorIndex": 0,
+            "id": 2,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_33",
+              "position": {
+                "x": 10,
+                "y": 5
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 9.0,
+                    "y": 5.22000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 9.0,
+                    "y": 4.22000027,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 5
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 4
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 5
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 6
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 10,
+                  "y": 5
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_33",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [
+              0,
+              0
+            ],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "S",
+            "HasWaitingPeople": true
+          },
+          {
+            "gridX": 2,
+            "gridY": 5,
+            "type": 0,
+            "colorIndex": 0,
+            "id": 3,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_34",
+              "position": {
+                "x": 2,
+                "y": 5
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 1.0,
+                    "y": 5.22000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 1.0,
+                    "y": 4.22000027,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 2,
+                    "y": 5
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 2,
+                    "y": 4
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 2,
+                    "y": 5
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 2,
+                    "y": 6
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 2,
+                  "y": 5
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_34",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [
+              1,
+              0,
+              0
+            ],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "S",
+            "HasWaitingPeople": true
+          },
+          {
+            "gridX": 6,
+            "gridY": 5,
+            "type": 0,
+            "colorIndex": 0,
+            "id": 4,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_28",
+              "position": {
+                "x": 6,
+                "y": 5
+              },
+              "rotation": 90,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 5.5,
+                    "y": 4.72000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 4.5,
+                    "y": 4.72000027,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 6,
+                    "y": 5
+                  },
+                  "direction": 1,
+                  "neighborCell": {
+                    "x": 7,
+                    "y": 5
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 6,
+                    "y": 5
+                  },
+                  "direction": 3,
+                  "neighborCell": {
+                    "x": 5,
+                    "y": 5
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 6,
+                  "y": 5
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_28",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [
+              1,
+              0
+            ],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "S",
+            "HasWaitingPeople": true
+          },
+          {
+            "gridX": 6,
+            "gridY": 8,
+            "type": 0,
+            "colorIndex": 0,
+            "id": 5,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_49",
+              "position": {
+                "x": 6,
+                "y": 8
+              },
+              "rotation": 90,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 5.5,
+                    "y": 1.72000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 4.5,
+                    "y": 1.72000027,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 6,
+                    "y": 8
+                  },
+                  "direction": 1,
+                  "neighborCell": {
+                    "x": 7,
+                    "y": 8
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 6,
+                    "y": 8
+                  },
+                  "direction": 3,
+                  "neighborCell": {
+                    "x": 5,
+                    "y": 8
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 6,
+                  "y": 8
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_49",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "S",
+            "HasWaitingPeople": false
+          },
+          {
+            "gridX": 4,
+            "gridY": 13,
+            "type": 1,
+            "colorIndex": 0,
+            "id": 7,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_65",
+              "position": {
+                "x": 4,
+                "y": 13
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 3.0,
+                    "y": -2.78000069,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 3.0,
+                    "y": -3.78000069,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 4,
+                    "y": 13
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 4,
+                    "y": 12
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 4,
+                    "y": 13
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 4,
+                    "y": 14
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 4,
+                  "y": 13
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_65",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "D",
+            "HasWaitingPeople": false
+          },
+          {
+            "gridX": 6,
+            "gridY": 3,
+            "type": 2,
+            "colorIndex": 0,
+            "id": 8,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_27",
+              "position": {
+                "x": 6,
+                "y": 3
+              },
+              "rotation": 90,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 5.5,
+                    "y": 6.72,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 4.5,
+                    "y": 6.72,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 6,
+                    "y": 3
+                  },
+                  "direction": 1,
+                  "neighborCell": {
+                    "x": 7,
+                    "y": 3
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 6,
+                    "y": 3
+                  },
+                  "direction": 3,
+                  "neighborCell": {
+                    "x": 5,
+                    "y": 3
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 6,
+                  "y": 3
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_27",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 1,
+            "Letter": "T",
+            "HasWaitingPeople": false
+          },
+          {
+            "gridX": 10,
+            "gridY": 8,
+            "type": 2,
+            "colorIndex": 1,
+            "id": 9,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_37",
+              "position": {
+                "x": 10,
+                "y": 8
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 9.0,
+                    "y": 2.22000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 9.0,
+                    "y": 1.22000027,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 8
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 7
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 8
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 9
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 10,
+                  "y": 8
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_37",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 2,
+            "Letter": "T",
+            "HasWaitingPeople": false
+          },
+          {
+            "gridX": 10,
+            "gridY": 9,
+            "type": 0,
+            "colorIndex": 0,
+            "id": 10,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_55",
+              "position": {
+                "x": 10,
+                "y": 9
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 9.0,
+                    "y": 1.22000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 9.0,
+                    "y": 0.220000267,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 9
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 8
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 9
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 10
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 10,
+                  "y": 9
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_55",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "S",
+            "HasWaitingPeople": false
+          },
+          {
+            "gridX": 2,
+            "gridY": 9,
+            "type": 0,
+            "colorIndex": 0,
+            "id": 11,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_53",
+              "position": {
+                "x": 2,
+                "y": 9
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 1.0,
+                    "y": 1.22000027,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 1.0,
+                    "y": 0.220000267,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 2,
+                    "y": 9
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 2,
+                    "y": 8
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 2,
+                    "y": 9
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 2,
+                    "y": 10
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 2,
+                  "y": 9
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_53",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "S",
+            "HasWaitingPeople": false
+          },
+          {
+            "gridX": 10,
+            "gridY": 13,
+            "type": 1,
+            "colorIndex": 1,
+            "id": 21,
+            "part": {
+              "partType": "Straight",
+              "partId": "Straight_70",
+              "position": {
+                "x": 10,
+                "y": 13
+              },
+              "rotation": 0,
+              "splines": [],
+              "worldSplines": [
+                [
+                  {
+                    "x": 9.0,
+                    "y": -2.78000069,
+                    "z": 0.0
+                  },
+                  {
+                    "x": 9.0,
+                    "y": -3.78000069,
+                    "z": 0.0
+                  }
+                ]
+              ],
+              "exits": [
+                {
+                  "exitIndex": 0,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 13
+                  },
+                  "direction": 0,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 12
+                  }
+                },
+                {
+                  "exitIndex": 1,
+                  "localCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "rotatedCell": {
+                    "x": 0,
+                    "y": 0
+                  },
+                  "worldCell": {
+                    "x": 10,
+                    "y": 13
+                  },
+                  "direction": 2,
+                  "neighborCell": {
+                    "x": 10,
+                    "y": 14
+                  }
+                }
+              ],
+              "occupyingCells": [
+                {
+                  "x": 10,
+                  "y": 13
+                }
+              ],
+              "allowedPathsGroup": [
+                {
+                  "allowedPaths": [
+                    {
+                      "entryConnectionId": 0,
+                      "exitConnectionId": 1,
+                      "length": 1.0
+                    },
+                    {
+                      "entryConnectionId": 1,
+                      "exitConnectionId": 0,
+                      "length": 1.0
+                    }
+                  ]
+                }
+              ]
+            },
+            "anchor": {
+              "partId": "Straight_70",
+              "exitPin": 0,
+              "splineIndex": -1,
+              "t": 0.0
+            },
+            "waitingPeople": [],
+            "initialCarts": [],
+            "direction": 3,
+            "Letter": "D",
+            "HasWaitingPeople": false
+          }
+        ]
+      },
+      "winRate": 0.48,
+      "avgMoves": 25.55,
+      "collisionRate": 20.63,
+      "attemptsTried": 467
+    }
+  ]
+}

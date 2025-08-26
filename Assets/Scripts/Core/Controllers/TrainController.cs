@@ -53,8 +53,11 @@ public class TrainController : MonoBehaviour
         currCellSize = cellSize;
         currCarts.Clear();
 
-        trainRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(p.colorIndex);
-        trainSelectedHighLight.GetComponent<SpriteRenderer>().color = LevelVisualizer.Instance.GetColorByIndex(p.colorIndex);
+        //trainRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(p.colorIndex);
+
+        trainRenderer.material = LevelVisualizer.Instance.GetBoatMaterialByIndex(p.colorIndex);
+
+        //trainSelectedHighLight.GetComponent<SpriteRenderer>().color = LevelVisualizer.Instance.GetColorByIndex(p.colorIndex);
 
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Clear();

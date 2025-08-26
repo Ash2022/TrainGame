@@ -226,3 +226,17 @@ Station hopping sim (teleport between stations using pathfinder) for single-trai
 
 Auto-tuner/editor tools to evaluate station subsets with target win-rate bands.
 
+
+
+
+Issues:
+
+Spline preview path -- DONE
+bug when switching selected boats when you have a path selected -- DONE 
+make objects with mapping for the carts and passengers
+green boat texture too light
+make all the parts with simple plat BG color
+make selection indication much bigger
+change the depot colors of the roof - now its flat and similar on both sides
+
+

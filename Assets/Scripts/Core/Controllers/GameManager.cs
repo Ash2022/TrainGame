@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ModelManager modelManager;
     [SerializeField] private LevelVisualizer levelVisualizer;
     [SerializeField] private GameOverView gameOverView;
+    
 
     [Header("Simulation")]
     public bool UseSimulation = true;   // toggle sim on/off
@@ -78,6 +79,10 @@ public class GameManager : MonoBehaviour
 
         // optional: reset GameManager state for a clean run
         ResetCurrLevel();
+
+        //ScenarioModel scenarioModel = ScenarioLoader.GetScenario("G4", 0);
+
+        //levelCopy.gameData = scenarioModel;
 
         // build via visualizer
         if (levelVisualizer != null)
@@ -217,6 +222,9 @@ public class GameManager : MonoBehaviour
 
         if (selectedTrain != null)
             selectedTrain.ShowHideTrainHighLight(false);
+
+        if (selectedTrain != trainController)
+            _lastPath = null;
 
 
         selectedTrain = trainController;

@@ -21,7 +21,9 @@ public class DepotView : MonoBehaviour
 
         exits.transform.localEulerAngles = new Vector3(0, 0, -part.rotation);
 
-        depotRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(point.colorIndex);
+        //depotRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(point.colorIndex);
+
+        depotRenderer.material = LevelVisualizer.Instance.GetDepotMaterialByIndex(point.colorIndex);
     }
 
 }

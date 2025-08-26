@@ -475,7 +475,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   exits: {fileID: 7020560412307322390}
-  depotRenderer: {fileID: 7852994778699620721}
+  depotRenderer: {fileID: 756744488036712650}
 --- !u!65 &6314266263958881690
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -566,6 +566,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 884cbc777d54d6343b8f97816fa9cbda, type: 3}
+--- !u!23 &756744488036712650 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 884cbc777d54d6343b8f97816fa9cbda, type: 3}
+  m_PrefabInstance: {fileID: 2108224193384111182}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1930728977663933349 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 884cbc777d54d6343b8f97816fa9cbda, type: 3}

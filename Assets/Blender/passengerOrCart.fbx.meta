@@ -1,14 +1,9 @@
 fileFormatVersion: 2
-guid: 600dfd2107aee36468a75e68d1ad80d5
+guid: 884d15203c4d96b44b2516ef9c85a9d5
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: PolyPack_Boats
-    second: {fileID: 2100000, guid: 5b4fc6d2b3656f044b3db0d6641f6db8, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
