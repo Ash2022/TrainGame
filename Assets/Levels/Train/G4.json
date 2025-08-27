@@ -3487,10 +3487,12 @@
           "t": 0.0
         },
         "waitingPeople": [
-          2,
-          2,
           0,
-          0
+          0,
+          0,
+          0,
+          2,
+          2
         ],
         "initialCarts": [],
         "direction": 3,

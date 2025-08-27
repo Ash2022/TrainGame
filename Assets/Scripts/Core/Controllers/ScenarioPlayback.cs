@@ -18,6 +18,7 @@ public static class ScenarioPlayback
         public float bandMin;
         public float bandMax;
         public List<ScenarioEntry> scenarios = new();
+        internal List<ScenarioEntry> entries;
     }
 
     [Serializable]

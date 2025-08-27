@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
         // optional: reset GameManager state for a clean run
         ResetCurrLevel();
 
-        //ScenarioModel scenarioModel = ScenarioLoader.GetScenario("G4", 0);
+        //ScenarioModel scenarioModel = ScenarioLoader.GetScenario("G4", 2);
 
         //levelCopy.gameData = scenarioModel;
 
