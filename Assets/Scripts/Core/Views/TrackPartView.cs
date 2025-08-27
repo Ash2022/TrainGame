@@ -28,9 +28,9 @@ public class TrackPartView : MonoBehaviour
             Debug.Log($"No sprite for partType '{model.partType}'");
 
 
-        GameObject partObject = Instantiate(LevelVisualizer.Instance.GetGameObjectFor(model.partType), objectHolder);
-        partObject.transform.localPosition = Vector3.zero;
-        partObject.transform.localEulerAngles = Vector3.zero;
+        //GameObject partObject = Instantiate(LevelVisualizer.Instance.GetGameObjectFor(model.partType), objectHolder);
+        //partObject.transform.localPosition = Vector3.zero;
+        //partObject.transform.localEulerAngles = Vector3.zero;
 
         //partObject.GetComponent<Renderer>().material = partsMaterial;
 

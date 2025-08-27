@@ -229,6 +229,7 @@ public class LevelVisualizer : MonoBehaviour
         GameObject emptyHolder = null;
 
         // ADD: fill gaps with empties
+        /*
         for (int x = minX; x <= maxX; x++)
         {
             for (int y = minY; y <= maxY; y++)
@@ -317,7 +318,7 @@ public class LevelVisualizer : MonoBehaviour
                     emptyView.Setup();// partsMaterial);
             }
         }
-
+        */
 
         GameManager.Instance.StartNewLevel(currLevel);
 
@@ -563,7 +564,7 @@ public class LevelVisualizer : MonoBehaviour
 
         //draw the preview under the boats
         for (int i = 0; i < extracted.Count; i++)
-            extracted[i] = new Vector3(extracted[i].x, extracted[i].y, 0.25f);
+            extracted[i] = new Vector3(extracted[i].x, extracted[i].y, 0.1f);
         
 
         globalPathRenderer.material.color = color;
