@@ -1,6 +1,7 @@
 ﻿using RailSimCore;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -131,7 +132,16 @@ public class GameManager : MonoBehaviour
 
         // Depot?
         var depotView = hit.collider.GetComponent<DepotView>();
-        if (depotView != null) { OnPointClicked(GetPointFromView(depotView)); return; }
+        if (depotView != null) 
+        {
+            //check if the depot is locked or not - if its locked - it cant be selected
+
+            if (AnyStationHasColor(depotView.PointModel.colorIndex))
+                return;
+
+            OnPointClicked(GetPointFromView(depotView)); 
+                return; 
+        }
 
         // Train?
         var trainClickView = hit.collider.GetComponent<TrainClickView>();

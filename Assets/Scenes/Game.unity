@@ -636,8 +636,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelJsons:
-  - {fileID: 4900000, guid: 9754d0882de52f14f8dcb43ed01eb878, type: 3}
   - {fileID: 4900000, guid: caf2fb2c60b22be41a8fe878c257e8df, type: 3}
+  - {fileID: 4900000, guid: 9754d0882de52f14f8dcb43ed01eb878, type: 3}
   - {fileID: 4900000, guid: b594a63a435d5ac4682fc3b5e741d317, type: 3}
   - {fileID: 4900000, guid: b35736cc2de9d164a82a9ea4b2b34185, type: 3}
   - {fileID: 4900000, guid: 623460b55a7827243924b478f9b67772, type: 3}
@@ -1062,6 +1062,7 @@ Transform:
   m_Children:
   - {fileID: 1784434352}
   - {fileID: 1420580197}
+  - {fileID: 2034271029}
   - {fileID: 2127980554}
   - {fileID: 1324158658}
   - {fileID: 1196068238}
@@ -1639,7 +1640,7 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Positions: []
   m_Parameters:
     serializedVersion: 3
@@ -1811,18 +1812,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partsJson: {fileID: 4900000, guid: 2182bb239ebd4ec43a7e86ac213ba357, type: 3}
   partSprites:
-  - {fileID: 21300000, guid: 500360d14f3cc91428b344a7349fce24, type: 3}
-  - {fileID: 21300000, guid: d189ef96f11917644aeed5a224ed0730, type: 3}
-  - {fileID: 21300000, guid: ae7052d2656c2b94997371d7a968f8f5, type: 3}
-  - {fileID: 21300000, guid: 8cfd4a08c29901f47ab637510d49dbf8, type: 3}
-  - {fileID: 21300000, guid: b5115d1bf64b67049a96bbc860c5a445, type: 3}
-  - {fileID: 21300000, guid: 94e0c229df43348439789ca3836b04a4, type: 3}
-  - {fileID: 21300000, guid: ed8ca7599f34e514799e0f095c3be861, type: 3}
-  - {fileID: 21300000, guid: 8851ca80e41e0564d99001fa94a34cdf, type: 3}
-  - {fileID: 21300000, guid: f84b25dca794f5245a1727a4d96ccece, type: 3}
-  - {fileID: 21300000, guid: edebcb435cf9dce499703ed0ac419bb6, type: 3}
-  - {fileID: 21300000, guid: a7500bacc2d708948824ce5b46c06954, type: 3}
-  - {fileID: 21300000, guid: 139f17c4916e67a4ca7fae210286d4a9, type: 3}
+  - {fileID: 21300000, guid: 2b7c8bab94c37b848af6757f5ee03547, type: 3}
+  - {fileID: 21300000, guid: ca23eac2162ae8e43b4c841d4175d7a2, type: 3}
+  - {fileID: 21300000, guid: 0327cb523ae38094984881fb32d5c7be, type: 3}
+  - {fileID: 21300000, guid: 86061ecf916a1e14ea39a3f39660e37b, type: 3}
+  - {fileID: 21300000, guid: 499d6ef6dc56a2641a6d0191771dd559, type: 3}
+  - {fileID: 21300000, guid: 0fde1e40d64f97c44bd890aa6e7c6070, type: 3}
+  - {fileID: 21300000, guid: 26e1586b87f151944a8afd2db9395b3f, type: 3}
+  - {fileID: 21300000, guid: 34bba32c08a855644b524d9b779ae03e, type: 3}
+  - {fileID: 21300000, guid: debf71ad5bb34e74ba6602f98dd44b75, type: 3}
+  - {fileID: 21300000, guid: 04a690711fddcfc4dba589327e940a41, type: 3}
+  - {fileID: 21300000, guid: cfdd4152ac2f0bb409d66f5bb279169c, type: 3}
+  - {fileID: 21300000, guid: 4d9f09fb95c7300459f4325ed4ce2db6, type: 3}
   partObjects:
   - {fileID: 919132149155446097, guid: 363cf3aa4afdd7243b5d800a70876f4b, type: 3}
   - {fileID: 919132149155446097, guid: aa64ce010e0f2d14182790f730563ac1, type: 3}
@@ -1841,9 +1842,9 @@ MonoBehaviour:
   - {r: 0.05271244, g: 1, b: 0, a: 1}
   - {r: 0.6163442, g: 0.33490568, b: 1, a: 1}
   boatMaterials:
-  - {fileID: 2100000, guid: 3048a91eb13eab449ab6ca59c7e8419b, type: 2}
-  - {fileID: 2100000, guid: 7ba08430660c8664daaf810690d1b0a8, type: 2}
-  - {fileID: 2100000, guid: 6b38db55fdd06d84eb38c6104b931e67, type: 2}
+  - {fileID: 2100000, guid: 33b98256fb56aaa46aa0629be092ef96, type: 2}
+  - {fileID: 2100000, guid: f23e1c2d38587d545826aea778e092d3, type: 2}
+  - {fileID: 2100000, guid: e67518eb70c0f7c478d6e3989a05e19c, type: 2}
   depotMaterials:
   - {fileID: 2100000, guid: d4807a5d4bfd38147a69589eb96f5b34, type: 2}
   - {fileID: 2100000, guid: dadc78f8acc9a1f40b760818e9ea8a0c, type: 2}
@@ -1855,11 +1856,11 @@ MonoBehaviour:
   levelJson: {fileID: 4900000, guid: 623460b55a7827243924b478f9b67772, type: 3}
   partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}
   emptyPartPrefab: {fileID: 1678834536405887873, guid: 2875be2479d1f734ebbe2b347f9f9bad, type: 3}
-  stationPrefab: {fileID: 7225796874260481156, guid: 5e9e9912989ad5d4c989134b6a52f358, type: 3}
+  stationPrefab: {fileID: 7225796874260481156, guid: 4fdde403041da2b4b890daa4193afbc6, type: 3}
   depotPrefab: {fileID: 7225796874260481156, guid: 4e96a27e8624f7a49be5ac10cec29fd8, type: 3}
   passengerPrefab: {fileID: 1267055530054662668, guid: d2ce050b7ff97e24da6c6ca354a55ea2, type: 3}
   trainPrefab: {fileID: 6102414799845618142, guid: c307705b2ceebab42892a2c47a7d5135, type: 3}
-  cartPrefab: {fileID: 1267055530054662668, guid: 097eeb02430494341b13e7e653d5eaa3, type: 3}
+  cartPrefab: {fileID: 1267055530054662668, guid: a2f63bccb9b3a4f48b20420922d8edf6, type: 3}
   levelHolder: {fileID: 1324158658}
   dynamicHolder: {fileID: 1196068238}
   frameRenderer: {fileID: 2127980555}
@@ -1870,6 +1871,90 @@ MonoBehaviour:
   simPathColor: {r: 1, g: 0, b: 1, a: 1}
   drawSimPathOverlay: 0
   MAX_CELL_SIZE: 100
+--- !u!1 &2034271028
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2034271029}
+  - component: {fileID: 2034271030}
+  m_Layer: 0
+  m_Name: FrameBG
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2034271029
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034271028}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 11.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1001080935}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &2034271030
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034271028}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300000, guid: 7dfb5df8062a4bd4abbfeacf0630e62c, type: 3}
+  m_Color: {r: 0.42677733, g: 0.4716981, b: 0.28702384, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 2
+  m_Size: {x: 20, y: 30}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &2127980553
 GameObject:
   m_ObjectHideFlags: 0
@@ -1896,7 +1981,7 @@ Transform:
   m_GameObject: {fileID: 2127980553}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 10.15}
+  m_LocalPosition: {x: 0, y: 0, z: 10.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1943,8 +2028,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 22da1e920f33ad84f9e115105cf71188, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 7dfb5df8062a4bd4abbfeacf0630e62c, type: 3}
+  m_Color: {r: 0.6509804, g: 0.72156864, b: 0.43137258, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
