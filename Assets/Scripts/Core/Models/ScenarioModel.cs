@@ -43,6 +43,8 @@ public class GamePoint
 
     // Only meaningful for stations
     public List<int> waitingPeople = new List<int>();
+    public List<int> waitingDelays = new List<int>();
+
 
     // Only meaningful for trains
     public List<int> initialCarts = new List<int>();   // each int = color index

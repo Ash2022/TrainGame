@@ -15,7 +15,7 @@ public class TrainMover : MonoBehaviour
     public bool debugBack = false;
 
     [Header("Collision (simple)")]
-    public bool collisionsEnabled = true;
+    bool collisionsEnabled = true;
     public bool collisionDebug = true;
     public float safetyGap = 0.0f;           // meters added behind stationary trains (along tape)
     public float collisionSampleStep = 0.0f; // if 0, defaults to cellSize/8 per leg
@@ -209,6 +209,9 @@ public class TrainMover : MonoBehaviour
                         idMap[mv.sim] = tc.TrainId;
                     }
                     others = list;
+
+                    if (others.Count == 0)
+                        Debug.Log("No Other Trains Found");
                 }
                 int GetId(SimpleTrainSim s) => (idMap != null && idMap.TryGetValue(s, out var id)) ? id : 0;
 

@@ -70,7 +70,7 @@ public class StationView : MonoBehaviour
 
             // init color
             PassengerView pv = go.GetComponent<PassengerView>();
-            if (pv != null) pv.Initialize(colorIndex);
+            if (pv != null) pv.Initialize(colorIndex, _pointModel.waitingDelays[dataIdx]>GameManager.Instance.level.totalCollectedPassengers);
             else Debug.LogWarning("PassengerView missing on passenger prefab.");
 
             go.transform.localScale = Vector3.zero;
@@ -87,6 +87,9 @@ public class StationView : MonoBehaviour
 
     /// <summary>
     /// Remove the first 'count' passenger visuals (head of queue) and re-stack.
+    /// 
+    /// now should also see if some other passengers of it are unlocked
+    /// 
     /// </summary>
     public void RemoveHeadPassengers(int count)
     {
@@ -120,6 +123,22 @@ public class StationView : MonoBehaviour
             float z = -(0.5f + stackIdx) * _spacing;
             c.localPosition = new Vector3(0f, 0f, z);
             c.localRotation = Quaternion.identity;
+        }
+    }
+
+    public void UpdatePassengersLocking()
+    {
+        int rem = passengersHolder.childCount;
+        for (int stackIdx = 0; stackIdx < rem; stackIdx++)
+        {
+            var c = passengersHolder.GetChild(stackIdx);
+            //check if this passenger was locked - and if so check if its now unlocked - and if so update visuals.
+            PassengerView passengerView = c.gameObject.GetComponent<PassengerView>();
+            if (passengerView.isLocked)
+            {
+                if (_pointModel.waitingDelays[stackIdx] <= GameManager.Instance.level.totalCollectedPassengers)
+                    passengerView.UnlockPassenger(_pointModel.waitingPeople[stackIdx]);
+            }
         }
     }
 }

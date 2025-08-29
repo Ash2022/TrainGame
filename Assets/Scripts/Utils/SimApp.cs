@@ -26,6 +26,12 @@ public sealed class SimApp
     private readonly Dictionary<int, List<int>> _stationPeople = new();      // live
     private readonly Dictionary<int, List<int>> _stationPeopleOrig = new();  // for Reset()
 
+    // Stations dynamic state (our own copy; we never touch scenarioRef.waitingPeople)
+    private readonly Dictionary<int, List<int>> _stationDelayPeople = new();      // live
+    private readonly Dictionary<int, List<int>> _stationDelayPeopleOrig = new();  // for Reset()
+
+    int totalCollectedPeople = 0;
+
     // Keep our own mirror of cart offsets per train (meters behind head center)
     private readonly Dictionary<int, List<float>> _cartOffsetsByPointId = new();
 
@@ -51,6 +57,7 @@ public sealed class SimApp
     {
         if (level == null || scenario == null) throw new ArgumentNullException("level/scenario");
         _level = level;
+        totalCollectedPeople = 0;
         _scenarioRef = scenario;
         _worldOrigin = worldOrigin;
         _minX = minX; _minY = minY; _gridH = gridH;
@@ -68,6 +75,17 @@ public sealed class SimApp
             var copy = new List<int>(gp.waitingPeople ?? new List<int>());
             _stationPeople[gp.id] = new List<int>(copy);
             _stationPeopleOrig[gp.id] = copy; // store original for Reset()
+        }
+
+        // 2) Snapshot station delay passengers into our own dynamic copy
+        _stationDelayPeople.Clear();
+        _stationDelayPeopleOrig.Clear();
+        foreach (var gp in _scenarioRef.points)
+        {
+            if (gp.type != GamePointType.Station) continue;
+            var copy = new List<int>(gp.waitingDelays ?? new List<int>());
+            _stationDelayPeople[gp.id] = new List<int>(copy);
+            _stationDelayPeopleOrig[gp.id] = copy; // store original for Reset()
         }
 
         // 3) Fresh world + maps
@@ -219,13 +237,24 @@ public sealed class SimApp
                 _stationPeople[dest.id] = people;
             }
 
+            // Our dynamic station list
+            if (!_stationDelayPeople.TryGetValue(dest.id, out var peopleDelay))
+            {
+                peopleDelay = new List<int>(dest.waitingDelays ?? new List<int>());
+                _stationDelayPeople[dest.id] = peopleDelay;
+            }
+
             // Remove head-streak of matching color
             int removed = 0;
-            while (people.Count > 0 && people[0] == trainColor)
+            while (people.Count > 0 && people[0] == trainColor && peopleDelay[0]<= totalCollectedPeople)
             {
                 people.RemoveAt(0);
+                peopleDelay.RemoveAt(0);
+
                 removed++;
+                totalCollectedPeople++;
             }
+
 
             if (removed > 0)
                 AddCartsToTrain(trainPointId, removed);
@@ -287,6 +316,8 @@ public sealed class SimApp
         if (scenario == null) throw new ArgumentNullException(nameof(scenario));
         _scenarioRef = scenario;  // rebind to the game’s current scenario
 
+        totalCollectedPeople = 0;
+
         _parkedTrains.Clear();
         // Re-snapshot stations from the *new* scenario (fresh orig + live)
         _stationPeopleOrig.Clear();
@@ -298,6 +329,18 @@ public sealed class SimApp
             var copy = new List<int>(src);
             _stationPeopleOrig[gp.id] = new List<int>(copy);
             _stationPeople[gp.id] = new List<int>(copy);
+        }
+
+        // Re-snapshot stations from the *new* scenario (fresh orig + live)
+        _stationDelayPeopleOrig.Clear();
+        _stationDelayPeople.Clear();
+        foreach (var gp in _scenarioRef.points)
+        {
+            if (gp.type != GamePointType.Station) continue;
+            var src = gp.waitingDelays ?? new List<int>();
+            var copy = new List<int>(src);
+            _stationDelayPeopleOrig[gp.id] = new List<int>(copy);
+            _stationDelayPeople[gp.id] = new List<int>(copy);
         }
 
         // Rebuild trains (dynamic only; no track rebuild)
@@ -470,29 +513,5 @@ public sealed class SimApp
         return null;
     }
 
-    // Head-streak length (consecutive passengers of color at the head of the queue)
-    public int GetStationHeadStreak(int stationPointId, int colorIndex)
-    {
-        if (_stationPeople.TryGetValue(stationPointId, out var list) && list != null)
-        {
-            int cnt = 0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i] == colorIndex) cnt++; else break;
-            }
-            return cnt;
-        }
-
-        var gp = FindPoint(stationPointId);
-        if (gp != null && gp.type == GamePointType.Station && gp.waitingPeople != null)
-        {
-            int cnt = 0;
-            for (int i = 0; i < gp.waitingPeople.Count; i++)
-            {
-                if (gp.waitingPeople[i] == colorIndex) cnt++; else break;
-            }
-            return cnt;
-        }
-        return 0;
-    }
+   
 }

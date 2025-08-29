@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] List<Material> depotMaterials = new List<Material>();
     [SerializeField] List<Material> passengersMaterials = new List<Material>();
 
+    [SerializeField] Material passengerEmptyMaterial;
 
     [Header("Data")]
     [SerializeField] private TextAsset levelJson;
@@ -639,6 +641,9 @@ public class LevelVisualizer : MonoBehaviour
             if (point.waitingPeople != null)
                 newPoint.waitingPeople = new List<int>(point.waitingPeople);
 
+            if (point.waitingPeople != null)
+                newPoint.waitingDelays = new List<int>(point.waitingDelays);
+
             if (point.initialCarts != null)
                 newPoint.initialCarts = new List<int>(point.initialCarts);
 
@@ -669,6 +674,9 @@ public class LevelVisualizer : MonoBehaviour
 
             if (point.waitingPeople != null)
                 newPoint.waitingPeople = new List<int>(point.waitingPeople);
+
+            if (point.waitingPeople != null)
+                newPoint.waitingDelays = new List<int>(point.waitingDelays);
 
             if (point.initialCarts != null)
                 newPoint.initialCarts = new List<int>(point.initialCarts);
@@ -749,6 +757,11 @@ public class LevelVisualizer : MonoBehaviour
     public Material GetPassengersMaterialByIndex(int colorIndex)
     {
         return passengersMaterials[colorIndex];
+    }
+
+    internal Material GetPassengersEmptyMaterial()
+    {
+        return passengerEmptyMaterial;
     }
 }
 

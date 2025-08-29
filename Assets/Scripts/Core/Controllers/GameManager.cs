@@ -1,6 +1,7 @@
 ﻿using RailSimCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using static RailSimCore.Types;
@@ -8,7 +9,7 @@ using static RailSimCore.Types;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
+    
     [Tooltip("Drag your LevelData asset or fill at runtime.")]
     public LevelData level;
 
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
     private SimApp simApp;
 
     public int CurrentLevelIndex = 0;
-
+    
     private enum GameEndOutcome { None, Win, LoseWrongDepot, LosePrematureDepot }
 
     private void Awake()
@@ -279,17 +280,28 @@ public class GameManager : MonoBehaviour
             Debug.Log($"PICKUP @S{dest.id}: before={dest.waitingPeople.Count} color={trainColor}");
 
             int removed = 0;
-            while (dest.waitingPeople.Count > 0 && dest.waitingPeople[0] == trainColor)
+            while (dest.waitingPeople.Count > 0 && dest.waitingPeople[0] == trainColor && dest.waitingDelays[0]<= level.totalCollectedPassengers)
             {
                 dest.waitingPeople.RemoveAt(0);
+                dest.waitingDelays.RemoveAt(0);
                 removed++;
+                level.totalCollectedPassengers++;    
                 tc.OnArrivedStation_AddCart(trainColor,removed);
             }
+
 
             Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
             var sv = FindStationViewByPointId(dest.id);
             if (sv != null) sv.RemoveHeadPassengers(removed);
+
+            //update all stations with unlocking
+            foreach (StationView stationView in FindObjectsOfType<StationView>().ToList())
+                stationView.UpdatePassengersLocking();
+            
             return; // no WL check on station arrival
+
+            
+
         }
         else if (dest.type == GamePointType.Depot)
         {
@@ -365,6 +377,11 @@ public class GameManager : MonoBehaviour
             if (gp != null && gp.id == id) return views[i];
         }
         return null;
+    }
+
+    private List<StationView> GetStationViews()
+    {
+        return FindObjectsOfType<StationView>().ToList();
     }
 
     private bool AnyStationHasColor(int colorIndex)
@@ -493,6 +510,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetCurrLevel()
     {
+        level.totalCollectedPassengers = 0;
         trains.Clear();
         _carried.Clear();
         selectedTrain = null;

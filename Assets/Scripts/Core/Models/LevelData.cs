@@ -15,6 +15,8 @@ public class LevelData
     public ScenarioModel gameData = new ScenarioModel();                  // still not game specific - but all the overlay on the tracks
                                                                         //mainly points 
     public RouteModel routeModelData = new RouteModel();
+
+    public int totalCollectedPassengers = 0;
 }
 
 // A placed part instance on the grid

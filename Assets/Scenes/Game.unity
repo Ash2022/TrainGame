@@ -601,6 +601,7 @@ MonoBehaviour:
     width: 0
     height: 0
     parts: []
+    totalCollectedPassengers: 0
   trains: []
   selectedTrain: {fileID: 0}
   modelManager: {fileID: 190145370}
@@ -636,12 +637,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelJsons:
-  - {fileID: 4900000, guid: caf2fb2c60b22be41a8fe878c257e8df, type: 3}
-  - {fileID: 4900000, guid: 9754d0882de52f14f8dcb43ed01eb878, type: 3}
-  - {fileID: 4900000, guid: b594a63a435d5ac4682fc3b5e741d317, type: 3}
-  - {fileID: 4900000, guid: b35736cc2de9d164a82a9ea4b2b34185, type: 3}
-  - {fileID: 4900000, guid: 623460b55a7827243924b478f9b67772, type: 3}
-  - {fileID: 4900000, guid: 986517217493f2b45a94794daf6fe1b2, type: 3}
+  - {fileID: 4900000, guid: 2d7323ce069819044bb8e0ef4eab1b6f, type: 3}
+  - {fileID: 4900000, guid: 4bb385a1de0d53541a0cd628ede00891, type: 3}
+  - {fileID: 4900000, guid: 68c691509e7d6ca40ace615d91d6245a, type: 3}
+  - {fileID: 4900000, guid: 60cff48bdb7041f408c2bc6cadb04ca9, type: 3}
+  - {fileID: 4900000, guid: 1dc7548b4f8c0684faaf3a2a1f01dc17, type: 3}
+  - {fileID: 4900000, guid: 5ae5c15343324be4c82088f3d3dd4801, type: 3}
+  - {fileID: 4900000, guid: bd59c6bf9736b3641ab825f9929db49e, type: 3}
+  - {fileID: 4900000, guid: 741e06bf15783b84cbc0132ad7ae4674, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1853,6 +1856,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 3e84d01893c9bb1428bd5689267f6ed6, type: 2}
   - {fileID: 2100000, guid: aa99ee86f04e87e4f98ac4481685016f, type: 2}
   - {fileID: 2100000, guid: e729e7fa3b46163408855d8142b7c6cf, type: 2}
+  passengerEmptyMaterial: {fileID: 2100000, guid: d0dc57b7ff292bd4b8479e07d773a8a1, type: 2}
   levelJson: {fileID: 4900000, guid: 623460b55a7827243924b478f9b67772, type: 3}
   partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}
   emptyPartPrefab: {fileID: 1678834536405887873, guid: 2875be2479d1f734ebbe2b347f9f9bad, type: 3}

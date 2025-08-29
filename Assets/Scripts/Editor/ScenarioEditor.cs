@@ -156,6 +156,7 @@ public class ScenarioEditor
                 if (GUI.Button(addBtn, "Add Person"))
                 {
                     p.waitingPeople.Add(0);
+                    p.waitingDelays.Add(0);   // <-- also add matching delay
                     Event.current.Use();
                 }
 
@@ -177,6 +178,15 @@ public class ScenarioEditor
                     Handles.color = Color.black;
                     Handles.DrawSolidRectangleWithOutline(pr, Color.clear, Color.black);
 
+                    while (p.waitingDelays.Count < p.waitingPeople.Count)
+                        p.waitingDelays.Add(0);
+
+                    // --- NEW: delay text box next to passenger
+                    Rect delayRect = new Rect(pr.x , pr.y + 15f, 15f, personSize);
+                    int newDelay = EditorGUI.IntField(delayRect, p.waitingDelays[j]);
+                    if (newDelay != p.waitingDelays[j])
+                        p.waitingDelays[j] = Mathf.Max(0, newDelay); // clamp to 0+
+
                     if (Event.current.type == EventType.MouseDown && pr.Contains(Event.current.mousePosition))
                     {
                         if (Event.current.button == 0)
@@ -188,6 +198,7 @@ public class ScenarioEditor
                         {
                             // Right-click: remove this person
                             p.waitingPeople.RemoveAt(j);
+                            p.waitingDelays.RemoveAt(j);
                         }
                         Event.current.Use();
                         break; // stop processing this row, since the list changed
@@ -196,7 +207,7 @@ public class ScenarioEditor
                     px += personSize + iconSpacing;
                 }
 
-                y = py + personSize + spacing;
+                y = py + personSize + spacing+15f;
             }
             else // Train
             {

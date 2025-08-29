@@ -102,16 +102,16 @@ public class TrainController : MonoBehaviour
             float targetHgt = SimTuning.CartLen(cellSize);     // local +Z (up)
 
             var mr = trainVisuals.GetComponent<MeshRenderer>();
-            if (mr != null)
+            if (trainRenderer != null)
             {
-                var size = mr.localBounds.size;  // local, unaffected by root rotation
-                if (size.x > 0f && size.y > 0f && size.z > 0f)
-                {
-                    float scaleX = targetLen / size.x;
-                    float scaleY = targetWid / size.y;
-                    float scaleZ = targetHgt / size.z;
-                    trainVisuals.localScale = new Vector3(scaleX, scaleY, scaleZ);
-                }
+                //var size = trainRenderer.localBounds.size;  // local, unaffected by root rotation
+                //if (size.x > 0f && size.y > 0f && size.z > 0f)
+                //{
+                    float scaleX = targetLen / 1f;
+                    float scaleY = targetWid / 1.65f;
+                    float scaleZ = targetHgt / 1.65f;
+                    trainVisuals.localScale = new Vector3(scaleX, scaleX/3f, scaleX / 3f);
+                //}
             }
         }
 
