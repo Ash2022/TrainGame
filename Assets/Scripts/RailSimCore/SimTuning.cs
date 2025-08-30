@@ -8,7 +8,7 @@ namespace RailSimCore
 
         // Fractions of cell size
         public const float CartLenFracOfCell = 1f / 3.33f;   // cart length along path
-        public const float GapFracOfCell = 1f / 10f;  // gap between carts
+        public const float GapFracOfCell = 1f / 12f;  // gap between carts
         public const float SampleStepFracOfCell = 1f / 8f;   // path/tape sampling
         public const float EpsFracOfCell = 1e-4f;     // numeric tolerance
 

@@ -9,6 +9,7 @@ public class DepotView : MonoBehaviour
 
     [SerializeField] Transform exits;
     [SerializeField] Renderer depotRenderer;
+    [SerializeField] Transform depotHolder;
 
     public GamePoint PointModel { get => _pointModel; set => _pointModel = value; }
 
@@ -18,6 +19,8 @@ public class DepotView : MonoBehaviour
     public void Initialize(GamePoint point, PlacedPartInstance part, float cellSize)
     {
         _pointModel = point;
+
+        depotHolder.localScale = new Vector3(cellSize,cellSize,cellSize);
 
         exits.transform.localEulerAngles = new Vector3(0, 0, -part.rotation);
 

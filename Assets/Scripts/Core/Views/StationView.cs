@@ -11,6 +11,7 @@ public class StationView : MonoBehaviour
 
     [SerializeField] Transform passengersHolder;
     [SerializeField] Transform exits;
+    [SerializeField] Transform stationHolder;
 
     // fraction of cellSize used as passenger size/spacing
     [SerializeField] float passengerDepth = 0.25f;
@@ -34,6 +35,8 @@ public class StationView : MonoBehaviour
 
         if (passengersHolder == null || passengerPrefab == null || _pointModel == null)
             return;
+
+        stationHolder.localScale = new Vector3(cellSize, cellSize, cellSize);
 
         // clear old visuals
         if (clearExistingOnInit)
@@ -64,7 +67,7 @@ public class StationView : MonoBehaviour
             go.name = $"Passenger_{colorIndex}_{dataIdx + 1}";
 
             // position at -(0.5 + stackIdx) * spacing along local -Z
-            float z = -(0.5f + stackIdx) * _spacing;
+            float z = -(0.5f + stackIdx) * _spacing- passengerDepth/2f;
             go.transform.localPosition = new Vector3(0f, 0f, z + 2);
             go.transform.localRotation = Quaternion.identity;
 
@@ -120,7 +123,7 @@ public class StationView : MonoBehaviour
         for (int stackIdx = 0; stackIdx < rem; stackIdx++)
         {
             var c = passengersHolder.GetChild(stackIdx);
-            float z = -(0.5f + stackIdx) * _spacing;
+            float z = -(0.5f + stackIdx) * _spacing - passengerDepth / 2f;
             c.localPosition = new Vector3(0f, 0f, z);
             c.localRotation = Quaternion.identity;
         }

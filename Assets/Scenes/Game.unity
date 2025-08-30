@@ -1841,21 +1841,29 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: df87571d4702b08459806c013c99b5cc, type: 3}
   - {fileID: 919132149155446097, guid: 0adf707970e445f49b7e524d323248e1, type: 3}
   colors:
-  - {r: 1, g: 0.23993567, b: 0, a: 1}
+  - {r: 1, g: 0.1932027, b: 0, a: 1}
   - {r: 0.05271244, g: 1, b: 0, a: 1}
+  - {r: 0.33333337, g: 0.807724, b: 1, a: 1}
   - {r: 0.6163442, g: 0.33490568, b: 1, a: 1}
+  - {r: 1, g: 0.4846769, b: 0, a: 1}
   boatMaterials:
   - {fileID: 2100000, guid: 33b98256fb56aaa46aa0629be092ef96, type: 2}
   - {fileID: 2100000, guid: f23e1c2d38587d545826aea778e092d3, type: 2}
   - {fileID: 2100000, guid: e67518eb70c0f7c478d6e3989a05e19c, type: 2}
+  - {fileID: 2100000, guid: 12b209900824627469a6e10eef5198cd, type: 2}
+  - {fileID: 2100000, guid: 064100f85a0811b408c29e893a7abef5, type: 2}
   depotMaterials:
   - {fileID: 2100000, guid: d4807a5d4bfd38147a69589eb96f5b34, type: 2}
   - {fileID: 2100000, guid: dadc78f8acc9a1f40b760818e9ea8a0c, type: 2}
+  - {fileID: 2100000, guid: 8554c2d29a1853b429bb6b333b4f31a6, type: 2}
+  - {fileID: 2100000, guid: 8554c2d29a1853b429bb6b333b4f31a6, type: 2}
   - {fileID: 2100000, guid: 8554c2d29a1853b429bb6b333b4f31a6, type: 2}
   passengersMaterials:
   - {fileID: 2100000, guid: 3e84d01893c9bb1428bd5689267f6ed6, type: 2}
   - {fileID: 2100000, guid: aa99ee86f04e87e4f98ac4481685016f, type: 2}
   - {fileID: 2100000, guid: e729e7fa3b46163408855d8142b7c6cf, type: 2}
+  - {fileID: 2100000, guid: 2662cde48e0a0e544bd88952738f6ae2, type: 2}
+  - {fileID: 2100000, guid: 2a89af9ccd936364c9a60aac77ddcc87, type: 2}
   passengerEmptyMaterial: {fileID: 2100000, guid: d0dc57b7ff292bd4b8479e07d773a8a1, type: 2}
   levelJson: {fileID: 4900000, guid: 623460b55a7827243924b478f9b67772, type: 3}
   partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}

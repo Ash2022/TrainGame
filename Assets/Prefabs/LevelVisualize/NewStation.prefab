@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 348742445740578888}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6, y: -0.1, z: 0.8}
+  m_LocalPosition: {x: 0.6, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -110,7 +110,7 @@ Transform:
   m_GameObject: {fileID: 2220177667438584909}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.125, z: 0.95}
+  m_LocalPosition: {x: 0.125, y: 0.05, z: 0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -156,13 +156,13 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: 864ad17faab437548bff89e2c04fa8b0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
-  m_Size: {x: 1.8, y: 1}
+  m_Size: {x: 1.5, y: 1.1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -535,7 +535,7 @@ Transform:
   m_GameObject: {fileID: 5636798061246536476}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.7}
+  m_LocalPosition: {x: 0, y: 0, z: 0.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -596,6 +596,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   passengersHolder: {fileID: 9004478894080534952}
   exits: {fileID: 7020560412307322390}
+  stationHolder: {fileID: 7020560412307322390}
   passengerDepth: 0.25
   clearExistingOnInit: 1
 --- !u!212 &3242645726616056764
@@ -670,7 +671,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1.6, y: 1, z: 0.5}
-  m_Center: {x: 0.15, y: 0, z: -0.25}
+  m_Center: {x: 0.15, y: 0, z: 0.2}
 --- !u!1001 &4975538275806738814
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -681,11 +682,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 8b37e07834b56b04287c9d0b90d35206, type: 3}
       propertyPath: m_LocalScale.x
-      value: 25
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8b37e07834b56b04287c9d0b90d35206, type: 3}
       propertyPath: m_LocalScale.y
-      value: 25
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8b37e07834b56b04287c9d0b90d35206, type: 3}
       propertyPath: m_LocalPosition.x
@@ -693,11 +694,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8b37e07834b56b04287c9d0b90d35206, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.125
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8b37e07834b56b04287c9d0b90d35206, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.875
+      value: -0.075
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8b37e07834b56b04287c9d0b90d35206, type: 3}
       propertyPath: m_LocalRotation.w

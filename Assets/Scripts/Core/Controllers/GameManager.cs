@@ -336,7 +336,7 @@ public class GameManager : MonoBehaviour
             }
 
             // --- Correct depot, no more passengers of this color → park this train ---
-            tc.ClearAllCarts();                 // visuals + sim offsets cleared (engine-only)
+            //tc.ClearAllCarts();                 // visuals + sim offsets cleared (engine-only)
             _parkedTrains.Add(tc.TrainId);
 
             // WL compare (sim may report Win if global state is already complete)

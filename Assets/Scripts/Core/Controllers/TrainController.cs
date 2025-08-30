@@ -11,6 +11,7 @@ public class TrainController : MonoBehaviour
     [SerializeField] TrainMover mover;
     [SerializeField] Transform cartHolder;
     [SerializeField] Transform trainVisuals;
+    [SerializeField] Transform trainHolder;
     [SerializeField] Renderer trainRenderer;
     [SerializeField] TrainClickView trainClickView;
     [SerializeField] GameObject trainSelectedHighLight;
@@ -73,7 +74,7 @@ public class TrainController : MonoBehaviour
         float cellY = worldCell.y - minY + 0.5f;
         Vector2 flipped = new Vector2(cellX, gridH - cellY);
         Vector3 centerPos = new Vector3(worldOrigin.x + flipped.x * cellSize,
-                                        worldOrigin.y + flipped.y * cellSize, 0f);
+                                        worldOrigin.y + flipped.y * cellSize, -0.05f);
         transform.position = centerPos;
 
         if(animTime > 0)
@@ -101,17 +102,12 @@ public class TrainController : MonoBehaviour
             float targetWid = SimTuning.CartLen(cellSize);   // local +Y (side)
             float targetHgt = SimTuning.CartLen(cellSize);     // local +Z (up)
 
-            var mr = trainVisuals.GetComponent<MeshRenderer>();
-            if (trainRenderer != null)
+            //var mr = trainVisuals.GetComponent<MeshRenderer>();
+            if (trainHolder != null)
             {
-                //var size = trainRenderer.localBounds.size;  // local, unaffected by root rotation
-                //if (size.x > 0f && size.y > 0f && size.z > 0f)
-                //{
-                    float scaleX = targetLen / 1f;
-                    float scaleY = targetWid / 1.65f;
-                    float scaleZ = targetHgt / 1.65f;
-                    trainVisuals.localScale = new Vector3(scaleX, scaleX/3f, scaleX / 3f);
-                //}
+                
+                    trainHolder.localScale = new Vector3(targetLen, targetLen, targetLen);
+                
             }
         }
 
