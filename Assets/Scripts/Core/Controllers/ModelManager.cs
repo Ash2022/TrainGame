@@ -5,17 +5,42 @@ using UnityEngine;
 
 public sealed class ModelManager : MonoBehaviour
 {
+    const string LAST_PLAYED_LEVEL = "LastPlayedLevel";
+    public static ModelManager Instance;
+
     [Header("Levels (JSON)")]
     [SerializeField] private TextAsset[] levelJsons;
-    
+
+    List<int> unlocksIndexList = new List<int>();
+    [SerializeField] List<Sprite> unlockBGs = new List<Sprite>();
+    [SerializeField] List<Sprite> unlockFills = new List<Sprite>();
+
+    [SerializeField] List<Sprite> unlockColorsSprites = new List<Sprite>();
 
     private readonly List<LevelData> _levels = new List<LevelData>();
     private JsonSerializerSettings _settings;
 
     public int LevelCount => _levels.Count;
+    public List<int> UnlocksIndexList { get => unlocksIndexList; set => unlocksIndexList = value; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     public void Init()
     {
+        unlocksIndexList.Add(6);//hidden tile
+        UnlocksIndexList.Add(12);//color 7 -- red 6
+        unlocksIndexList.Add(18);//alternating lock
+
         _settings = new JsonSerializerSettings
         {
             Converters = new List<JsonConverter>
@@ -61,5 +86,37 @@ public sealed class ModelManager : MonoBehaviour
         return JsonConvert.DeserializeObject<LevelData>(json, _settings);
     }
 
-    
+    public Sprite GetUnlockImage(int index, bool BGImage)
+    {
+        if (BGImage)
+            return unlockBGs[index];
+        else
+            return unlockFills[index];
+    }
+
+    internal int GetUnlock(int currLevelIndex)
+    {
+        int index = -1;
+
+        if (unlocksIndexList.Contains(currLevelIndex))
+            index = unlocksIndexList.FindIndex(x => x.Equals(currLevelIndex));
+
+        return index;
+    }
+
+    public int GetLastPlayedLevel()
+    {
+        return PlayerPrefs.GetInt(LAST_PLAYED_LEVEL, -1);
+    }
+
+    public void SetLastPlayedLevel(int level)
+    {
+        PlayerPrefs.SetInt(LAST_PLAYED_LEVEL, level);
+    }
+
+    public Sprite GetUnlockedColorSprite(int index)
+    {
+        return unlockColorsSprites[index];
+    }
+
 }

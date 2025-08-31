@@ -189,7 +189,22 @@ public static class Utils
         new Color(0.8f, 0.3f, 0.3f) // Dark Red
     };
 
+    /// <summary>
+    /// Counts the total number of passengers in the given level.
+    /// </summary>
+    public static int GetTotalPassengers(LevelData level)
+    {
+        int total = 0;
 
+        foreach (var point in level.gameData.points)
+        {
+            // Assuming passenger info is stored on the point
+            // e.g. point.passengers or point.passengerCount
+            total += point.waitingPeople.Count;
+        }
+
+        return total;
+    }
 
 
     public static List<Vector3> BuildPathWorldPolylineFromTemplates(

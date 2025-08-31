@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameOverView : MonoBehaviour
+public class GameOverViewOld : MonoBehaviour
 {
     [SerializeField] TMP_Text captionText;
     [SerializeField] TMP_Text buttonCaptionText;

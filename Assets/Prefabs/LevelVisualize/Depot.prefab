@@ -561,7 +561,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   exits: {fileID: 7020560412307322390}
-  depotRenderer: {fileID: 756744488036712650}
+  depotRenderer: {fileID: 5231679188584179078}
   depotHolder: {fileID: 753725900104955877}
 --- !u!65 &6314266263958881690
 BoxCollider:
@@ -689,11 +689,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 884cbc777d54d6343b8f97816fa9cbda, type: 3}
---- !u!23 &756744488036712650 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 884cbc777d54d6343b8f97816fa9cbda, type: 3}
-  m_PrefabInstance: {fileID: 2108224193384111182}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1930728977663933349 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 884cbc777d54d6343b8f97816fa9cbda, type: 3}
@@ -768,6 +763,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a088622afacc8be4b91549cc9dbcbb7c, type: 3}
+--- !u!23 &5231679188584179078 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: a088622afacc8be4b91549cc9dbcbb7c, type: 3}
+  m_PrefabInstance: {fileID: 6871152868645124354}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6400042078059028201 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a088622afacc8be4b91549cc9dbcbb7c, type: 3}

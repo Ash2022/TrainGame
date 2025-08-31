@@ -5118,7 +5118,7 @@ Transform:
   m_GameObject: {fileID: 3464144431140669403}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.32500002}
+  m_LocalPosition: {x: 0, y: 0, z: -0.05}
   m_LocalScale: {x: 3.1249998, y: 6.7066674, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5250,7 +5250,7 @@ MonoBehaviour:
   trainRenderer: {fileID: 7328454181961758999}
   trainClickView: {fileID: 6101206347962491971}
   trainSelectedHighLight: {fileID: 3464144431140669403}
-  particleSystem: {fileID: 6955996555119570450}
+  particleSystemTrain: {fileID: 6955996555119570450}
   direction: 0
   CurrentPointModel:
     gridX: 0

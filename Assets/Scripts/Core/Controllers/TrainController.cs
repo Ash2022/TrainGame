@@ -15,7 +15,7 @@ public class TrainController : MonoBehaviour
     [SerializeField] Renderer trainRenderer;
     [SerializeField] TrainClickView trainClickView;
     [SerializeField] GameObject trainSelectedHighLight;
-    [SerializeField] Transform particleSystem;
+    [SerializeField] Transform particleSystemTrain;
     Transform lastCartTransform=null;
     
 
@@ -324,10 +324,10 @@ public class TrainController : MonoBehaviour
 
     private void SetParticles(Transform newParent,float offsetX)
     {
-        particleSystem.SetParent(newParent);
-        particleSystem.localPosition = new Vector3(offsetX, 0, 0);
-        particleSystem.localEulerAngles = Vector3.zero;
-        particleSystem.localScale = Vector3.one;
+        particleSystemTrain.SetParent(newParent);
+        particleSystemTrain.localPosition = new Vector3(offsetX, 0, 0);
+        particleSystemTrain.localEulerAngles = Vector3.zero;
+        particleSystemTrain.localScale = Vector3.one;
     }
 
 

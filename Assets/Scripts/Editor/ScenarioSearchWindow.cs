@@ -57,7 +57,6 @@ public class ScenarioSearchWindow : EditorWindow
     // --- runner state ---
     private IEnumerator _runnerEnum;
     private bool _isRunning;
-    private bool _cancelRequested;
     private float _progress;           // 0..1
     private string _status = "";       // shown in window
     private System.Diagnostics.Stopwatch _sw;
@@ -161,11 +160,7 @@ public class ScenarioSearchWindow : EditorWindow
                 if (GUILayout.Button("Run Search", GUILayout.Height(28)))
                     RunSearch();
             }
-            else
-            {
-                if (GUILayout.Button("Stop", GUILayout.Height(28)))
-                    _cancelRequested = true;
-            }
+            
         }
         if (_isRunning)
         {
@@ -735,7 +730,7 @@ public class ScenarioSearchWindow : EditorWindow
         else
         {
             var blockedThisDecision = new HashSet<(int train, int target)>();
-            bool arrivedThisDecision = false;
+
 
             // Pre-order once by score
             var ordered = cands.OrderByDescending(c => c.Score).ToList();
@@ -785,7 +780,6 @@ public class ScenarioSearchWindow : EditorWindow
                         picked = (beforeCount >= 0 && afterCount >= 0) ? System.Math.Max(0, beforeCount - afterCount) : 0;
                     }
                     LG($"[Result] T{next.TrainPid}->{tgtLabel} ARRIVED picked={picked}");
-                    arrivedThisDecision = true;
                     break; // end decision on first successful arrival
                 }
             }

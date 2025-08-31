@@ -227,8 +227,6 @@ public class LevelVisualizer : MonoBehaviour
             yield return new WaitForSeconds(tileDelay);
         }
 
-        bool addedEmptyHolder = false;
-        GameObject emptyHolder = null;
 
         // ADD: fill gaps with empties
         /*

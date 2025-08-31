@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ModelManager modelManager;
     [SerializeField] private LevelVisualizer levelVisualizer;
     [SerializeField] private GameOverView gameOverView;
+    [SerializeField]private UIManager uiManager;
     
 
     [Header("Simulation")]
@@ -64,6 +65,23 @@ public class GameManager : MonoBehaviour
         float newVertRad = Mathf.Atan(Mathf.Tan(refHorizRad) / currentAspect);
         Camera.main.fieldOfView = newVertRad * 2f * Mathf.Rad2Deg;
 
+        Application.targetFrameRate = 60;
+
+        //TinySauce.SubscribeOnInitFinishedEvent((param1, param2) =>
+        //{
+            if (CurrentLevelIndex == -1)
+            {
+                CurrentLevelIndex = ModelManager.Instance.GetLastPlayedLevel();
+
+                CurrentLevelIndex++;
+
+            }
+
+            //if (CurrentLevelIndex == 0)
+            //{                
+            //    uiManager.ShowTutorialImage(true, CurrentLevelIndex);
+            //}
+        //});   
 
         LoadCurrentLevel();
     }
@@ -89,6 +107,8 @@ public class GameManager : MonoBehaviour
         // build via visualizer
         if (levelVisualizer != null)
             levelVisualizer.Build(levelCopy, UseSimulation ? simApp : null, UseSimulation);
+
+        uiManager.InitLevel(level, CurrentLevelIndex);
 
     }
 
@@ -285,7 +305,8 @@ public class GameManager : MonoBehaviour
                 dest.waitingPeople.RemoveAt(0);
                 dest.waitingDelays.RemoveAt(0);
                 removed++;
-                level.totalCollectedPassengers++;    
+                level.totalCollectedPassengers++;
+                uiManager.PassengersCollected(level.totalCollectedPassengers);
                 tc.OnArrivedStation_AddCart(trainColor,removed);
             }
 
@@ -516,15 +537,44 @@ public class GameManager : MonoBehaviour
         selectedTrain = null;
         _parkedTrains.Clear();
         if (gameOverView != null) 
-            gameOverView.Hide();
+            gameOverView.gameObject.SetActive(false);
     }
 
     public void GameOver(bool win)
     {
+        /*
         if (win)
             gameOverView.ShowWin(AdvanceLevelAndReload);
         else
             gameOverView.ShowLose(ReloadDynamicOnly);
+
+        */
+
+        gameOverView.InitEndScreen(win, CurrentLevelIndex, () =>
+        {
+            
+                if (win)
+                {
+                    ModelManager.Instance.SetLastPlayedLevel(CurrentLevelIndex);
+                    // Advance to next level (or loop)
+                    CurrentLevelIndex++;
+                }
+
+                int unlockIndex = ModelManager.Instance.GetUnlock(CurrentLevelIndex);
+
+                if (unlockIndex != -1)
+                {
+                    uiManager.ShowTutorialImage(true, unlockIndex + 1);
+
+                }
+                else
+                {
+                    if (win)
+                        LoadCurrentLevel();
+                    else
+                        ReloadDynamicOnly();
+                }
+        });
     }
 
     private void ReloadDynamicOnly()
@@ -533,16 +583,10 @@ public class GameManager : MonoBehaviour
         ResetCurrLevel();
         if (levelVisualizer != null)
             levelVisualizer.ResetLevel();   // your GenerateDynamic-only path
-        gameOverView.Hide();
-    }
 
-    private void AdvanceLevelAndReload()
-    {
-        if (modelManager != null && modelManager.LevelCount > 0)
-            CurrentLevelIndex = (CurrentLevelIndex + 1) % modelManager.LevelCount;
-        LoadCurrentLevel();                 // full load (static + dynamic)
+        uiManager.InitLevel(level, CurrentLevelIndex);
+        gameOverView.gameObject.SetActive(false);
     }
-      
 
     private bool AllTrainsParked()
     {
