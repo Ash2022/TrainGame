@@ -175,7 +175,16 @@ public class GameManager : MonoBehaviour
             //check if the depot is locked or not - if its locked - it cant be selected
 
             if (AnyStationHasColor(depotView.PointModel.colorIndex))
+            {
+                uiManager.ShowUserMessage("Collect all the passengers of that color before going to depot");
                 return;
+            }
+
+            if(depotView.PointModel.MyDepotIsLockedByDepotPointID != -1)
+            {
+                uiManager.ShowUserMessage("Collect gate key before going to depot");
+                return;
+            }
 
             OnPointClicked(depotView.PointModel); 
                 return; 
@@ -329,7 +338,7 @@ public class GameManager : MonoBehaviour
         else if (dest.type == GamePointType.Depot)
         {
             // --- Wrong depot => immediate lose --- should not be possible anymore
-
+            /*
             if (dest.colorIndex != trainColor)
             {
                 Debug.Log($"[Game] LOSE (wrong depot). Train {tc.TrainId} at depot {dest.id}");
@@ -357,7 +366,13 @@ public class GameManager : MonoBehaviour
 
                 GameOver(false);
                 return;
-            }
+            }*/
+
+            //find the depot we arrived to and see if it has a key to collect
+            DepotView depot = levelDepots.Find(x=>x.PointModel.id == dest.id);
+
+            if (depot != null)
+                depot.CollectKey();
 
             // --- Correct depot, no more passengers of this color → park this train ---
             //tc.ClearAllCarts();                 // visuals + sim offsets cleared (engine-only)
@@ -692,5 +707,20 @@ public class GameManager : MonoBehaviour
             if (mv != null && mv.isMoving) return true;
         }
         return false;
+    }
+
+    internal void UpdateDepotItsKeyWasCollected(int myDepotIsLockingDepotPointID)
+    {
+        foreach (DepotView depot in levelDepots)
+        {
+            if (depot.PointModel.id == myDepotIsLockingDepotPointID)
+            {
+                depot.PointModel.MyDepotIsLockedByDepotPointID = -1;
+
+                if(AnyStationHasColor(depot.PointModel.colorIndex)==false)
+                    depot.ShowMyDepotUnlocking();
+
+            }
+        }
     }
 }

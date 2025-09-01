@@ -247,10 +247,14 @@ make sure depot cannot be clicked incase its still locked - and give info to use
 locked indication view, and removing when unlocked - DONE
 make the level visualizer generate a list of all stationsViews and TrainViews - DONE
 unlock gets passengers to a train in the station already - DONE
-key locking feature 
-add gates to the depots and fix their logic
+key locking feature -- DONE
+add gates to the depots and fix their logic -- DONE
 tutorial
 check multi trains moving together - seems very possible - something about selected train needs to be fine tuned
+
+
+
+
 
 make bullets like this:
 Where you stand on the AI development?

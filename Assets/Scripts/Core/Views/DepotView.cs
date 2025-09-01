@@ -58,6 +58,12 @@ public class DepotView : MonoBehaviour
 
     public void CollectKey()
     {
-
+        if (_pointModel.MyDepotIsLockingDepotPointID != -1)
+        {
+            GameManager.Instance.UpdateDepotItsKeyWasCollected(_pointModel.MyDepotIsLockingDepotPointID);
+            _pointModel.MyDepotIsLockingDepotPointID = -1;
+            key.SetActive(false);
+        }
+        
     }
 }

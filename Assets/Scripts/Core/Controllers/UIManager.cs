@@ -1,3 +1,5 @@
+using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,6 +10,8 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] TMP_Text resultText;
+    [SerializeField] TMP_Text userInfoText;
+    [SerializeField] GameObject userInfoObj;
 
     [SerializeField] List<Sprite> tutorialImages = new List<Sprite>();
     [SerializeField] TutorialImageView tutorialImageView;
@@ -27,6 +31,9 @@ public class UIManager : MonoBehaviour
 
     public void InitLevel(LevelData levelData,int levelIndex)
     {
+        userInfoObj.transform.localScale = Vector3.one;
+        userInfoObj.SetActive(false);
+
         levelText.text = "LEVEL "+(levelIndex+1).ToString();
 
         //show the total passengers in the level
@@ -96,6 +103,20 @@ public class UIManager : MonoBehaviour
         for (int i = dynamicUIElementsHolder.childCount - 1; i >= 0; i--)
             Destroy(dynamicUIElementsHolder.GetChild(i).gameObject);
     }
+
+    internal void ShowUserMessage(string v)
+    {
+        userInfoObj.SetActive(true);
+        userInfoText.text = v;
+
+        userInfoObj.transform.DOScale(1.1f, 2f).OnComplete(()=>
+        {
+            userInfoObj.SetActive(false);
+            userInfoObj.transform.localScale = Vector3.one;
+        });
+        
+    }
+
 
     /*
     public GameObject GenerateHiddenTilesIndication(Vector3 worldPos)
