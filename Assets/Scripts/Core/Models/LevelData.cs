@@ -17,6 +17,7 @@ public class LevelData
     public RouteModel routeModelData = new RouteModel();
 
     public int totalCollectedPassengers = 0;
+    public int totalArrivedPassengers = 0;
 }
 
 // A placed part instance on the grid

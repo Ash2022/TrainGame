@@ -1,5 +1,6 @@
 ﻿
 
+using DG.Tweening;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -11,7 +12,13 @@ public class DepotView : MonoBehaviour
     [SerializeField] Renderer depotRenderer;
     [SerializeField] Transform depotHolder;
 
-    public GamePoint PointModel { get => _pointModel; set => _pointModel = value; }
+    [SerializeField] Transform gateHinge;
+    [SerializeField] GameObject key;
+    [SerializeField] Renderer gateRenderer;
+
+    public bool depotGateLocked = true;
+
+    public GamePoint PointModel { get => _pointModel; private set => _pointModel = value; }
 
     /// <summary>
     /// Call this right after Instantiate to wire up the model.
@@ -24,9 +31,33 @@ public class DepotView : MonoBehaviour
 
         exits.transform.localEulerAngles = new Vector3(0, 0, -part.rotation);
 
-        //depotRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(point.colorIndex);
-
         depotRenderer.material = LevelVisualizer.Instance.GetDepotMaterialByIndex(point.colorIndex);
+
+        gateRenderer.material = LevelVisualizer.Instance.GetGateMaterialByIndex(point.colorIndex);
+
+        if(point.DepotLockingColorIndex != -1)
+        {
+            //means this depot is locking some other depot 
+            key.SetActive(true);
+            key.GetComponent<Renderer>().material = LevelVisualizer.Instance.GetKeyMaterialByIndex(point.DepotLockingColorIndex);
+        }
+        else
+            key.SetActive(false);
+
     }
 
+    public void ShowMyDepotUnlocking()
+    {
+        if(depotGateLocked)
+        {
+            depotGateLocked = false;
+            gateHinge.DOLocalRotate(new Vector3(-180, 0, 0),1f);
+        }
+
+    }
+
+    public void CollectKey()
+    {
+
+    }
 }

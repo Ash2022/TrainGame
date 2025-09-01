@@ -210,8 +210,8 @@ public class TrainMover : MonoBehaviour
                     }
                     others = list;
 
-                    if (others.Count == 0)
-                        Debug.Log("No Other Trains Found");
+                    //if (others.Count == 0)
+                    //    Debug.Log("No Other Trains Found");
                 }
                 int GetId(SimpleTrainSim s) => (idMap != null && idMap.TryGetValue(s, out var id)) ? id : 0;
 

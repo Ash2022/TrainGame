@@ -238,5 +238,28 @@ green boat texture too light
 make all the parts with simple plat BG color
 make selection indication much bigger
 change the depot colors of the roof - now its flat and similar on both sides
+fix depot rotation when facing down or right
+make sure depot cannot be clicked incase its still locked - and give info to user.
+
+
+
+
+locked indication view, and removing when unlocked - DONE
+make the level visualizer generate a list of all stationsViews and TrainViews - DONE
+unlock gets passengers to a train in the station already - DONE
+key locking feature 
+add gates to the depots and fix their logic
+tutorial
+check multi trains moving together - seems very possible - something about selected train needs to be fine tuned
+
+make bullets like this:
+Where you stand on the AI development?
+
+In this project i was able for the first time to build an MCP server that is linked to my specific project.
+was able (so far with using Claude AI as middle part) - to get the LLM to build and save level layouts for me.
+
+What is new / what did you crack?
+What is working well with AI?
+What are the current blockers / what did not work?
 
 

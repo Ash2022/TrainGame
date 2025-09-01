@@ -25,10 +25,11 @@ public class TrainController : MonoBehaviour
     float cartHalfLength; // = cellSize / 6f
     float requiredTapeLength; // >= tail offset + small margin
 
-    private List<GameObject> currCarts = new List<GameObject>();
+    public List<GameObject> currCarts = new List<GameObject>();
 
     public TrainDir direction;
-    public GamePoint CurrentPointModel;
+    public GamePoint trainPointModel;
+    public GamePoint trainIsOnThisGamePoint;
     float currCellSize;
 
     [Header("Capacity")]
@@ -39,7 +40,7 @@ public class TrainController : MonoBehaviour
     private Action<MoveCompletion> _moveCompletedCb;
 
     // Quick facts (handy for logs/debug)
-    public int TrainId => CurrentPointModel?.id ?? 0;
+    public int TrainId => trainPointModel?.id ?? 0;
     public Vector3 HeadWorldPos => transform.position;
 
     public int MirrorId { get; private set; }
@@ -62,7 +63,8 @@ public class TrainController : MonoBehaviour
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Clear();
 
-        CurrentPointModel = p;
+        trainPointModel = p;
+        trainIsOnThisGamePoint = p;
 
         // 1) Snapped world cell
         Vector2 worldCell = p.anchor.exitPin >= 0
@@ -250,7 +252,7 @@ public class TrainController : MonoBehaviour
         }
         else if (r.Outcome == MoveOutcome.Blocked)
         {
-            Debug.Log("Train " + CurrentPointModel.id + " blocked by Train " + r.BlockerId + " at " + r.HitPos);
+            Debug.Log("Train " + trainPointModel.id + " blocked by Train " + r.BlockerId + " at " + r.HitPos);
         }
 
         // forward to engine
@@ -301,7 +303,7 @@ public class TrainController : MonoBehaviour
 
         // spawn & color the cart
         var cart = Instantiate(LevelVisualizer.Instance.CartPrefab, transform.parent);
-        cart.name = $"Train_{CurrentPointModel.id}_Cart_{currCarts.Count + 1}";
+        cart.name = $"Train_{trainPointModel.id}_Cart_{currCarts.Count + 1}";
         cart.transform.position = pos;
         cart.transform.rotation = rot * Quaternion.Euler(0, 0, -90f);
         cart.transform.localScale = Vector3.one * cartLen;
@@ -311,7 +313,10 @@ public class TrainController : MonoBehaviour
 
         cart.transform.localScale = Vector3.zero;
 
-        cart.transform.DOScale(Vector3.one * cartLen, 0.25f).SetDelay(0.25f * counter);
+        cart.transform.DOScale(Vector3.one * cartLen, 0.25f).SetDelay(0.25f * counter).OnStart(()=>
+        {
+            Taptic.Medium();
+        });
 
         // record it
         currCarts.Add(cart);

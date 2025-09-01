@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 
@@ -51,6 +52,10 @@ public class GamePoint
 
     public TrainDir direction = TrainDir.Left;   // NEW
 
+    public int DepotLockingColorIndex = -1;
+    public int MyDepotIsLockingDepotPointID = -1;
+    public int MyDepotIsLockedByDepotPointID = -1;
+
     public GamePoint(PlacedPartInstance placedPartInstance, int x, int y,
                      GamePointType type, int colorIndex = 0, Anchor anchor = default)
     {
@@ -72,6 +77,9 @@ public class GamePoint
     };
 
     public static void ResetIds(int startAt = 1) => NextID = startAt;
+
+    
+
     public bool HasWaitingPeople => waitingPeople.Count > 0;
 }
 

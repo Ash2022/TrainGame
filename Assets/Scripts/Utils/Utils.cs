@@ -184,10 +184,14 @@ public static class Utils
 
     public static readonly Color[] colors = new Color[]
     {
-        new Color(0.4f, 0.6f, 0.8f),  // Dark Blue
-        new Color(0.2f, 0.7f, 0.4f),  // Dark Green
-        new Color(0.8f, 0.3f, 0.3f) // Dark Red
+        new Color(1.0f, 0.6f, 0.6f),  // Light Red (soft pinkish red)
+        new Color(0.6f, 1.0f, 0.6f),  // Light Green (mint green)
+        new Color(0.6f, 0.7f, 1.0f),  // Light Blue (sky blue)
+        new Color(0.8f, 0.6f, 1.0f),  // Light Purple (lavender)
+        new Color(1.0f, 0.8f, 0.6f)   // Light Orange (peach)
     };
+
+
 
     /// <summary>
     /// Counts the total number of passengers in the given level.

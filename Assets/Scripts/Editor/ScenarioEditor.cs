@@ -26,7 +26,7 @@ public class ScenarioEditor
     
 
 
-    public ScenarioEditor(ScenarioModel gameData, CellOccupationManager cellMgr, int colorCount = 3)
+    public ScenarioEditor(ScenarioModel gameData, CellOccupationManager cellMgr, int colorCount = 5)
     {
         _data = gameData;
         _cellMgr = cellMgr;
@@ -134,7 +134,7 @@ public class ScenarioEditor
 
         float y = gridRect.y;
 
-        foreach (var p in points.Where(pt => pt.type == GamePointType.Station || pt.type == GamePointType.Train))
+        foreach (var p in points)
         {
             Vector2Int cell = new Vector2Int(p.gridX, p.gridY);
             string partId = "none";
@@ -209,7 +209,7 @@ public class ScenarioEditor
 
                 y = py + personSize + spacing+15f;
             }
-            else // Train
+            else if(p.type == GamePointType.Train)// Train
             {
                 // --- sizes (all UI pixels, not grid) ---
                 rowH = 18f;
@@ -282,6 +282,51 @@ public class ScenarioEditor
                 }
 
                 y += trainH + spacing;
+            }
+
+            else if (p.type == GamePointType.Depot)
+            {
+                Rect box = new Rect(gridRect.xMax + spacing, y, panelW, rowH);
+
+                GUI.Label(
+                    new Rect(box.x, box.y, 180f, labelH),
+                    "Depot " + p.id + " | Cl " + cell + " | Part: " + partId,
+                    new GUIStyle(GUI.skin.label) { fontSize = 11, fontStyle = FontStyle.Bold });
+
+                // Draw the depot lock color box (same style as passenger box)
+                Rect colRect = new Rect(box.x + 200f, box.y, 20f, 20f);
+
+                Color displayColor = (p.DepotLockingColorIndex >= 0 && p.DepotLockingColorIndex < colors.Length)
+                    ? colors[p.DepotLockingColorIndex]
+                    : Color.white;
+
+                // Draw solid rect + black outline
+                EditorGUI.DrawRect(colRect, displayColor);
+                Handles.color = Color.black;
+                Handles.DrawSolidRectangleWithOutline(colRect, Color.clear, Color.black);
+
+                // Click to cycle colors
+                if (Event.current.type == EventType.MouseDown && colRect.Contains(Event.current.mousePosition))
+                {
+                    if (Event.current.button == 0) // left-click: cycle
+                    {
+                        p.DepotLockingColorIndex++;
+                        if (p.DepotLockingColorIndex >= colors.Length)
+                            p.DepotLockingColorIndex = -1; // back to white
+                    }
+                    else if (Event.current.button == 1) // right-click: reset
+                    {
+                        p.DepotLockingColorIndex = -1;
+                    }
+
+                    Event.current.Use();
+                }
+
+                // Show index for debugging
+                GUI.Label(new Rect(colRect.xMax + 6f, colRect.y, 40f, labelH),
+                          p.DepotLockingColorIndex.ToString());
+
+                y += rowH + spacing;
             }
         }
     }

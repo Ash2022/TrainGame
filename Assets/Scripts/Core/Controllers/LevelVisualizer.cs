@@ -19,6 +19,8 @@ public class LevelVisualizer : MonoBehaviour
 
     [SerializeField]List<Material> boatMaterials = new List<Material>();
     [SerializeField] List<Material> depotMaterials = new List<Material>();
+    [SerializeField] List<Material> gateMaterials = new List<Material>();
+    [SerializeField] List<Material> keyMaterials = new List<Material>();
     [SerializeField] List<Material> passengersMaterials = new List<Material>();
 
     [SerializeField] Material passengerEmptyMaterial;
@@ -415,8 +417,12 @@ public class LevelVisualizer : MonoBehaviour
             var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
             stationView.Initialize(pt, part, cellSize,passengerPrefab,stationDelay*counter+ animTime);
 
+            GameManager.Instance.AddStationView(stationView);
+
             counter++;
         }
+
+        List<DepotView> tempDepotsForLocking = new List<DepotView>();
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Depot))
         {
@@ -441,10 +447,38 @@ public class LevelVisualizer : MonoBehaviour
             var depotView = go.GetComponent<DepotView>();
 
             var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
+
             depotView.Initialize(pt, part, cellSize);
+
+            GameManager.Instance.AddDepotView(depotView);
+
+            tempDepotsForLocking.Add(depotView);
 
             counter++;
         }
+
+        //after building all the depots - need to check if any depot is locking other depot
+        //if so update the locked depot to know about its locking depot 
+
+        foreach (DepotView depot in tempDepotsForLocking)
+        {
+            if(depot.PointModel.DepotLockingColorIndex != -1)
+            {
+                //need to find the depot that its locking and notify it
+                int keyColor = depot.PointModel.DepotLockingColorIndex;
+
+                foreach (DepotView targetDepot in tempDepotsForLocking)
+                {
+                    if (targetDepot.PointModel.colorIndex == keyColor)
+                    {
+                        depot.PointModel.MyDepotIsLockingDepotPointID = targetDepot.PointModel.id;
+                        targetDepot.PointModel.MyDepotIsLockedByDepotPointID = depot.PointModel.id;
+                    }
+                }
+
+            }
+        }
+
 
         foreach (var p in scenarioModel.points.Where(x => x.type == GamePointType.Train))
         {
@@ -460,6 +494,8 @@ public class LevelVisualizer : MonoBehaviour
                 mirrorId = SimAppInstance.GetMirrorIdByPoint(p.id);
 
             trainController.AssignMirrorId(mirrorId);
+
+            GameManager.Instance.AddTrainController(trainController);
 
             counter++;
 
@@ -636,6 +672,8 @@ public class LevelVisualizer : MonoBehaviour
 
             newPoint.direction = point.direction;
 
+            newPoint.DepotLockingColorIndex = point.DepotLockingColorIndex;
+
             if (point.waitingPeople != null)
                 newPoint.waitingPeople = new List<int>(point.waitingPeople);
 
@@ -667,6 +705,8 @@ public class LevelVisualizer : MonoBehaviour
                 point.colorIndex,
                 point.anchor
             );
+
+            newPoint.DepotLockingColorIndex = point.DepotLockingColorIndex;
 
             newPoint.direction = point.direction;
 
@@ -750,6 +790,16 @@ public class LevelVisualizer : MonoBehaviour
     public Material GetDepotMaterialByIndex(int colorIndex)
     {
         return depotMaterials[colorIndex];
+    }
+
+    public Material GetGateMaterialByIndex(int colorIndex)
+    {
+        return gateMaterials[colorIndex];
+    }
+
+    public Material GetKeyMaterialByIndex(int colorIndex)
+    {
+        return keyMaterials[colorIndex];
     }
 
     public Material GetPassengersMaterialByIndex(int colorIndex)

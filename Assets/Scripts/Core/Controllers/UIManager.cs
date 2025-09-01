@@ -5,18 +5,25 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager Instance;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] TMP_Text resultText;
 
     [SerializeField] List<Sprite> tutorialImages = new List<Sprite>();
     [SerializeField] TutorialImageView tutorialImageView;
-
+    [SerializeField] RectTransform tutorialHand;
+    [SerializeField] GameObject lockedIndicationPrefab;
 
     [SerializeField] Transform dynamicUIElementsHolder;
  
     public Transform DynamicUIElementsHolder { get => dynamicUIElementsHolder; set => dynamicUIElementsHolder = value; }
 
     int levelTotalPassengers = 0;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     public void InitLevel(LevelData levelData,int levelIndex)
     {
@@ -64,6 +71,32 @@ public class UIManager : MonoBehaviour
         return tutorialImageView.gameObject.activeInHierarchy;
     }
 
+    public void ShowTutorialHand()
+    {
+        tutorialHand.localPosition = GameManager.Instance.WorldToRect(GameManager.Instance.GetFirstTrain().position);
+
+        tutorialHand.gameObject.SetActive(true);
+    }
+
+    public GameObject GenerateLockedIndication(Vector3 position, int displayValue)
+    {
+        GameObject lockedIndicationObject = Instantiate(lockedIndicationPrefab, dynamicUIElementsHolder);
+
+        Vector3 rectPosition = GameManager.Instance.WorldToRect(position);
+
+        lockedIndicationObject.GetComponent<RectTransform>().localPosition = new Vector3(rectPosition.x, rectPosition.y-50, rectPosition.z);
+        LockedIndicationView lockedIndicationView = lockedIndicationObject.GetComponent<LockedIndicationView>();
+        lockedIndicationView.SetValue(displayValue);
+        return lockedIndicationObject;
+    }
+
+    public void ClearDynamicHolder()
+    {
+        // clear out any previously spawned parts
+        for (int i = dynamicUIElementsHolder.childCount - 1; i >= 0; i--)
+            Destroy(dynamicUIElementsHolder.GetChild(i).gameObject);
+    }
+
     /*
     public GameObject GenerateHiddenTilesIndication(Vector3 worldPos)
     {
@@ -72,8 +105,8 @@ public class UIManager : MonoBehaviour
         hiddenTilesIndication.GetComponent<RectTransform>().localPosition = TileStacksGameManager.Instance.WorldToRect(worldPos) - new Vector2(0,60);
 
         return hiddenTilesIndication;
-    }
-
+    }*/
+    /*
     internal void GenerateCounterEffect(int count, float delay, int colorIndex, TileStacksColorButtonView clickedButton)
     {
         GameObject counterEffectGO = Instantiate(counterEffectPrefab, dynamicUIElementsHolder);

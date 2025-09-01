@@ -17,11 +17,16 @@ public class StationView : MonoBehaviour
     [SerializeField] float passengerDepth = 0.25f;
     [SerializeField] bool clearExistingOnInit = true;
 
+    List<PassengerView> passengers = new List<PassengerView>();
+    GameObject lockedIndication;
+
+
+
     // computed once per Initialize
     private float _spacing;
     Coroutine buildRoutine;
 
-    public GamePoint PointModel { get => _pointModel; set => _pointModel = value; }
+    public GamePoint PointModel { get => _pointModel; private set => _pointModel = value; }
 
     /// <summary>
     /// Call this right after Instantiate to wire up the model.
@@ -53,6 +58,8 @@ public class StationView : MonoBehaviour
     {
         yield return new WaitForSeconds(StartDelay);
 
+        List<PassengerView> lockedPassengers = new List<PassengerView>();
+
         // compute spacing = size of one passenger
         _spacing = Mathf.Max(0.01f, passengerDepth) + passengerDepth / 5f;
 
@@ -71,9 +78,20 @@ public class StationView : MonoBehaviour
             go.transform.localPosition = new Vector3(0f, 0f, z + 2);
             go.transform.localRotation = Quaternion.identity;
 
+
+            //locking will be managed in the station level 
+
             // init color
             PassengerView pv = go.GetComponent<PassengerView>();
-            if (pv != null) pv.Initialize(colorIndex, _pointModel.waitingDelays[dataIdx]>GameManager.Instance.level.totalCollectedPassengers);
+
+            passengers.Add(pv);
+
+            bool isPassengerLocked = _pointModel.waitingDelays[dataIdx] > GameManager.Instance.level.totalCollectedPassengers;
+
+            if(isPassengerLocked)
+                lockedPassengers.Add(pv);
+
+            if (pv != null) pv.Initialize(colorIndex, _pointModel.waitingDelays[dataIdx]);
             else Debug.LogWarning("PassengerView missing on passenger prefab.");
 
             go.transform.localScale = Vector3.zero;
@@ -82,9 +100,18 @@ public class StationView : MonoBehaviour
             go.transform.DOLocalMove(new Vector3(0f, 0f, z), 0.2f);
 
             yield return new WaitForSeconds(0.2f);
+        }
 
+        //check if we have locked and if so display 1 lock on the middle passengerView
+        if(lockedPassengers.Count>0)
+        {
+            yield return new WaitForSeconds(0.2f);
 
+            int indexToShowOn = lockedPassengers.Count/2;
 
+            PassengerView passengerView = lockedPassengers[indexToShowOn];
+
+            lockedIndication = UIManager.Instance.GenerateLockedIndication(passengerView.transform.position, passengerView.isLocked);
         }
     }
 
@@ -98,32 +125,20 @@ public class StationView : MonoBehaviour
     {
         if (passengersHolder == null || count <= 0) return;
 
-        int available = passengersHolder.childCount;
-        int toRemove = Mathf.Min(count, available);
-
-        // 1) Collect the last 'toRemove' children now (indices won’t change)
-        var victims = new List<Transform>(toRemove);
-        for (int i = 0; i < toRemove; i++)
-        {
-            int idx = available - 1 - i;                // e.g. if available=5 and toRemove=2, idx=4,3
-            victims.Add(passengersHolder.GetChild(idx));
-        }
-
-        int counter = 0;
+        
         float delay = 0.25f;
-        // 2) Destroy them (Destroy is deferred, but we’ve already captured them)
-        foreach (var t in victims)
-        {
-            Destroy(t.gameObject,delay*counter);
-            counter++;
-        }
+
+        for (int i = 0; i < count; i++)
+            passengers[passengers.Count -1 - i].DestroyPassenger(delay * i);        
+
+        passengers.RemoveRange(passengers.Count-count, count);
 
         // 3) Restack what’s left at the same offsets
-        int rem = passengersHolder.childCount;
-        for (int stackIdx = 0; stackIdx < rem; stackIdx++)
+        
+        for (int passengerIndex = 0; passengerIndex < passengers.Count; passengerIndex++)
         {
-            var c = passengersHolder.GetChild(stackIdx);
-            float z = -(0.5f + stackIdx) * _spacing - passengerDepth / 2f;
+            var c = passengers[passengers.Count - 1 - passengerIndex].transform;
+            float z = -(0.5f + passengerIndex) * _spacing - passengerDepth / 2f;
             c.localPosition = new Vector3(0f, 0f, z);
             c.localRotation = Quaternion.identity;
         }
@@ -131,16 +146,21 @@ public class StationView : MonoBehaviour
 
     public void UpdatePassengersLocking()
     {
-        int rem = passengersHolder.childCount;
-        for (int stackIdx = 0; stackIdx < rem; stackIdx++)
+        for (int passengerIndex = 0; passengerIndex < passengers.Count; passengerIndex++)
         {
-            var c = passengersHolder.GetChild(stackIdx);
+            var c = passengers[passengers.Count - 1 - passengerIndex].transform;
             //check if this passenger was locked - and if so check if its now unlocked - and if so update visuals.
             PassengerView passengerView = c.gameObject.GetComponent<PassengerView>();
-            if (passengerView.isLocked)
+            if (passengerView.isLocked!=0)
             {
-                if (_pointModel.waitingDelays[stackIdx] <= GameManager.Instance.level.totalCollectedPassengers)
-                    passengerView.UnlockPassenger(_pointModel.waitingPeople[stackIdx]);
+                if (_pointModel.waitingDelays[passengerIndex] <= GameManager.Instance.level.totalCollectedPassengers)
+                {
+                    passengerView.UnlockPassenger(_pointModel.waitingPeople[passengerIndex]);
+
+                    //if any passegner unlocked - it means the entire stack unlocked
+                    if(lockedIndication!=null)
+                        Destroy(lockedIndication);
+                }
             }
         }
     }

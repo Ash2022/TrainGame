@@ -34,7 +34,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelVisualizer levelVisualizer;
     [SerializeField] private GameOverView gameOverView;
     [SerializeField]private UIManager uiManager;
+    [SerializeField] private RectTransform canvasRect;
     
+    //view helpers
+    List<StationView> levelStations = new List<StationView>();
+    List<DepotView> levelDepots = new List<DepotView>();
+    List<TrainController> levelTrains = new List<TrainController>();
 
     [Header("Simulation")]
     public bool UseSimulation = true;   // toggle sim on/off
@@ -112,6 +117,8 @@ public class GameManager : MonoBehaviour
 
     }
 
+    
+
     // Call this from TrainController.Init when the train is ready
     public void RegisterTrain(TrainController tc)
     {
@@ -132,15 +139,25 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             LevelVisualizer.Instance.ResetLevel();
 
+        if (Input.GetKeyDown(KeyCode.A))
+            GameOver(true);
+
+        if (Input.GetKeyDown(KeyCode.S))
+            GameOver(false);
+
+        if (Input.GetKeyDown(KeyCode.T))
+            uiManager.ShowTutorialHand();
+
     }
 
     private void HandleClick()
     {
+        /*
         if (AnyTrainIsMoving())
         {
             Debug.Log("[Input] Ignored click: a train is moving.");
             return;
-        }
+        }*/
 
         var cam = Camera.main;
         var ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -149,7 +166,7 @@ public class GameManager : MonoBehaviour
 
         // Station?
         var stationView = hit.collider.GetComponent<StationView>();
-        if (stationView != null) { OnPointClicked(GetPointFromView(stationView)); return; }
+        if (stationView != null) { OnPointClicked(stationView.PointModel); return; }
 
         // Depot?
         var depotView = hit.collider.GetComponent<DepotView>();
@@ -160,7 +177,7 @@ public class GameManager : MonoBehaviour
             if (AnyStationHasColor(depotView.PointModel.colorIndex))
                 return;
 
-            OnPointClicked(GetPointFromView(depotView)); 
+            OnPointClicked(depotView.PointModel); 
                 return; 
         }
 
@@ -171,19 +188,22 @@ public class GameManager : MonoBehaviour
 
     private void OnPointClicked(GamePoint target)
     {
+        /*
         if (AnyTrainIsMoving())
         {
             Debug.Log("[Input] Ignored click: a train is moving.");
             return;
-        }
+        }*/
 
         if (target == null) { Debug.LogError("Clicked view has no GamePoint!"); return; }
         if (selectedTrain == null) { Debug.LogWarning("No train selected."); return; }
 
+        Taptic.Medium();
+
         // --- Second click on same target -> start move ---
         if (_lastTargetId == target.id && _lastPath != null && _lastPath.Success)
         {
-            Color pathColor = LevelVisualizer.Instance.GetColorByIndex(selectedTrain.CurrentPointModel.colorIndex);
+            Color pathColor = LevelVisualizer.Instance.GetColorByIndex(selectedTrain.trainPointModel.colorIndex);
 
             var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath, pathColor);
 
@@ -192,7 +212,7 @@ public class GameManager : MonoBehaviour
             int willTake = 0;
             if (target.type == GamePointType.Station)
             {
-                int myColor = selectedTrain.CurrentPointModel.colorIndex;
+                int myColor = selectedTrain.trainPointModel.colorIndex;
                 var lst = target.waitingPeople;
                 for (int i = 0; i < lst.Count; i++) { if (lst[i] == myColor) willTake++; else break; }
             }
@@ -202,7 +222,7 @@ public class GameManager : MonoBehaviour
             var newDirection = GetTrainDirectionAfterEntering(target.part, entryExitID);
             target.direction = newDirection;
 
-            var trainPoint = selectedTrain.CurrentPointModel;
+            var trainPoint = selectedTrain.trainPointModel;
             trainPoint.direction = newDirection;
             trainPoint.gridX = target.gridX;
             trainPoint.gridY = target.gridY;
@@ -211,7 +231,7 @@ public class GameManager : MonoBehaviour
 
             _arrivalTarget = target;
 
-            Debug.Log($"GO → T{selectedTrain.TrainId} to P{target.id} ({target.type}) color={selectedTrain.CurrentPointModel.colorIndex}");
+            Debug.Log($"GO → T{selectedTrain.TrainId} to P{target.id} ({target.type}) color={selectedTrain.trainPointModel.colorIndex}");
 
             if (UseSimulation)
             {
@@ -221,6 +241,8 @@ public class GameManager : MonoBehaviour
             // Start the move
             selectedTrain.MoveAlongPath(worldPoints);
 
+            selectedTrain.trainIsOnThisGamePoint = target;
+
             // Clear click state
             _lastTargetId = 0;
             _lastPath = null;
@@ -228,7 +250,7 @@ public class GameManager : MonoBehaviour
         }
 
         // --- First click (or different target) -> compute & preview path ---
-        var startPoint = selectedTrain.CurrentPointModel;
+        var startPoint = selectedTrain.trainPointModel;
         var path = PathService.FindPath(level, startPoint, target);
 
         if (!path.Success)
@@ -240,7 +262,7 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("Path found with " + path.Traversals.Count + " steps, cost=" + path.TotalCost);
-        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>(), LevelVisualizer.Instance.GetColorByIndex(selectedTrain.CurrentPointModel.colorIndex));
+        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>(), LevelVisualizer.Instance.GetColorByIndex(selectedTrain.trainPointModel.colorIndex));
 
         _lastTargetId = target.id;   // use ID for the second-click match
         _lastPath = path;
@@ -293,32 +315,12 @@ public class GameManager : MonoBehaviour
         _arrivalTarget = null;
         if (dest == null) return;
 
-        int trainColor = (tc.CurrentPointModel != null) ? tc.CurrentPointModel.colorIndex : 0;
+        int trainColor = (tc.trainPointModel != null) ? tc.trainPointModel.colorIndex : 0;
 
         if (dest.type == GamePointType.Station)
         {
-            Debug.Log($"PICKUP @S{dest.id}: before={dest.waitingPeople.Count} color={trainColor}");
+            ResolveTrainArrivedAtStation(dest, trainColor,tc);
 
-            int removed = 0;
-            while (dest.waitingPeople.Count > 0 && dest.waitingPeople[0] == trainColor && dest.waitingDelays[0]<= level.totalCollectedPassengers)
-            {
-                dest.waitingPeople.RemoveAt(0);
-                dest.waitingDelays.RemoveAt(0);
-                removed++;
-                level.totalCollectedPassengers++;
-                uiManager.PassengersCollected(level.totalCollectedPassengers);
-                tc.OnArrivedStation_AddCart(trainColor,removed);
-            }
-
-
-            Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
-            var sv = FindStationViewByPointId(dest.id);
-            if (sv != null) sv.RemoveHeadPassengers(removed);
-
-            //update all stations with unlocking
-            foreach (StationView stationView in FindObjectsOfType<StationView>().ToList())
-                stationView.UpdatePassengersLocking();
-            
             return; // no WL check on station arrival
 
             
@@ -326,7 +328,8 @@ public class GameManager : MonoBehaviour
         }
         else if (dest.type == GamePointType.Depot)
         {
-            // --- Wrong depot => immediate lose ---
+            // --- Wrong depot => immediate lose --- should not be possible anymore
+
             if (dest.colorIndex != trainColor)
             {
                 Debug.Log($"[Game] LOSE (wrong depot). Train {tc.TrainId} at depot {dest.id}");
@@ -341,7 +344,7 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            // --- Premature depot => immediate lose ---
+            // --- Premature depot => immediate lose --- should not be possible anymore
             if (AnyStationHasColor(trainColor))
             {
                 Debug.Log($"[Game] LOSE (premature depot). Train {tc.TrainId} at depot {dest.id}");
@@ -359,6 +362,12 @@ public class GameManager : MonoBehaviour
             // --- Correct depot, no more passengers of this color → park this train ---
             //tc.ClearAllCarts();                 // visuals + sim offsets cleared (engine-only)
             _parkedTrains.Add(tc.TrainId);
+
+            level.totalArrivedPassengers += tc.currCarts.Count;
+
+            Taptic.Medium();
+
+            uiManager.PassengersCollected(level.totalArrivedPassengers);
 
             // WL compare (sim may report Win if global state is already complete)
             if (UseSimulation && simApp != null)
@@ -378,32 +387,70 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void ResolveTrainArrivedAtStation(GamePoint dest, int trainColor, TrainController tc)
+    {
+        Debug.Log($"PICKUP @S{dest.id}: before={dest.waitingPeople.Count} color={trainColor}");
+
+        int removed = 0;
+        while (dest.waitingPeople.Count > 0 && dest.waitingPeople[0] == trainColor && dest.waitingDelays[0] <= level.totalCollectedPassengers)
+        {
+            dest.waitingPeople.RemoveAt(0);
+            dest.waitingDelays.RemoveAt(0);
+            removed++;
+            level.totalCollectedPassengers++;
+            tc.OnArrivedStation_AddCart(trainColor, removed);
+        }
+
+
+        Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
+        var sv = FindStationViewByPointId(dest.id);
+        if (sv != null) sv.RemoveHeadPassengers(removed);
+
+        //update all stations with unlocking
+        foreach (StationView stationView in levelStations)
+            stationView.UpdatePassengersLocking();
+
+        //check if we can unlock depot gate
+        foreach (DepotView depot in levelDepots)
+        {
+            if(depot.depotGateLocked && AnyStationHasColor(depot.PointModel.colorIndex)==false && depot.PointModel.MyDepotIsLockedByDepotPointID == -1)
+            {
+                //gate is complete
+                depot.ShowMyDepotUnlocking();
+            }
+        }
+
+        //need to check if now any of the stations have trains that can take the new unlocked passengers
+        //if it happened - we need to start the whole process again 
+
+        foreach (TrainController train in levelTrains)
+        {
+            if (train.trainIsOnThisGamePoint.type == GamePointType.Station)
+            {
+                if(train.trainIsOnThisGamePoint.waitingPeople.Count>0 && (train.trainIsOnThisGamePoint.waitingPeople[0] == train.trainPointModel.colorIndex
+                    && train.trainIsOnThisGamePoint.waitingDelays[0] <= level.totalCollectedPassengers))
+                    {
+                        ResolveTrainArrivedAtStation(train.trainIsOnThisGamePoint, train.trainPointModel.colorIndex, train);
+                        break;
+                    }
+            }
+        }
+    }
+
 
     // === Helpers ===
 
-    private static GamePoint GetPointFromView(Component view)
-    {
-        if (view == null) return null;
-        if (view is StationView sv) return sv.PointModel;
-        if (view is DepotView dv) return dv.PointModel;
-        return null;
-    }
 
     private StationView FindStationViewByPointId(int id)
-    {
-        var views = FindObjectsOfType<StationView>();
-        for (int i = 0; i < views.Length; i++)
+    {        
+        for (int i = 0; i < levelStations.Count; i++)
         {
-            var gp = GetPointFromView(views[i]);
-            if (gp != null && gp.id == id) return views[i];
+            if (levelStations[i].PointModel != null && levelStations[i].PointModel.id == id) return levelStations[i];
         }
         return null;
     }
 
-    private List<StationView> GetStationViews()
-    {
-        return FindObjectsOfType<StationView>().ToList();
-    }
+   
 
     private bool AnyStationHasColor(int colorIndex)
     {
@@ -532,6 +579,14 @@ public class GameManager : MonoBehaviour
     public void ResetCurrLevel()
     {
         level.totalCollectedPassengers = 0;
+        level.totalArrivedPassengers = 0;
+
+        uiManager.ClearDynamicHolder();
+
+        levelStations.Clear();
+        levelTrains.Clear();
+        levelDepots.Clear();
+
         trains.Clear();
         _carried.Clear();
         selectedTrain = null;
@@ -577,6 +632,13 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    public void HideTutorialImage()
+    {
+        uiManager.ShowTutorialImage(false, 0);
+        LoadCurrentLevel();
+
+    }
+
     private void ReloadDynamicOnly()
     {
         // dynamic-only reset (no static rebuild)
@@ -593,6 +655,33 @@ public class GameManager : MonoBehaviour
         // only trains present in this level
         int totalTrains = trains.Count;
         return totalTrains > 0 && _parkedTrains.Count == totalTrains;
+    }
+
+    public Vector2 WorldToRect(Vector3 world)
+    {
+        Vector2 myCurrentHeightWorld = Camera.main.WorldToScreenPoint(world);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, myCurrentHeightWorld,null, out var localPos);
+        return localPos;
+    }
+
+    public Transform GetFirstTrain()
+    {
+        return trains[0].transform;
+    }
+
+    public void AddStationView(StationView stationView)
+    {
+        levelStations.Add(stationView);
+    }
+
+    public void AddTrainController(TrainController trainController)
+    {
+        levelTrains.Add(trainController);
+    }
+
+    public void AddDepotView(DepotView depotView)
+    {
+        levelDepots.Add(depotView);
     }
 
     private bool AnyTrainIsMoving()

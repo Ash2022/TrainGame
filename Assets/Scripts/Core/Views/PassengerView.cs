@@ -1,18 +1,21 @@
 
+using System;
 using UnityEngine;
 
 public class PassengerView : MonoBehaviour
 {
 
     [SerializeField] Renderer passengerRenderer;
-    public bool isLocked = false;
-    internal void Initialize(int colorIndex, bool _isLocked)  
+    public int isLocked = 0;
+    public int colorIndex = 0;
+    internal void Initialize(int _colorIndex, int _isLocked)  
     {
         //passengerRenderer.material.color = LevelVisualizer.Instance.GetColorByIndex(colorIndex);
 
         isLocked = _isLocked;
+        colorIndex = _colorIndex;
 
-        if(isLocked)
+        if(isLocked!=0)
             passengerRenderer.material = LevelVisualizer.Instance.GetPassengersEmptyMaterial();
         else
             passengerRenderer.material = LevelVisualizer.Instance.GetPassengersMaterialByIndex(colorIndex);
@@ -20,8 +23,12 @@ public class PassengerView : MonoBehaviour
 
     public void UnlockPassenger(int colorIndex)
     {
-        isLocked=false;
+        isLocked=0;
         passengerRenderer.material = LevelVisualizer.Instance.GetPassengersMaterialByIndex(colorIndex);
     }
-    
+
+    internal void DestroyPassenger(float delay)
+    {
+        Destroy(gameObject, delay);
+    }
 }
