@@ -326,6 +326,17 @@ public class ScenarioEditor
                 GUI.Label(new Rect(colRect.xMax + 6f, colRect.y, 40f, labelH),
                           p.DepotLockingColorIndex.ToString());
 
+
+                // Direction button (right of the color box + label)
+                Rect dirBtn = new Rect(colRect.xMax + 50f, colRect.y, 60f, rowH);
+                int dir = (int)p.direction;
+                string arrow = dir == 0 ? "↑" : (dir == 1 ? "→" : (dir == 2 ? "↓" : "←"));
+                if (GUI.Button(dirBtn, "Dir " + arrow))
+                {
+                    dir = (dir + 1) % 4;
+                    p.direction = (TrainDir)dir;
+                }
+
                 y += rowH + spacing;
             }
         }

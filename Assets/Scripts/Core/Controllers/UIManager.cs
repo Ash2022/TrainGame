@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 
 public class UIManager : MonoBehaviour
@@ -19,6 +21,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject lockedIndicationPrefab;
 
     [SerializeField] Transform dynamicUIElementsHolder;
+
+    Sequence handSequence;
  
     public Transform DynamicUIElementsHolder { get => dynamicUIElementsHolder; set => dynamicUIElementsHolder = value; }
 
@@ -78,11 +82,22 @@ public class UIManager : MonoBehaviour
         return tutorialImageView.gameObject.activeInHierarchy;
     }
 
-    public void ShowTutorialHand()
+    public void ShowTutorialHand(Vector3 position)
     {
-        tutorialHand.localPosition = GameManager.Instance.WorldToRect(GameManager.Instance.GetFirstTrain().position);
+        if(handSequence!=null)
+            handSequence.Kill();
+
+        tutorialHand.localScale = Vector3.one;
+
+        tutorialHand.localPosition = GameManager.Instance.WorldToRect(position);
 
         tutorialHand.gameObject.SetActive(true);
+
+        handSequence = DOTween.Sequence();
+
+        handSequence.Append(tutorialHand.DOScale(0.8f, .8f).SetEase(Ease.InOutSine).SetLoops(100, LoopType.Yoyo));
+
+        handSequence.Play();
     }
 
     public GameObject GenerateLockedIndication(Vector3 position, int displayValue)
@@ -104,8 +119,9 @@ public class UIManager : MonoBehaviour
             Destroy(dynamicUIElementsHolder.GetChild(i).gameObject);
     }
 
-    internal void ShowUserMessage(string v)
+    internal void ShowUserMessage(string v, bool showBG=true)
     {
+        userInfoObj.GetComponent<Image>().enabled = showBG;
         userInfoObj.SetActive(true);
         userInfoText.text = v;
 
@@ -115,6 +131,14 @@ public class UIManager : MonoBehaviour
             userInfoObj.transform.localScale = Vector3.one;
         });
         
+    }
+
+    internal void HideTutorialHand()
+    {
+        if (handSequence != null)
+            handSequence.Kill();
+
+        tutorialHand.gameObject.SetActive(false);
     }
 
 

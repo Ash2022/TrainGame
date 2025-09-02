@@ -2954,6 +2954,9 @@
         "waitingDelays": [],
         "initialCarts": [],
         "direction": 3,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "D",
         "HasWaitingPeople": false
       },
@@ -3060,7 +3063,10 @@
         "waitingPeople": [],
         "waitingDelays": [],
         "initialCarts": [],
-        "direction": 3,
+        "direction": 0,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "D",
         "HasWaitingPeople": false
       },
@@ -3168,6 +3174,9 @@
         "waitingDelays": [],
         "initialCarts": [],
         "direction": 2,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "T",
         "HasWaitingPeople": false
       },
@@ -3287,6 +3296,9 @@
         ],
         "initialCarts": [],
         "direction": 3,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "S",
         "HasWaitingPeople": true
       },
@@ -3394,6 +3406,9 @@
         "waitingDelays": [],
         "initialCarts": [],
         "direction": 0,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "T",
         "HasWaitingPeople": false
       },
@@ -3513,6 +3528,9 @@
         ],
         "initialCarts": [],
         "direction": 3,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "S",
         "HasWaitingPeople": true
       }
@@ -7426,5 +7444,6 @@
       }
     }
   },
-  "totalCollectedPassengers": 0
+  "totalCollectedPassengers": 0,
+  "totalArrivedPassengers": 0
 }

@@ -249,21 +249,125 @@ make the level visualizer generate a list of all stationsViews and TrainViews - 
 unlock gets passengers to a train in the station already - DONE
 key locking feature -- DONE
 add gates to the depots and fix their logic -- DONE
-tutorial
+
+fix depots to turn to the correct entrance. --- DONE
+
+blender model a key --- DONE
+
+tutorial --- DONE
+
+Level
 check multi trains moving together - seems very possible - something about selected train needs to be fine tuned
+Small animation Touches 
+
+
+visual missions for nina:
+gates, keys, unlock panels with text
+highlight indication
+verify roads
+maybe no stripes on depots
+gates non dynamic parts
+texts for all the screens
+main user info text
+
+Question Mark:
+Title: Hidden Color
+Body : Pick up X passengers to reveal its color.
+
+Key/Lock feature
+Title: Locked Depots
+Body: A depot unlocks only after you collect the matching colored key.
+
+
+New truck unlock feature
+
+new truck unlocked
+
+need to show some image for the new truck - maybe make Orange and Purple only.
+
+
+
+
 
 
 
 
 
 make bullets like this:
-Where you stand on the AI development?
+
+A. Where you stand on the AI development/What did i use AI for in this project
+
+this time i used AI to build 3 different editors and parts of the game:
+
+1. main editor for being able to build track parts on a grid - game points on those paths that can be train/station/depot
+can also than feed those components data using the same UI.
+Show Image.
+
+2. secondary editor to edit the track parts and mainly their path splines.
+Show Image
+
+3. game simulator - this time is was very hard - because this game isnt just numbers in a table
+we actually have to simulate moving pieces and check collisions WITHOUT using unity colliders
+
+hard parts were making the simulation match the visuals - detect the crash as if you were using unity colliders.
+and later make the simulation match the game in reality - even that both are running the same simulation - 
+once you start loading and unloading passengers and visualizing only the game - you need to confirm the simulation results are similar.
+splines collisions were also not trivial.
+
+4. scenario editor ui - which let's me load levels with their layout - and than on top of that it picks some 
+random stations, fills it with random passengers and than runs the simulator to see how difficult the level is.
+Show Image
+
+5. as for parts of the game, i was very dissappointed with the results, maybe i didnt give 
+enough directionnning but the results were not good - they were working, but they were
+not made in a good way - mainly using indexes refering to child GameObjects which is a bad practice.
+
+B. What is new / what did you crack?
 
 In this project i was able for the first time to build an MCP server that is linked to my specific project.
-was able (so far with using Claude AI as middle part) - to get the LLM to build and save level layouts for me.
+this server has 9 commands - it was built on top of the level editor i had and in a way it was using the 
+same logic like a huan would have - place part XXX in position YYY
+rotate part XXX to 180
+get a list of all the parts
 
-What is new / what did you crack?
-What is working well with AI?
-What are the current blockers / what did not work?
+all the setup for that was done by the AI - i only gave the command i wanted and it did all the wrapping
+building a server in Unity that i can start and stop
+and building all the configuration files needed.
+
+however - when using the ChatGPT - it can never leave its browser window - so for using this as the LLM that 
+builds the levels for me i need to build another gateway and copy paste things to and from it.
+
+so this time i used Claude AI desktop, the reason is this tool supports custome build MCP servers
+that can be configured in the Claude UI , and then it can directly talk to your MCP server.
+
+was able to get the LLM to build and save level layouts for me.
+
+
+C. What is working well with AI?
+
+used the GPT agents mode to make a summary of my project to give to a new instance of a LLM so it can be debreifed on the project.
+
+all the usual was working well, building a more complex editor and keep modifying it over a long period of time.
+building the actual MCP server went very well.
+and also building the simulation which isnt trivial went well.
+
+D. What are the current blockers / what did not work?
+
+wasnt able to get the scenario generator to generate good enough scenarios - the approach i took might
+have been too simplistic - results were not satisfactory.
+
+wasnt able to make the AI build good level layouts - 
+
+Had to get the paid version, as free one is very limited.
+
+used the Paid (Claude) version for about 10-15 minutes until i got a message saying i reached my limit
+and i have to wait 5 hours, i than cancelled my subscription.
+
+the process of using the MCP server takes time, longer than usual, as the AI does some ping pong with the server
+asking to get info and sending commands, you need to approve access once, but still took around 2-3 minutes to get a level.
+
+in those 10-15 minutes the AI built for me 2 level layouts - not very big ones 
+and they were faulty - but most of the level made sense and connected well.
+
 
 

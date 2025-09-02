@@ -82,7 +82,10 @@ public class TrainController : MonoBehaviour
         if(animTime > 0)
         {
             transform.position = new Vector3(centerPos.x, centerPos.y, centerPos.z-10f);
-            transform.DOMove(centerPos,animTime).SetEase(Ease.OutBounce).SetDelay(startDelay);
+            transform.DOMove(centerPos,animTime).SetEase(Ease.OutBounce).SetDelay(startDelay).OnComplete(()=>
+            {
+                GameManager.Instance.BuildingComplete();
+            });
         }
 
 

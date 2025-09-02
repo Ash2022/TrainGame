@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
     private SimApp simApp;
 
     public int CurrentLevelIndex = 0;
+    private int tutorialSteps = 0;
     
     private enum GameEndOutcome { None, Win, LoseWrongDepot, LosePrematureDepot }
 
@@ -117,6 +118,15 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void BuildingComplete()
+    {
+        if(CurrentLevelIndex == 0)
+        {
+            //first level - show tutorial
+            uiManager.ShowTutorialHand(levelTrains[0].transform.position);
+            tutorialSteps = 1;
+        }
+    }
     
 
     // Call this from TrainController.Init when the train is ready
@@ -145,8 +155,8 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
             GameOver(false);
 
-        if (Input.GetKeyDown(KeyCode.T))
-            uiManager.ShowTutorialHand();
+        //if (Input.GetKeyDown(KeyCode.T))
+        //    uiManager.ShowTutorialHand();
 
     }
 
@@ -186,6 +196,20 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
+            //tutorial
+            if(CurrentLevelIndex == 0)                
+            {
+                if(tutorialSteps == 4)
+                {
+                    uiManager.HideTutorialHand();
+                    tutorialSteps = 100;
+                }
+                
+                if (tutorialSteps == 3)
+                    tutorialSteps++;
+
+            }
+
             OnPointClicked(depotView.PointModel); 
                 return; 
         }
@@ -221,6 +245,9 @@ public class GameManager : MonoBehaviour
             int willTake = 0;
             if (target.type == GamePointType.Station)
             {
+                if(CurrentLevelIndex == 0 && tutorialSteps==2)
+                    uiManager.HideTutorialHand();
+                
                 int myColor = selectedTrain.trainPointModel.colorIndex;
                 var lst = target.waitingPeople;
                 for (int i = 0; i < lst.Count; i++) { if (lst[i] == myColor) willTake++; else break; }
@@ -280,6 +307,13 @@ public class GameManager : MonoBehaviour
 
     internal void SelectTrain(TrainController trainController)
     {
+        if(CurrentLevelIndex == 0 && tutorialSteps ==1)
+        {
+            //prompt user to click the station
+            uiManager.ShowTutorialHand(levelStations[0].transform.position);
+            tutorialSteps = 2;
+        }
+
         LevelVisualizer.Instance.ClearGlobalPathRenderer();
 
         if (selectedTrain != null)
@@ -318,6 +352,12 @@ public class GameManager : MonoBehaviour
         }
 
         if (r.Outcome != MoveOutcome.Arrived) return;
+
+        if(CurrentLevelIndex == 0 && (tutorialSteps == 2|| tutorialSteps == 3))
+        {
+            uiManager.ShowTutorialHand(levelDepots[0].transform.position);
+            tutorialSteps++;
+        }
 
         // === Arrived ===
         var dest = _arrivalTarget;
@@ -596,6 +636,8 @@ public class GameManager : MonoBehaviour
         level.totalCollectedPassengers = 0;
         level.totalArrivedPassengers = 0;
 
+        tutorialSteps = 0;
+
         uiManager.ClearDynamicHolder();
 
         levelStations.Clear();
@@ -677,11 +719,6 @@ public class GameManager : MonoBehaviour
         Vector2 myCurrentHeightWorld = Camera.main.WorldToScreenPoint(world);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, myCurrentHeightWorld,null, out var localPos);
         return localPos;
-    }
-
-    public Transform GetFirstTrain()
-    {
-        return trains[0].transform;
     }
 
     public void AddStationView(StationView stationView)

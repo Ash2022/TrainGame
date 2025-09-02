@@ -46,7 +46,7 @@ public class GameOverView : MonoBehaviour
 
         if (levelWon)
         {
-            titleText.text = "TABLE CLEARED\n\n<size=120>LEVEL " + (levelIndex + 1) + "\nCOMPLETE";
+            titleText.text = "\n\n\n<size=120>LEVEL " + (levelIndex + 1) + "\nCOMPLETE";
 
             if (stillHaveUnlocks)
             {

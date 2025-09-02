@@ -3431,7 +3431,8 @@
         "initialCarts": [],
         "direction": 3,
         "DepotLockingColorIndex": 0,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "D",
         "HasWaitingPeople": false
       },
@@ -3538,9 +3539,10 @@
         "waitingPeople": [],
         "waitingDelays": [],
         "initialCarts": [],
-        "direction": 3,
+        "direction": 1,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "D",
         "HasWaitingPeople": false
       },
@@ -3659,7 +3661,8 @@
         "initialCarts": [],
         "direction": 3,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "S",
         "HasWaitingPeople": true
       },
@@ -3782,7 +3785,8 @@
         "initialCarts": [],
         "direction": 3,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "S",
         "HasWaitingPeople": true
       },
@@ -3905,7 +3909,8 @@
         "initialCarts": [],
         "direction": 3,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "S",
         "HasWaitingPeople": true
       },
@@ -4014,7 +4019,8 @@
         "initialCarts": [],
         "direction": 3,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "T",
         "HasWaitingPeople": false
       },
@@ -4133,7 +4139,8 @@
         "initialCarts": [],
         "direction": 3,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "S",
         "HasWaitingPeople": true
       },
@@ -4242,7 +4249,8 @@
         "initialCarts": [],
         "direction": 1,
         "DepotLockingColorIndex": -1,
-        "MyDepotLockedByDepotWithPointID": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "T",
         "HasWaitingPeople": false
       }
