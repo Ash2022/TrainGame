@@ -519,6 +519,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7020560412307322390}
+  - component: {fileID: 2232303225074270586}
   m_Layer: 0
   m_Name: Exits
   m_TagString: Untagged
@@ -547,6 +548,27 @@ Transform:
   - {fileID: 6972609591807156296}
   m_Father: {fileID: 6763486698181064284}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2232303225074270586
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5636798061246536476}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.6, y: 1, z: 0.5}
+  m_Center: {x: 0.15, y: 0, z: 0.2}
 --- !u!1 &7225796874260481156
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,7 +580,6 @@ GameObject:
   - component: {fileID: 6763486698181064284}
   - component: {fileID: 4691800478878501743}
   - component: {fileID: 3242645726616056764}
-  - component: {fileID: 1260058302608310536}
   m_Layer: 0
   m_Name: NewStation
   m_TagString: Untagged
@@ -651,27 +672,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!65 &1260058302608310536
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7225796874260481156}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.6, y: 1, z: 0.5}
-  m_Center: {x: 0.15, y: 0, z: 0.2}
 --- !u!1001 &4975538275806738814
 PrefabInstance:
   m_ObjectHideFlags: 0

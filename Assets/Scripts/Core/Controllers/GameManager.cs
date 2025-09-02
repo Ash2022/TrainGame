@@ -13,12 +13,6 @@ public class GameManager : MonoBehaviour
     [Tooltip("Drag your LevelData asset or fill at runtime.")]
     public LevelData level;
 
-
-    private int _lastTargetId;
-    // The exact point we told the train to go to (station or depot)
-    private GamePoint _arrivalTarget;
-    private PathModel _lastPath;
-
     public List<TrainController> trains = new List<TrainController>();
     public TrainController selectedTrain;
 
@@ -47,7 +41,8 @@ public class GameManager : MonoBehaviour
 
     public int CurrentLevelIndex = 0;
     private int tutorialSteps = 0;
-    
+    bool gameOver = false;
+
     private enum GameEndOutcome { None, Win, LoseWrongDepot, LosePrematureDepot }
 
     private void Awake()
@@ -65,7 +60,7 @@ public class GameManager : MonoBehaviour
 
         //fix aspect
         float currentAspect = (float)Screen.width / Screen.height;
-        float refRad = 60f * Mathf.Deg2Rad * 0.5f;
+        float refRad = 62f * Mathf.Deg2Rad * 0.5f;
         float refHorizRad = Mathf.Atan(Mathf.Tan(refRad) * 9f/16f);
 
         float newVertRad = Mathf.Atan(Mathf.Tan(refHorizRad) / currentAspect);
@@ -162,6 +157,9 @@ public class GameManager : MonoBehaviour
 
     private void HandleClick()
     {
+        if (gameOver)
+            return;
+
         /*
         if (AnyTrainIsMoving())
         {
@@ -175,11 +173,18 @@ public class GameManager : MonoBehaviour
         if (!Physics.Raycast(ray, out hit)) return;
 
         // Station?
-        var stationView = hit.collider.GetComponent<StationView>();
-        if (stationView != null) { OnPointClicked(stationView.PointModel); return; }
+        var stationView = hit.collider.transform.parent.gameObject.GetComponent<StationView>();
+        if (stationView != null) 
+        {
+            if(selectedTrain!=null && selectedTrain.LastPath==null)
+                stationView.DoSelectedAnimation();
+
+            OnPointClicked(stationView.PointModel);
+            return;
+        }
 
         // Depot?
-        var depotView = hit.collider.GetComponent<DepotView>();
+        var depotView = hit.collider.transform.parent.gameObject.GetComponent<DepotView>();
         if (depotView != null) 
         {
             //check if the depot is locked or not - if its locked - it cant be selected
@@ -210,6 +215,9 @@ public class GameManager : MonoBehaviour
 
             }
 
+            if (selectedTrain != null && selectedTrain.LastPath == null)
+                depotView.DoSelectedAnimation();
+
             OnPointClicked(depotView.PointModel); 
                 return; 
         }
@@ -221,6 +229,9 @@ public class GameManager : MonoBehaviour
 
     private void OnPointClicked(GamePoint target)
     {
+        if (gameOver)
+            return;
+
         /*
         if (AnyTrainIsMoving())
         {
@@ -234,11 +245,11 @@ public class GameManager : MonoBehaviour
         Taptic.Medium();
 
         // --- Second click on same target -> start move ---
-        if (_lastTargetId == target.id && _lastPath != null && _lastPath.Success)
+        if (selectedTrain.LastTargetId == target.id && selectedTrain.LastPath != null && selectedTrain.LastPath.Success)
         {
             Color pathColor = LevelVisualizer.Instance.GetColorByIndex(selectedTrain.trainPointModel.colorIndex);
 
-            var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath, pathColor);
+            var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(selectedTrain.LastPath, pathColor);
 
 
             // Precompute willTake if destination is a Station
@@ -254,7 +265,7 @@ public class GameManager : MonoBehaviour
             }
 
             // Update logical model NOW (so sim/path use the new start)
-            int entryExitID = _lastPath.Traversals[_lastPath.Traversals.Count - 1].entryExit;
+            int entryExitID = selectedTrain.LastPath.Traversals[selectedTrain.LastPath.Traversals.Count - 1].entryExit;
             var newDirection = GetTrainDirectionAfterEntering(target.part, entryExitID);
             target.direction = newDirection;
 
@@ -265,7 +276,7 @@ public class GameManager : MonoBehaviour
             trainPoint.anchor = target.anchor;
             trainPoint.part = target.part;
 
-            _arrivalTarget = target;
+            selectedTrain.ArrivalTarget = target;
 
             Debug.Log($"GO → T{selectedTrain.TrainId} to P{target.id} ({target.type}) color={selectedTrain.trainPointModel.colorIndex}");
 
@@ -280,8 +291,8 @@ public class GameManager : MonoBehaviour
             selectedTrain.trainIsOnThisGamePoint = target;
 
             // Clear click state
-            _lastTargetId = 0;
-            _lastPath = null;
+            selectedTrain.LastTargetId = 0;
+            selectedTrain.LastPath = null;
             return;
         }
 
@@ -292,16 +303,16 @@ public class GameManager : MonoBehaviour
         if (!path.Success)
         {
             Debug.LogWarning("No path found to point " + target.id);
-            _lastTargetId = 0;
-            _lastPath = null;
+            selectedTrain.LastTargetId = 0;
+            selectedTrain.LastPath = null;
             return;
         }
 
         Debug.Log("Path found with " + path.Traversals.Count + " steps, cost=" + path.TotalCost);
         LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>(), LevelVisualizer.Instance.GetColorByIndex(selectedTrain.trainPointModel.colorIndex));
 
-        _lastTargetId = target.id;   // use ID for the second-click match
-        _lastPath = path;
+        selectedTrain.LastTargetId = target.id;   // use ID for the second-click match
+        selectedTrain.LastPath = path;
     }
 
 
@@ -319,8 +330,8 @@ public class GameManager : MonoBehaviour
         if (selectedTrain != null)
             selectedTrain.ShowHideTrainHighLight(false);
 
-        if (selectedTrain != trainController)
-            _lastPath = null;
+        if (selectedTrain !=null && selectedTrain != trainController)
+            selectedTrain.LastPath = null;
 
 
         selectedTrain = trainController;
@@ -346,7 +357,7 @@ public class GameManager : MonoBehaviour
         if (r.Outcome == MoveOutcome.Blocked)
         {
             Debug.Log($"[Game] LOSE (collision). Train {tc.TrainId} vs {r.BlockerId}");
-            _arrivalTarget = null;
+            selectedTrain.ArrivalTarget = null;
             GameOver(false);                 // centralized: shows UI and triggers dynamic-only reset on click
             return;
         }
@@ -360,8 +371,8 @@ public class GameManager : MonoBehaviour
         }
 
         // === Arrived ===
-        var dest = _arrivalTarget;
-        _arrivalTarget = null;
+        var dest = tc.ArrivalTarget;
+        tc.ArrivalTarget = null;
         if (dest == null) return;
 
         int trainColor = (tc.trainPointModel != null) ? tc.trainPointModel.colorIndex : 0;
@@ -377,37 +388,7 @@ public class GameManager : MonoBehaviour
         }
         else if (dest.type == GamePointType.Depot)
         {
-            // --- Wrong depot => immediate lose --- should not be possible anymore
-            /*
-            if (dest.colorIndex != trainColor)
-            {
-                Debug.Log($"[Game] LOSE (wrong depot). Train {tc.TrainId} at depot {dest.id}");
-
-                if (UseSimulation && simApp != null)
-                {
-                    var simOutcome = simApp.EvaluateDepotOutcome(tc.TrainId, dest.id);
-                    CompareWinLose(GameEndOutcome.LoseWrongDepot, simOutcome, tc.TrainId, dest.id);
-                }
-
-                GameOver(false);
-                return;
-            }
-
-            // --- Premature depot => immediate lose --- should not be possible anymore
-            if (AnyStationHasColor(trainColor))
-            {
-                Debug.Log($"[Game] LOSE (premature depot). Train {tc.TrainId} at depot {dest.id}");
-
-                if (UseSimulation && simApp != null)
-                {
-                    var simOutcome = simApp.EvaluateDepotOutcome(tc.TrainId, dest.id);
-                    CompareWinLose(GameEndOutcome.LosePrematureDepot, simOutcome, tc.TrainId, dest.id);
-                }
-
-                GameOver(false);
-                return;
-            }*/
-
+            
             //find the depot we arrived to and see if it has a key to collect
             DepotView depot = levelDepots.Find(x=>x.PointModel.id == dest.id);
 
@@ -637,7 +618,7 @@ public class GameManager : MonoBehaviour
         level.totalArrivedPassengers = 0;
 
         tutorialSteps = 0;
-
+        gameOver = false;
         uiManager.ClearDynamicHolder();
 
         levelStations.Clear();
@@ -662,6 +643,8 @@ public class GameManager : MonoBehaviour
 
         */
 
+        gameOver = true;
+
         gameOverView.InitEndScreen(win, CurrentLevelIndex, () =>
         {
             
@@ -676,6 +659,7 @@ public class GameManager : MonoBehaviour
 
                 if (unlockIndex != -1)
                 {
+                    levelVisualizer.DestoryCurrentObjects();
                     uiManager.ShowTutorialImage(true, unlockIndex + 1);
 
                 }
@@ -758,6 +742,75 @@ public class GameManager : MonoBehaviour
                     depot.ShowMyDepotUnlocking();
 
             }
+        }
+    }
+
+    private List<GameObject> GetTrainAndParts(int trainID)
+    {
+        List<GameObject> result = new List<GameObject>();   
+
+        foreach (TrainController trainController in levelTrains)
+        {
+            if(trainController.trainPointModel.id == trainID)
+            {
+                result.Add(trainController.gameObject);
+
+                foreach (GameObject cart in trainController.currCarts)
+                {
+                    result.Add(cart);
+                }
+
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Applies an outward force to all rigidbodies within a radius of a point.
+    /// </summary>
+    /// <param name="origin">Center of the "explosion".</param>
+    /// <param name="radius">How far the force reaches.</param>
+    /// <param name="force">Max force at the origin (linearly decreases with distance).</param>
+    /// <param name="upwardModifier">Optional lift upward (like AddExplosionForce).</param>
+    public void ApplyRadialForce(Vector3 origin, int train_1_ID, int train_2_ID, float radius, float force, float upwardModifier = 0f)
+    {
+        // Find all colliders in the radius
+        Collider[] colliders = Physics.OverlapSphere(origin, radius);
+
+        List<GameObject> collidingTrainParts = new List<GameObject>();
+
+        collidingTrainParts.AddRange(GetTrainAndParts(train_1_ID));
+        collidingTrainParts.AddRange(GetTrainAndParts(train_2_ID));
+
+
+        foreach (GameObject go in collidingTrainParts)
+        {
+            Rigidbody rb = go.transform.GetComponentInChildren<Rigidbody>();
+            if (rb == null) continue;
+
+            // Direction from explosion center to object
+            Vector3 dir = (rb.position - origin).normalized;
+
+            // Distance falloff (1 = center, 0 = edge)
+            float dist = Vector3.Distance(origin, rb.position);
+            float falloff = Mathf.Clamp01(1f - (dist / radius));
+
+            // Final force vector
+            Vector3 finalForce = dir * force * falloff;
+
+            // Add optional upward kick
+            if (upwardModifier != 0f)
+                finalForce += Vector3.up * force * falloff * upwardModifier;
+
+            rb.isKinematic = false;
+
+            rb.AddForce(finalForce, ForceMode.Impulse);
+
+            // Add some random spin proportional to explosion strength
+            float torqueStrength = force * falloff * 0.5f; // scale factor
+            Vector3 randomTorque = UnityEngine.Random.onUnitSphere * torqueStrength;
+            rb.AddTorque(randomTorque, ForceMode.Impulse);
         }
     }
 }

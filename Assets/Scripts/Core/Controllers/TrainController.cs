@@ -16,6 +16,7 @@ public class TrainController : MonoBehaviour
     [SerializeField] TrainClickView trainClickView;
     [SerializeField] GameObject trainSelectedHighLight;
     [SerializeField] Transform particleSystemTrain;
+    [SerializeField]Rigidbody trainRigidbody;
     Transform lastCartTransform=null;
     
 
@@ -35,6 +36,9 @@ public class TrainController : MonoBehaviour
     [Header("Capacity")]
     public int reservedCartSlots = 20;
 
+    public int LastTargetId { get; set; }
+    public GamePoint ArrivalTarget { get; set; }
+    public PathModel LastPath { get; set; }
 
 
     private Action<MoveCompletion> _moveCompletedCb;
@@ -82,7 +86,7 @@ public class TrainController : MonoBehaviour
         if(animTime > 0)
         {
             transform.position = new Vector3(centerPos.x, centerPos.y, centerPos.z-10f);
-            transform.DOMove(centerPos,animTime).SetEase(Ease.OutBounce).SetDelay(startDelay).OnComplete(()=>
+            transform.DOMove(centerPos,animTime*2).SetEase(Ease.OutBounce).SetDelay(startDelay).OnComplete(()=>
             {
                 GameManager.Instance.BuildingComplete();
             });
@@ -216,6 +220,10 @@ public class TrainController : MonoBehaviour
 
     private void TrainWasClicked()
     {
+        transform.localScale = Vector3.one;
+
+        transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
+
         GameManager.Instance.SelectTrain(this);
 
         ShowHideTrainHighLight(true);
@@ -256,6 +264,9 @@ public class TrainController : MonoBehaviour
         else if (r.Outcome == MoveOutcome.Blocked)
         {
             Debug.Log("Train " + trainPointModel.id + " blocked by Train " + r.BlockerId + " at " + r.HitPos);
+
+            //do explode
+            GameManager.Instance.ApplyRadialForce(r.HitPos, trainPointModel.id, r.BlockerId, 3, 10);
         }
 
         // forward to engine

@@ -182,7 +182,7 @@ public class ScenarioEditor
                         p.waitingDelays.Add(0);
 
                     // --- NEW: delay text box next to passenger
-                    Rect delayRect = new Rect(pr.x , pr.y + 15f, 15f, personSize);
+                    Rect delayRect = new Rect(pr.x , pr.y + 15f, 20f, personSize);
                     int newDelay = EditorGUI.IntField(delayRect, p.waitingDelays[j]);
                     if (newDelay != p.waitingDelays[j])
                         p.waitingDelays[j] = Mathf.Max(0, newDelay); // clamp to 0+

@@ -42,7 +42,7 @@ public class LevelVisualizer : MonoBehaviour
 
     [Header("Frame & Build Settings")]
     [SerializeField] private SpriteRenderer frameRenderer;
-    [SerializeField] private float tileDelay = 0.025f;
+    [SerializeField] private float tileDelay = 0.01f;
 
     [SerializeField] LineRenderer globalPathRenderer;
 
@@ -106,10 +106,8 @@ public class LevelVisualizer : MonoBehaviour
     }
 
 
-    private IEnumerator BuildCoroutine(LevelData level)
+    public void DestoryCurrentObjects()
     {
-        orgScenarioModel = CloneScenarioModelFromLevel(currLevel);
-
         // clear out any previously spawned parts
         for (int i = levelHolder.childCount - 1; i >= 0; i--)
             Destroy(levelHolder.GetChild(i).gameObject);
@@ -117,6 +115,13 @@ public class LevelVisualizer : MonoBehaviour
         // clear out any previously spawned parts
         for (int i = dynamicHolder.childCount - 1; i >= 0; i--)
             Destroy(dynamicHolder.GetChild(i).gameObject);
+    }
+
+    private IEnumerator BuildCoroutine(LevelData level)
+    {
+        orgScenarioModel = CloneScenarioModelFromLevel(currLevel);
+
+        DestoryCurrentObjects();
 
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
@@ -354,23 +359,24 @@ public class LevelVisualizer : MonoBehaviour
         // 1) Verify splines
         //SplineComparer.CompareAllSplines(currLevel, levelHolder, cellSize);
 
+        float animTime = 0.35f;
         // 2) Build the live dynamic content
-        GenerateDynamic();
+        GenerateDynamic(animTime);
 
         // 3) Build the data-driven “raw” dynamic content
         //GenerateDynamicFromData();
 
         // 4) Wait until the end of the frame so all Transforms have updated
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(animTime);
 
         // 5) Compare live vs. raw children
         //CompareDynamicHolders();
+        Camera.main.transform.DOShakePosition(0.25f, strength: 0.15f, vibrato: 10, randomness: 90, snapping: false, fadeOut: true);
 
-        
     }
 
 
-    public void GenerateDynamic()
+    public void GenerateDynamic(float animTime)
     {
         GamePoint.ResetIds(1);
 
@@ -390,8 +396,7 @@ public class LevelVisualizer : MonoBehaviour
         if (useSimulation && SimAppInstance != null)
             SimAppInstance.Reset(scenarioModel);
 
-        float animTime = 0.35f;
-        float stationDelay = 0.35f;
+        float stationDelay = 0.05f;
         int counter = 0;
 
         foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
@@ -407,7 +412,7 @@ public class LevelVisualizer : MonoBehaviour
 
             var go = Instantiate(stationPrefab, dynamicHolder);
             go.name = $"Station_{pt.id}";
-            go.transform.position = new Vector3(worldPos.x,worldPos.y,worldPos.z-6f);
+            go.transform.position = new Vector3(worldPos.x,worldPos.y,worldPos.z-8f);
 
             go.transform.localScale = Vector3.zero;
 
@@ -439,7 +444,7 @@ public class LevelVisualizer : MonoBehaviour
 
             var go = Instantiate(depotPrefab, dynamicHolder);
             go.name = $"Depot_{pt.id}";
-            go.transform.position = new Vector3(worldPos.x,worldPos.y,worldPos.z-6f);
+            go.transform.position = new Vector3(worldPos.x,worldPos.y,worldPos.z-8f);
 
             go.transform.localScale = Vector3.zero;
 
@@ -503,7 +508,7 @@ public class LevelVisualizer : MonoBehaviour
 
         }
 
-        
+
     }
 
     /// <summary>

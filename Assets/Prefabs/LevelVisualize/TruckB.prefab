@@ -4841,6 +4841,7 @@ GameObject:
   - component: {fileID: 1635398653924568213}
   - component: {fileID: 8775655816977262056}
   - component: {fileID: 6101206347962491971}
+  - component: {fileID: 8587148110090629262}
   m_Layer: 0
   m_Name: Holder
   m_TagString: Untagged
@@ -4902,6 +4903,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bab1617896bc684082063962f32a7c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!54 &8587148110090629262
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395880117950965120}
+  serializedVersion: 4
+  m_Mass: 5
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1868435576959347240
 GameObject:
   m_ObjectHideFlags: 0
@@ -5251,8 +5279,10 @@ MonoBehaviour:
   trainClickView: {fileID: 6101206347962491971}
   trainSelectedHighLight: {fileID: 3464144431140669403}
   particleSystemTrain: {fileID: 6955996555119570450}
+  trainRigidbody: {fileID: 8587148110090629262}
+  currCarts: []
   direction: 0
-  CurrentPointModel:
+  trainPointModel:
     gridX: 0
     gridY: 0
     type: 0
@@ -5274,6 +5304,34 @@ MonoBehaviour:
     waitingDelays: 
     initialCarts: 
     direction: 0
+    DepotLockingColorIndex: 0
+    MyDepotIsLockingDepotPointID: 0
+    MyDepotIsLockedByDepotPointID: 0
+  trainIsOnThisGamePoint:
+    gridX: 0
+    gridY: 0
+    type: 0
+    colorIndex: 0
+    id: 0
+    part:
+      partType: 
+      partId: 
+      position: {x: 0, y: 0}
+      rotation: 0
+      occupyingCells: []
+      allowedPathsGroup: []
+    anchor:
+      partId: 
+      exitPin: 0
+      splineIndex: 0
+      t: 0
+    waitingPeople: 
+    waitingDelays: 
+    initialCarts: 
+    direction: 0
+    DepotLockingColorIndex: 0
+    MyDepotIsLockingDepotPointID: 0
+    MyDepotIsLockedByDepotPointID: 0
   reservedCartSlots: 20
 --- !u!1001 &8246781282137990547
 PrefabInstance:

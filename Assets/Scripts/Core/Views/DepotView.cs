@@ -1,9 +1,10 @@
 ﻿
 
 using DG.Tweening;
+using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
+
 public class DepotView : MonoBehaviour
 {
     private GamePoint _pointModel;
@@ -14,9 +15,12 @@ public class DepotView : MonoBehaviour
 
     [SerializeField] Transform gateHinge;
     [SerializeField] GameObject key;
+    [SerializeField] Transform keyHolder;
     [SerializeField] Renderer gateRenderer;
 
     public bool depotGateLocked = true;
+
+    Sequence keyRotateSeq = null;
 
     public GamePoint PointModel { get => _pointModel; private set => _pointModel = value; }
 
@@ -38,15 +42,19 @@ public class DepotView : MonoBehaviour
         if(point.DepotLockingColorIndex != -1)
         {
             //means this depot is locking some other depot 
-            key.SetActive(true);
+            keyHolder.gameObject.SetActive(true);
             key.GetComponent<Renderer>().material = LevelVisualizer.Instance.GetKeyMaterialByIndex(point.DepotLockingColorIndex);
 
+            keyRotateSeq = DOTween.Sequence();
+
             //if key exists - make him spin so he is more noticable
-            key.transform.DOLocalRotate(new Vector3(360, 90, -90), 1,RotateMode.Fast).SetLoops(-1,LoopType.Restart);
+            keyRotateSeq.Append(keyHolder.DOLocalRotate(new Vector3(0, 0, 360), 2.5f,RotateMode.LocalAxisAdd).SetLoops(1000,LoopType.Restart));
+
+            keyRotateSeq.Play();
 
         }
         else
-            key.SetActive(false);
+            keyHolder.gameObject.SetActive(false);
 
 
         if(point.direction == TrainDir.Right)
@@ -77,8 +85,19 @@ public class DepotView : MonoBehaviour
         {
             GameManager.Instance.UpdateDepotItsKeyWasCollected(_pointModel.MyDepotIsLockingDepotPointID);
             _pointModel.MyDepotIsLockingDepotPointID = -1;
-            key.SetActive(false);
+
+            if(keyRotateSeq!=null)
+                keyRotateSeq.Kill();
+
+            keyHolder.gameObject.SetActive(false);
         }
         
+    }
+
+    internal void DoSelectedAnimation()
+    {
+        transform.localScale = Vector3.one;
+
+        transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
     }
 }

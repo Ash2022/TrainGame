@@ -1,10 +1,10 @@
 ﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
-[RequireComponent(typeof(Collider))]
 public class StationView : MonoBehaviour
 {
     private GamePoint _pointModel;
@@ -99,19 +99,23 @@ public class StationView : MonoBehaviour
             go.transform.DOScale(Vector3.one*passengerDepth, 0.1f);
             go.transform.DOLocalMove(new Vector3(0f, 0f, z), 0.2f);
 
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.15f);
         }
 
         //check if we have locked and if so display 1 lock on the middle passengerView
         if(lockedPassengers.Count>0)
         {
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.15f);
 
             int indexToShowOn = lockedPassengers.Count/2;
 
             PassengerView passengerView = lockedPassengers[indexToShowOn];
 
             lockedIndication = UIManager.Instance.GenerateLockedIndication(passengerView.transform.position, passengerView.isLocked);
+
+            lockedIndication.transform.localScale = Vector3.zero;
+
+            lockedIndication.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutElastic);
         }
     }
 
@@ -137,7 +141,7 @@ public class StationView : MonoBehaviour
         
         for (int passengerIndex = 0; passengerIndex < passengers.Count; passengerIndex++)
         {
-            var c = passengers[passengers.Count - 1 - passengerIndex].transform;
+            var c = passengers[passengerIndex].transform;
             float z = -(0.5f + passengerIndex) * _spacing - passengerDepth / 2f;
             c.localPosition = new Vector3(0f, 0f, z);
             c.localRotation = Quaternion.identity;
@@ -163,5 +167,12 @@ public class StationView : MonoBehaviour
                 }
             }
         }
+    }
+
+    internal void DoSelectedAnimation()
+    {
+        transform.localScale = Vector3.one;
+
+        transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
     }
 }

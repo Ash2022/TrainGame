@@ -256,9 +256,26 @@ blender model a key --- DONE
 
 tutorial --- DONE
 
-Level
-check multi trains moving together - seems very possible - something about selected train needs to be fine tuned
-Small animation Touches 
+Levels
+check multi trains moving together - seems very possible - something about selected train needs to be fine tuned 
+Small animation Touches -- DONE
+
+make the apear animations faster and maybe add a small camera shake --- DONE
+make the reset before showing the tutorial --- DONE
+
+stop the game right after crash -- DONE
+
+zoom camera out a little bit more --- DONE
+key rotation issue --- DONE
+
+Make Split3 road --- DONE - need nina 
+
+fix all the unlocking to match the features
+consider making the path spline as a drawing on the roads.
+consider what to do in the crash --- DONE
+SFX
+bug in level 19 - when having 3 colors stacked - something gets massed up after taking the top color.
+
 
 
 visual missions for nina:
@@ -269,6 +286,7 @@ maybe no stripes on depots
 gates non dynamic parts
 texts for all the screens
 main user info text
+Split 3 road
 
 Question Mark:
 Title: Hidden Color
@@ -276,7 +294,7 @@ Body : Pick up X passengers to reveal its color.
 
 Key/Lock feature
 Title: Locked Depots
-Body: A depot unlocks only after you collect the matching colored key.
+Body: Get colored key to unlock the gate.
 
 
 New truck unlock feature

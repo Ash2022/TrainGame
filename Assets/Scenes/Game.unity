@@ -377,7 +377,7 @@ MonoBehaviour:
   uiManager: {fileID: 190145371}
   canvasRect: {fileID: 130546899}
   UseSimulation: 0
-  CurrentLevelIndex: 0
+  CurrentLevelIndex: 1
 --- !u!4 &190145369
 Transform:
   m_ObjectHideFlags: 0
@@ -415,6 +415,25 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 4bb385a1de0d53541a0cd628ede00891, type: 3}
   - {fileID: 4900000, guid: 741e06bf15783b84cbc0132ad7ae4674, type: 3}
   - {fileID: 4900000, guid: 2740c3b8a56c34c42b750c215a63bc85, type: 3}
+  - {fileID: 4900000, guid: afc57db7e429c694fa12eff20301479c, type: 3}
+  - {fileID: 4900000, guid: 7592d44ee61151a46a9aa452cde2e305, type: 3}
+  - {fileID: 4900000, guid: 0faa1b344d3b91c4c80263916de6d4bf, type: 3}
+  - {fileID: 4900000, guid: ad28a291dccb2c641b766dba992f224b, type: 3}
+  - {fileID: 4900000, guid: 1af27488c57254b4ba249b2cff112c21, type: 3}
+  - {fileID: 4900000, guid: b0a4f2bf657c0fc43952f36298f292f4, type: 3}
+  - {fileID: 4900000, guid: f2548743934b9f442a0817cbbf4396f1, type: 3}
+  - {fileID: 4900000, guid: 955a5db47b68cae4d96b2ea3dd60fef0, type: 3}
+  - {fileID: 4900000, guid: 77ec2f73f4a4ef141af3c15de7762f19, type: 3}
+  - {fileID: 4900000, guid: d67cc5a229d902a4ba4ce90e5ac32073, type: 3}
+  - {fileID: 4900000, guid: 9f620718a88eb074abf534cf0854805b, type: 3}
+  - {fileID: 4900000, guid: 9fae6f709b277244199069218b54a724, type: 3}
+  - {fileID: 4900000, guid: 48049fd356402424a96d5900a3271445, type: 3}
+  - {fileID: 4900000, guid: ff64c3f59669cf044a84afab1f7f37a7, type: 3}
+  - {fileID: 4900000, guid: c909e1e837a617147b43770dbf6951d1, type: 3}
+  - {fileID: 4900000, guid: 5b0e740c9ccaf644da6c608ce9fd89a7, type: 3}
+  - {fileID: 4900000, guid: afc81d6343c18164f8c3bcb2176d2556, type: 3}
+  - {fileID: 4900000, guid: 9e6bfecb2c017cc43b0c91bcb4c29289, type: 3}
+  - {fileID: 4900000, guid: 5f367a550850496459e5bbf147fa5f66, type: 3}
   unlockBGs:
   - {fileID: 21300000, guid: 90cb691d943ab2d4f90d043405329f26, type: 3}
   - {fileID: 21300000, guid: 5f87ccc06759fd747949c18eea5cc750, type: 3}
@@ -445,6 +464,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f80358e417e42bc43816508fa5a44337, type: 3}
   - {fileID: 21300000, guid: 98e23d155d8762846beae6e19ccdbe7a, type: 3}
   - {fileID: 21300000, guid: 3f99dca39ddfb3d4db85bd10262f880b, type: 3}
+  - {fileID: 21300000, guid: 98e23d155d8762846beae6e19ccdbe7a, type: 3}
   tutorialImageView: {fileID: 1295628015}
   tutorialHand: {fileID: 424974025}
   lockedIndicationPrefab: {fileID: 994788248367984080, guid: c959beed314830b44a0551eb59f4e4d0, type: 3}
@@ -2042,6 +2062,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 04a690711fddcfc4dba589327e940a41, type: 3}
   - {fileID: 21300000, guid: cfdd4152ac2f0bb409d66f5bb279169c, type: 3}
   - {fileID: 21300000, guid: 4d9f09fb95c7300459f4325ed4ce2db6, type: 3}
+  - {fileID: 21300000, guid: 54f9a1968edf49f4d85ba9f6b545d72c, type: 3}
   partObjects:
   - {fileID: 919132149155446097, guid: 363cf3aa4afdd7243b5d800a70876f4b, type: 3}
   - {fileID: 919132149155446097, guid: aa64ce010e0f2d14182790f730563ac1, type: 3}
