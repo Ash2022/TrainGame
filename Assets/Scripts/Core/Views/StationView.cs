@@ -150,6 +150,8 @@ public class StationView : MonoBehaviour
 
     public void UpdatePassengersLocking()
     {
+        bool passengersUnlocked = false;
+
         for (int passengerIndex = 0; passengerIndex < passengers.Count; passengerIndex++)
         {
             var c = passengers[passengers.Count - 1 - passengerIndex].transform;
@@ -161,16 +163,23 @@ public class StationView : MonoBehaviour
                 {
                     passengerView.UnlockPassenger(_pointModel.waitingPeople[passengerIndex]);
 
+                    passengersUnlocked = true;
+
                     //if any passegner unlocked - it means the entire stack unlocked
-                    if(lockedIndication!=null)
+                    if (lockedIndication!=null)
                         Destroy(lockedIndication);
                 }
             }
         }
+
+        if (passengersUnlocked)
+            SoundsManager.Instance.HiddenUnlocked();
     }
 
     internal void DoSelectedAnimation()
     {
+        SoundsManager.Instance.SelectStation();
+
         transform.localScale = Vector3.one;
 
         transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);

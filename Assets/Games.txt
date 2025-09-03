@@ -274,6 +274,23 @@ fix all the unlocking to match the features
 consider making the path spline as a drawing on the roads -- Need texture from Nina
 consider what to do in the crash --- DONE
 SFX
+
+levels index for recordings - 15,6,8
+
+select a truck
+select a station
+pick up passengers
+depot unlocks
+select a depot
+accident
+building sound
+drop sound
+hidden unlocked
+
+dont let a moving trcuk to specify another location
+dont let a loading train to move while loading
+
+
 bug in level 19 - when having 3 colors stacked - something gets massed up after taking the top color - FIXED
 
 

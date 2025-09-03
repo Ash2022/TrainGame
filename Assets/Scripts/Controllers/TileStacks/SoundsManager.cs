@@ -13,13 +13,18 @@ public class SoundsManager : MonoBehaviour
         High
     }
 
-    [SerializeField] AudioClip _buttonClick;
-    [SerializeField]AudioClip _invalidButtonClick;
+    [SerializeField] AudioClip selectTruck;
+    [SerializeField] AudioClip selectStation;
+    [SerializeField] AudioClip selectDepot;
+    [SerializeField] AudioClip passengerPickUp;
+    [SerializeField] AudioClip depotGateOpens;
+    [SerializeField] AudioClip accident;
+    [SerializeField] AudioClip building;
+    [SerializeField] AudioClip buildingDrop;
+    [SerializeField] AudioClip hiddenUnlocked;
+    [SerializeField] AudioClip keyCollected;
+    [SerializeField] AudioClip arrivedToDepot;
 
-    [SerializeField] AudioClip _tileStartFlight;
-    [SerializeField] AudioClip _tileHitButton;
-    [SerializeField] AudioClip _tileHiddenUnlocked;
-    [SerializeField] AudioClip _stackUnlocked;
     [SerializeField] AudioClip _levelComplete;
     [SerializeField] AudioClip _levelFail;
     
@@ -34,7 +39,7 @@ public class SoundsManager : MonoBehaviour
     [SerializeField] AudioSource _SFX_Source8 = null;
     [SerializeField] AudioSource _SFX_Source9 = null;
     [SerializeField] AudioSource _SFX_Source10 = null;
-    [SerializeField] AudioSource _SFX_Source11 = null;
+    [SerializeField] AudioSource _SFX_BuildingSource = null;
 
     static SoundsManager _instance;
 
@@ -45,29 +50,72 @@ public class SoundsManager : MonoBehaviour
         _instance = this;
     }
 
-    
-    public void ButtonClick(bool validClick)
+    internal void SelectTruck()
     {
-        PlayClip(validClick?_buttonClick:_invalidButtonClick);
+        PlayClip(selectTruck);
     }
 
-    public void StackUnlcoked()
+    internal void SelectStation()
     {
-        PlayClip(_stackUnlocked,0.25f);
+        PlayClip(selectStation);
     }
 
-    public void HiddenTileUnlocked()
+    internal void SelectDepot()
     {
-        PlayClip(_tileHiddenUnlocked, 0.25f);
+        PlayClip(selectDepot);
     }
 
-    public void TileHitButton()
+
+    internal void PickUpPassenger()
     {
-        PlayClip(_tileHitButton);
+        PlayClip(passengerPickUp);
     }
-    public void TileStartFlying()
+
+    internal void DepotGateOpens()
     {
-        PlayClip(_tileStartFlight);
+        PlayClip(depotGateOpens);
+    }
+
+    internal void ArrivedToDepot()
+    {
+        PlayClip(arrivedToDepot);
+    }
+
+    internal void Accident()
+    {
+        PlayClip(accident);
+    }
+
+    internal void Building(bool start)
+    {
+        if(start)
+        {
+            _SFX_BuildingSource.loop = true;
+            _SFX_BuildingSource.clip =  building;
+            _SFX_BuildingSource.Play();
+        }
+        else
+        {
+            if (_SFX_BuildingSource != null)
+                _SFX_BuildingSource.Stop();
+        }
+    }
+
+
+
+    internal void BuildingDrop()
+    {
+        PlayClip(buildingDrop);
+    }
+
+    internal void HiddenUnlocked()
+    {
+        PlayClip(hiddenUnlocked);
+    }
+
+    internal void KeyCollected()
+    {
+        PlayClip(keyCollected);
     }
 
     internal void PlayLevelFailed()
@@ -101,7 +149,7 @@ public class SoundsManager : MonoBehaviour
         _SFX_Source8.mute = mute;
         _SFX_Source9.mute = mute;
         _SFX_Source10.mute = mute;
-        _SFX_Source11.mute = mute;
+        _SFX_BuildingSource.mute = mute;
 
     }
 
@@ -154,9 +202,6 @@ public class SoundsManager : MonoBehaviour
 
         if (!_SFX_Source10.isPlaying)
             return _SFX_Source10;
-
-        if (!_SFX_Source11.isPlaying)
-            return _SFX_Source11;
 
 
         return null;

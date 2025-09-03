@@ -73,6 +73,7 @@ public class DepotView : MonoBehaviour
     {
         if(depotGateLocked)
         {
+            SoundsManager.Instance.DepotGateOpens();
             depotGateLocked = false;
             gateHinge.DOLocalRotate(new Vector3(-180, 0, 0),1f);
         }
@@ -95,6 +96,8 @@ public class DepotView : MonoBehaviour
             if(keyRotateSeq!=null)
                 keyRotateSeq.Kill();
 
+            SoundsManager.Instance.KeyCollected();
+
             keyHolder.gameObject.SetActive(false);
         }
         
@@ -102,6 +105,8 @@ public class DepotView : MonoBehaviour
 
     internal void DoSelectedAnimation()
     {
+        SoundsManager.Instance.SelectDepot();
+
         transform.localScale = Vector3.one;
 
         transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);

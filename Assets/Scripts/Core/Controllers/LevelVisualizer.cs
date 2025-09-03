@@ -175,6 +175,8 @@ public class LevelVisualizer : MonoBehaviour
 
         var occupied = new HashSet<Vector2Int>();
 
+        SoundsManager.Instance.Building(true);
+
         foreach (var inst in level.parts)
         {
             // 1) find the bounding box of the occupied cells
@@ -234,6 +236,7 @@ public class LevelVisualizer : MonoBehaviour
             yield return new WaitForSeconds(tileDelay);
         }
 
+        SoundsManager.Instance.Building(false);
 
         // ADD: fill gaps with empties
         /*
@@ -371,6 +374,9 @@ public class LevelVisualizer : MonoBehaviour
 
         // 5) Compare live vs. raw children
         //CompareDynamicHolders();
+
+        SoundsManager.Instance.BuildingDrop();
+
         Camera.main.transform.DOShakePosition(0.25f, strength: 0.15f, vibrato: 10, randomness: 90, snapping: false, fadeOut: true);
 
     }

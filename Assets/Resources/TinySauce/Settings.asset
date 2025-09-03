@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: faa11ec82e9746928e211e7f096812ca, type: 3}
+  m_Name: Settings
+  m_EditorClassIdentifier: 
+  gameAnalyticsIosGameKey: 
+  gameAnalyticsIosSecretKey: 
+  gameAnalyticsAndroidGameKey: 3add3aa0f371dd49ae564faed69782cc
+  gameAnalyticsAndroidSecretKey: 6dacadb48c51b7efe9fbadd74106f503fc85a53c
+  facebookAppId: 751958284106663
+  facebookClientToken: b6020edb91dc1299d15edc300d16abb3
+  adjustIOSToken: 
+  adjustAndroidToken: gg4kywq6z0u8
+  EditorIdfa: 3398b2f6-9d73-407c-a6c6-4bf64d72332d
+  UseRemoteConfig: 0
+  UseVoodooAnalytics: 1
+  companyName: Shini
+  privacyPolicyURL: https://dancingmonkey-f249a.firebaseapp.com/privacy.txt
+  developerContactEmail: alonshini@gmail.com

@@ -48,6 +48,8 @@ public class TrainController : MonoBehaviour
     public Vector3 HeadWorldPos => transform.position;
 
     public int MirrorId { get; private set; }
+    public TrainMover Mover { get => mover; set => mover = value; }
+
     public void AssignMirrorId(int id) { MirrorId = id; }
 
     public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize, GameObject cartPrefab,float startDelay,float animTime)
@@ -220,6 +222,8 @@ public class TrainController : MonoBehaviour
 
     private void TrainWasClicked()
     {
+        SoundsManager.Instance.SelectTruck();  
+
         transform.localScale = Vector3.one;
 
         transform.DOPunchScale(Vector3.one * 0.1f, 0.1f);
@@ -265,8 +269,10 @@ public class TrainController : MonoBehaviour
         {
             Debug.Log("Train " + trainPointModel.id + " blocked by Train " + r.BlockerId + " at " + r.HitPos);
 
+
+            SoundsManager.Instance.Accident();
             //do explode
-            GameManager.Instance.ApplyRadialForce(r.HitPos, trainPointModel.id, r.BlockerId, 3, 10);
+            GameManager.Instance.ApplyRadialForce(r.HitPos, trainPointModel.id, r.BlockerId, 3, 7);
         }
 
         // forward to engine
@@ -329,7 +335,8 @@ public class TrainController : MonoBehaviour
 
         cart.transform.DOScale(Vector3.one * cartLen, 0.25f).SetDelay(0.25f * counter).OnStart(()=>
         {
-            Taptic.Medium();
+            SoundsManager.Instance.PlayHaptics(SoundsManager.TapticsStrenght.Medium);
+            SoundsManager.Instance.PickUpPassenger();
         });
 
         // record it

@@ -68,8 +68,8 @@ public class GameManager : MonoBehaviour
 
         Application.targetFrameRate = 60;
 
-        //TinySauce.SubscribeOnInitFinishedEvent((param1, param2) =>
-        //{
+        TinySauce.SubscribeOnInitFinishedEvent((param1, param2) =>
+        {
             if (CurrentLevelIndex == -1)
             {
                 CurrentLevelIndex = ModelManager.Instance.GetLastPlayedLevel();
@@ -82,9 +82,11 @@ public class GameManager : MonoBehaviour
             //{                
             //    uiManager.ShowTutorialImage(true, CurrentLevelIndex);
             //}
-        //});   
 
-        LoadCurrentLevel();
+            LoadCurrentLevel();
+        });   
+
+        
     }
 
     private void LoadCurrentLevel()
@@ -108,6 +110,8 @@ public class GameManager : MonoBehaviour
         // build via visualizer
         if (levelVisualizer != null)
             levelVisualizer.Build(levelCopy, UseSimulation ? simApp : null, UseSimulation);
+
+        
 
         uiManager.InitLevel(level, CurrentLevelIndex);
 
@@ -176,7 +180,7 @@ public class GameManager : MonoBehaviour
         var stationView = hit.collider.transform.parent.gameObject.GetComponent<StationView>();
         if (stationView != null) 
         {
-            if(selectedTrain!=null && selectedTrain.LastPath==null)
+            //if(selectedTrain!=null && selectedTrain.LastPath==null)
                 stationView.DoSelectedAnimation();
 
             OnPointClicked(stationView.PointModel);
@@ -215,7 +219,7 @@ public class GameManager : MonoBehaviour
 
             }
 
-            if (selectedTrain != null && selectedTrain.LastPath == null)
+            //if (selectedTrain != null && selectedTrain.LastPath == null)
                 depotView.DoSelectedAnimation();
 
             OnPointClicked(depotView.PointModel); 
@@ -242,7 +246,7 @@ public class GameManager : MonoBehaviour
         if (target == null) { Debug.LogError("Clicked view has no GamePoint!"); return; }
         if (selectedTrain == null) { Debug.LogWarning("No train selected."); return; }
 
-        Taptic.Medium();
+        SoundsManager.Instance.PlayHaptics(SoundsManager.TapticsStrenght.Medium);
 
         if (target.type == GamePointType.Station)
         {
@@ -262,6 +266,9 @@ public class GameManager : MonoBehaviour
 
             }
         }
+
+        if (selectedTrain.Mover.isMoving)
+            return;
 
         // --- Second click on same target -> start move ---
         if (selectedTrain.LastTargetId == target.id && selectedTrain.LastPath != null && selectedTrain.LastPath.Success)
@@ -423,8 +430,9 @@ public class GameManager : MonoBehaviour
 
             level.totalArrivedPassengers += tc.currCarts.Count;
 
-            Taptic.Medium();
+            SoundsManager.Instance.PlayHaptics(SoundsManager.TapticsStrenght.Medium);
 
+            SoundsManager.Instance.ArrivedToDepot();
             uiManager.UpdateScore(level.totalCollectedPassengers, level.totalArrivedPassengers);
 
             // WL compare (sim may report Win if global state is already complete)
@@ -667,6 +675,8 @@ public class GameManager : MonoBehaviour
         */
 
         gameOver = true;
+
+        TinySauce.OnGameFinished(win, 0, CurrentLevelIndex);
 
         gameOverView.InitEndScreen(win, CurrentLevelIndex, () =>
         {
