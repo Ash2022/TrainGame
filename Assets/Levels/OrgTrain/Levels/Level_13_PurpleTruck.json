@@ -2302,138 +2302,6 @@
         "HasWaitingPeople": false
       },
       {
-        "gridX": 9,
-        "gridY": 7,
-        "type": 0,
-        "colorIndex": 0,
-        "id": 8,
-        "part": {
-          "partType": "Straight",
-          "partId": "Straight_30",
-          "position": {
-            "x": 9,
-            "y": 7
-          },
-          "rotation": 90,
-          "splines": [],
-          "worldSplines": [
-            [
-              {
-                "x": 7.5,
-                "y": 0.720000267,
-                "z": 0.0
-              },
-              {
-                "x": 6.5,
-                "y": 0.720000267,
-                "z": 0.0
-              }
-            ]
-          ],
-          "exits": [
-            {
-              "exitIndex": 0,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 9,
-                "y": 7
-              },
-              "direction": 1,
-              "neighborCell": {
-                "x": 10,
-                "y": 7
-              }
-            },
-            {
-              "exitIndex": 1,
-              "localCell": {
-                "x": 0,
-                "y": 0
-              },
-              "rotatedCell": {
-                "x": 0,
-                "y": 0
-              },
-              "worldCell": {
-                "x": 9,
-                "y": 7
-              },
-              "direction": 3,
-              "neighborCell": {
-                "x": 8,
-                "y": 7
-              }
-            }
-          ],
-          "occupyingCells": [
-            {
-              "x": 9,
-              "y": 7
-            }
-          ],
-          "allowedPathsGroup": [
-            {
-              "allowedPaths": [
-                {
-                  "entryConnectionId": 0,
-                  "exitConnectionId": 1,
-                  "length": 1.0
-                },
-                {
-                  "entryConnectionId": 1,
-                  "exitConnectionId": 0,
-                  "length": 1.0
-                }
-              ]
-            }
-          ]
-        },
-        "anchor": {
-          "partId": "Straight_30",
-          "exitPin": 0,
-          "splineIndex": -1,
-          "t": 0.0
-        },
-        "waitingPeople": [
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3
-        ],
-        "waitingDelays": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "initialCarts": [],
-        "direction": 3,
-        "DepotLockingColorIndex": -1,
-        "MyDepotIsLockingDepotPointID": -1,
-        "MyDepotIsLockedByDepotPointID": -1,
-        "Letter": "S",
-        "HasWaitingPeople": true
-      },
-      {
         "gridX": 7,
         "gridY": 5,
         "type": 0,
@@ -2668,6 +2536,138 @@
         "MyDepotIsLockedByDepotPointID": -1,
         "Letter": "D",
         "HasWaitingPeople": false
+      },
+      {
+        "gridX": 5,
+        "gridY": 7,
+        "type": 0,
+        "colorIndex": 0,
+        "id": 13,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_18",
+          "position": {
+            "x": 5,
+            "y": 7
+          },
+          "rotation": 90,
+          "splines": [],
+          "worldSplines": [
+            [
+              {
+                "x": 3.9375,
+                "y": 0.8100003,
+                "z": 0.0
+              },
+              {
+                "x": 2.8125,
+                "y": 0.8100003,
+                "z": 0.0
+              }
+            ]
+          ],
+          "exits": [
+            {
+              "exitIndex": 0,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 5,
+                "y": 7
+              },
+              "direction": 1,
+              "neighborCell": {
+                "x": 6,
+                "y": 7
+              }
+            },
+            {
+              "exitIndex": 1,
+              "localCell": {
+                "x": 0,
+                "y": 0
+              },
+              "rotatedCell": {
+                "x": 0,
+                "y": 0
+              },
+              "worldCell": {
+                "x": 5,
+                "y": 7
+              },
+              "direction": 3,
+              "neighborCell": {
+                "x": 4,
+                "y": 7
+              }
+            }
+          ],
+          "occupyingCells": [
+            {
+              "x": 5,
+              "y": 7
+            }
+          ],
+          "allowedPathsGroup": [
+            {
+              "allowedPaths": [
+                {
+                  "entryConnectionId": 0,
+                  "exitConnectionId": 1,
+                  "length": 1.0
+                },
+                {
+                  "entryConnectionId": 1,
+                  "exitConnectionId": 0,
+                  "length": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        "anchor": {
+          "partId": "Straight_18",
+          "exitPin": 0,
+          "splineIndex": -1,
+          "t": 0.0
+        },
+        "waitingPeople": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "waitingDelays": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialCarts": [],
+        "direction": 3,
+        "DepotLockingColorIndex": -1,
+        "MyDepotIsLockingDepotPointID": -1,
+        "MyDepotIsLockedByDepotPointID": -1,
+        "Letter": "S",
+        "HasWaitingPeople": true
       }
     ]
   },

@@ -164,12 +164,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 2,
-              "length": 2.19023848
+              "length": 2.19023824
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 0,
-              "length": 2.19023848
+              "length": 2.19023824
             }
           ]
         },
@@ -178,12 +178,12 @@
             {
               "entryConnectionId": 1,
               "exitConnectionId": 2,
-              "length": 2.18887734
+              "length": 2.1888783
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 1,
-              "length": 2.18887734
+              "length": 2.1888783
             }
           ]
         },
@@ -192,12 +192,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 1,
-              "length": 3.0
+              "length": 3.000001
             },
             {
               "entryConnectionId": 1,
               "exitConnectionId": 0,
-              "length": 3.0
+              "length": 3.000001
             }
           ]
         }
@@ -1384,12 +1384,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 2,
-              "length": 2.19023848
+              "length": 2.19023824
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 0,
-              "length": 2.19023848
+              "length": 2.19023824
             }
           ]
         },
@@ -1398,12 +1398,12 @@
             {
               "entryConnectionId": 1,
               "exitConnectionId": 2,
-              "length": 2.18887734
+              "length": 2.1888783
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 1,
-              "length": 2.18887734
+              "length": 2.1888783
             }
           ]
         },
@@ -1412,12 +1412,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 1,
-              "length": 3.0
+              "length": 3.000001
             },
             {
               "entryConnectionId": 1,
               "exitConnectionId": 0,
-              "length": 3.0
+              "length": 3.000001
             }
           ]
         }
@@ -1584,12 +1584,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 2,
-              "length": 2.19023848
+              "length": 2.19023824
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 0,
-              "length": 2.19023848
+              "length": 2.19023824
             }
           ]
         },
@@ -1598,12 +1598,12 @@
             {
               "entryConnectionId": 1,
               "exitConnectionId": 2,
-              "length": 2.18887734
+              "length": 2.1888783
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 1,
-              "length": 2.18887734
+              "length": 2.1888783
             }
           ]
         },
@@ -1612,12 +1612,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 1,
-              "length": 3.0
+              "length": 3.000001
             },
             {
               "entryConnectionId": 1,
               "exitConnectionId": 0,
-              "length": 3.0
+              "length": 3.000001
             }
           ]
         }
@@ -1784,12 +1784,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 2,
-              "length": 2.19023848
+              "length": 2.19023824
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 0,
-              "length": 2.19023848
+              "length": 2.19023824
             }
           ]
         },
@@ -1798,12 +1798,12 @@
             {
               "entryConnectionId": 1,
               "exitConnectionId": 2,
-              "length": 2.18887734
+              "length": 2.1888783
             },
             {
               "entryConnectionId": 2,
               "exitConnectionId": 1,
-              "length": 2.18887734
+              "length": 2.1888783
             }
           ]
         },
@@ -1812,12 +1812,12 @@
             {
               "entryConnectionId": 0,
               "exitConnectionId": 1,
-              "length": 3.0
+              "length": 3.000001
             },
             {
               "entryConnectionId": 1,
               "exitConnectionId": 0,
-              "length": 3.0
+              "length": 3.000001
             }
           ]
         }
@@ -3326,7 +3326,7 @@
         "gridX": 11,
         "gridY": 15,
         "type": 1,
-        "colorIndex": 4,
+        "colorIndex": 0,
         "id": 1,
         "part": {
           "partType": "Straight",
@@ -3643,10 +3643,10 @@
           "t": 0.0
         },
         "waitingPeople": [
-          4,
-          4,
-          4,
-          4
+          0,
+          0,
+          0,
+          0
         ],
         "waitingDelays": [
           10,
@@ -3765,8 +3765,8 @@
         "waitingPeople": [
           2,
           2,
-          4,
-          4
+          0,
+          0
         ],
         "waitingDelays": [
           0,
@@ -3885,8 +3885,8 @@
         "waitingPeople": [
           2,
           2,
-          4,
-          4
+          0,
+          0
         ],
         "waitingDelays": [
           0,
@@ -4003,8 +4003,8 @@
           "t": 0.0
         },
         "waitingPeople": [
-          4,
-          4,
+          0,
+          0,
           2,
           2
         ],
@@ -4125,10 +4125,10 @@
         "waitingPeople": [
           2,
           2,
-          4,
-          4,
-          4,
-          4
+          0,
+          0,
+          0,
+          0
         ],
         "waitingDelays": [
           0,
@@ -4247,8 +4247,8 @@
           "t": 0.0
         },
         "waitingPeople": [
-          4,
-          4,
+          0,
+          0,
           2,
           2
         ],
@@ -4380,7 +4380,7 @@
         "gridX": 3,
         "gridY": 13,
         "type": 2,
-        "colorIndex": 4,
+        "colorIndex": 0,
         "id": 13,
         "part": {
           "partType": "Straight",

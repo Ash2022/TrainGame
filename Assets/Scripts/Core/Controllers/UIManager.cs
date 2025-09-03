@@ -12,8 +12,8 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] TMP_Text resultText;
-    [SerializeField] TMP_Text userInfoText;
-    [SerializeField] GameObject userInfoObj;
+    [SerializeField] UserMessageView userMessageView;
+
 
     [SerializeField] List<Sprite> tutorialImages = new List<Sprite>();
     [SerializeField] TutorialImageView tutorialImageView;
@@ -35,8 +35,7 @@ public class UIManager : MonoBehaviour
 
     public void InitLevel(LevelData levelData,int levelIndex)
     {
-        userInfoObj.transform.localScale = Vector3.one;
-        userInfoObj.SetActive(false);
+        userMessageView.HideMessage();
 
         levelText.text = "LEVEL "+(levelIndex+1).ToString();
 
@@ -47,10 +46,11 @@ public class UIManager : MonoBehaviour
         resultText.text = "0/" + levelTotalPassengers;
     }
 
-    public void PassengersCollected(int currentTotalCollected)
+    public void UpdateScore(int totalCollected, int currentTotalArrived)
     {
-        resultText.text = currentTotalCollected+ "/" + levelTotalPassengers;
+        resultText.text = currentTotalArrived + "/" + levelTotalPassengers;
     }
+
 
     public void ShowTutorialImage(bool show, int imageIndex)
     {
@@ -66,7 +66,10 @@ public class UIManager : MonoBehaviour
 
                 if (imageIndex == 1)
                     auxImage=ModelManager.Instance.GetUnlockedColorSprite(0);
-                
+
+                if (imageIndex == 3)
+                    auxImage = ModelManager.Instance.GetUnlockedColorSprite(1);
+
                 tutorialImageView.ShowTutorial(tutorialImages[imageIndex],auxImage);
             }
         }
@@ -82,7 +85,7 @@ public class UIManager : MonoBehaviour
         return tutorialImageView.gameObject.activeInHierarchy;
     }
 
-    public void ShowTutorialHand(Vector3 position)
+    public void ShowTutorialHand(Vector3 position,int index)
     {
         if(handSequence!=null)
             handSequence.Kill();
@@ -98,8 +101,36 @@ public class UIManager : MonoBehaviour
         handSequence.Append(tutorialHand.DOScale(0.8f, .8f).SetEase(Ease.InOutSine).SetLoops(100, LoopType.Yoyo));
 
         handSequence.Play();
+
+        if(index == 1)
+        {
+            userMessageView.ShowAutoMessage("Click the truck to select it", new Vector2(0,-300), 0);
+        }
+        else if(index == 2)
+        {
+            userMessageView.UpdateMessage("Great,Click the station to select it");
+        }
+        else if (index == 3 || index == 5)
+        {
+            userMessageView.UpdateMessage("Click again to confirm");
+        }
+        else if(index == 4)
+        {
+            userMessageView.ShowAutoMessage("Click the depot to select it", new Vector2(0, -300), 0);
+        }
     }
 
+    internal void HideTutorialHand(bool hideAlsoText=false)
+    {
+        if (handSequence != null)
+            handSequence.Kill();
+
+        tutorialHand.gameObject.SetActive(false);
+
+        if (hideAlsoText)
+            userMessageView.HideMessage();
+
+    }
     public GameObject GenerateLockedIndication(Vector3 position, int displayValue)
     {
         GameObject lockedIndicationObject = Instantiate(lockedIndicationPrefab, dynamicUIElementsHolder);
@@ -119,27 +150,16 @@ public class UIManager : MonoBehaviour
             Destroy(dynamicUIElementsHolder.GetChild(i).gameObject);
     }
 
-    internal void ShowUserMessage(string v, bool showBG=true)
+    internal void ShowUserMessage(string message, Vector2 position, float AutoRemoveTime, bool show)
     {
-        userInfoObj.GetComponent<Image>().enabled = showBG;
-        userInfoObj.SetActive(true);
-        userInfoText.text = v;
+        if (show)
+            userMessageView.ShowAutoMessage(message, position, AutoRemoveTime);
+        else
+            userMessageView.HideMessage();
 
-        userInfoObj.transform.DOScale(1.1f, 2f).OnComplete(()=>
-        {
-            userInfoObj.SetActive(false);
-            userInfoObj.transform.localScale = Vector3.one;
-        });
-        
     }
 
-    internal void HideTutorialHand()
-    {
-        if (handSequence != null)
-            handSequence.Kill();
-
-        tutorialHand.gameObject.SetActive(false);
-    }
+    
 
 
     /*

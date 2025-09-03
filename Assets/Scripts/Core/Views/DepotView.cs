@@ -79,6 +79,12 @@ public class DepotView : MonoBehaviour
 
     }
 
+    private void OnDestroy()
+    {
+        if (keyRotateSeq != null)
+            keyRotateSeq.Kill();
+    }
+
     public void CollectKey()
     {
         if (_pointModel.MyDepotIsLockingDepotPointID != -1)

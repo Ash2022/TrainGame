@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour
         if(CurrentLevelIndex == 0)
         {
             //first level - show tutorial
-            uiManager.ShowTutorialHand(levelTrains[0].transform.position);
+            uiManager.ShowTutorialHand(levelTrains[0].transform.position,1);
             tutorialSteps = 1;
         }
     }
@@ -191,22 +191,22 @@ public class GameManager : MonoBehaviour
 
             if (AnyStationHasColor(depotView.PointModel.colorIndex))
             {
-                uiManager.ShowUserMessage("Collect all the passengers of that color before going to depot");
+                uiManager.ShowUserMessage("Collect all the passengers\nbefore going to depot",Vector2.zero,2,true);
                 return;
             }
 
             if(depotView.PointModel.MyDepotIsLockedByDepotPointID != -1)
             {
-                uiManager.ShowUserMessage("Collect gate key before going to depot");
+                uiManager.ShowUserMessage("Collect gate key\nbefore going to depot", Vector2.zero, 2, true);
                 return;
             }
 
             //tutorial
             if(CurrentLevelIndex == 0)                
             {
-                if(tutorialSteps == 4)
+                if(tutorialSteps == 6)
                 {
-                    uiManager.HideTutorialHand();
+                    uiManager.HideTutorialHand(true);
                     tutorialSteps = 100;
                 }
                 
@@ -244,6 +244,25 @@ public class GameManager : MonoBehaviour
 
         Taptic.Medium();
 
+        if (target.type == GamePointType.Station)
+        {
+            if (CurrentLevelIndex == 0 && tutorialSteps == 2)
+            {
+                uiManager.ShowTutorialHand(levelStations[0].transform.position,3);
+                tutorialSteps = 3;
+            }
+        }
+
+        if (target.type == GamePointType.Depot)
+        {
+            if (CurrentLevelIndex == 0 && tutorialSteps == 5)
+            {
+                uiManager.ShowTutorialHand(levelDepots[0].transform.position, 5);
+                tutorialSteps = 6;
+
+            }
+        }
+
         // --- Second click on same target -> start move ---
         if (selectedTrain.LastTargetId == target.id && selectedTrain.LastPath != null && selectedTrain.LastPath.Success)
         {
@@ -256,8 +275,11 @@ public class GameManager : MonoBehaviour
             int willTake = 0;
             if (target.type == GamePointType.Station)
             {
-                if(CurrentLevelIndex == 0 && tutorialSteps==2)
-                    uiManager.HideTutorialHand();
+                if(CurrentLevelIndex == 0 && tutorialSteps==3)
+                {
+                    uiManager.HideTutorialHand(true);
+                    tutorialSteps = 4;
+                }
                 
                 int myColor = selectedTrain.trainPointModel.colorIndex;
                 var lst = target.waitingPeople;
@@ -321,7 +343,7 @@ public class GameManager : MonoBehaviour
         if(CurrentLevelIndex == 0 && tutorialSteps ==1)
         {
             //prompt user to click the station
-            uiManager.ShowTutorialHand(levelStations[0].transform.position);
+            uiManager.ShowTutorialHand(levelStations[0].transform.position,2);
             tutorialSteps = 2;
         }
 
@@ -364,10 +386,10 @@ public class GameManager : MonoBehaviour
 
         if (r.Outcome != MoveOutcome.Arrived) return;
 
-        if(CurrentLevelIndex == 0 && (tutorialSteps == 2|| tutorialSteps == 3))
+        if(CurrentLevelIndex == 0 &&  tutorialSteps == 4)
         {
-            uiManager.ShowTutorialHand(levelDepots[0].transform.position);
-            tutorialSteps++;
+            uiManager.ShowTutorialHand(levelDepots[0].transform.position,4);
+            tutorialSteps = 5;
         }
 
         // === Arrived ===
@@ -403,7 +425,7 @@ public class GameManager : MonoBehaviour
 
             Taptic.Medium();
 
-            uiManager.PassengersCollected(level.totalArrivedPassengers);
+            uiManager.UpdateScore(level.totalCollectedPassengers, level.totalArrivedPassengers);
 
             // WL compare (sim may report Win if global state is already complete)
             if (UseSimulation && simApp != null)
@@ -437,6 +459,7 @@ public class GameManager : MonoBehaviour
             tc.OnArrivedStation_AddCart(trainColor, removed);
         }
 
+        uiManager.UpdateScore(level.totalCollectedPassengers,level.totalArrivedPassengers);
 
         Debug.Log($"PICKUP result: took={removed} after={dest.waitingPeople.Count}");
         var sv = FindStationViewByPointId(dest.id);
@@ -660,7 +683,8 @@ public class GameManager : MonoBehaviour
                 if (unlockIndex != -1)
                 {
                     levelVisualizer.DestoryCurrentObjects();
-                    uiManager.ShowTutorialImage(true, unlockIndex + 1);
+                    uiManager.ClearDynamicHolder();
+                    uiManager.ShowTutorialImage(true, unlockIndex);
 
                 }
                 else

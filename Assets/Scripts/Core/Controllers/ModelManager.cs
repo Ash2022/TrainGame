@@ -6,6 +6,7 @@ using UnityEngine;
 public sealed class ModelManager : MonoBehaviour
 {
     const string LAST_PLAYED_LEVEL = "LastPlayedLevel";
+    const int LOOP_SIZE = 20;
     public static ModelManager Instance;
 
     [Header("Levels (JSON)")]
@@ -37,9 +38,10 @@ public sealed class ModelManager : MonoBehaviour
 
     public void Init()
     {
-        unlocksIndexList.Add(6);//hidden tile
+        unlocksIndexList.Add(7);//hidden tile
         UnlocksIndexList.Add(12);//color 7 -- red 6
-        unlocksIndexList.Add(18);//alternating lock
+        unlocksIndexList.Add(19);//alternating lock
+        UnlocksIndexList.Add(24);//ShowOrange color
 
         _settings = new JsonSerializerSettings
         {
@@ -74,9 +76,14 @@ public sealed class ModelManager : MonoBehaviour
 
     public LevelData GetLevelCopy(int index)
     {
-        if (_levels.Count == 0) return null;
-        int idx = ((index % _levels.Count) + _levels.Count) % _levels.Count; // wrap
-        return DeepClone(_levels[idx]);
+        int numLevels = _levels.Count;
+
+        int loopedIndex = index;
+
+        while (loopedIndex >= numLevels)
+            loopedIndex -= LOOP_SIZE;
+
+        return DeepClone(_levels[loopedIndex]);
     }
 
     private LevelData DeepClone(LevelData src)
