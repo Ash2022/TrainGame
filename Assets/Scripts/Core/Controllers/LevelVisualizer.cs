@@ -18,7 +18,8 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] List<Color> colors = new List<Color>();
 
     [SerializeField]List<Material> boatMaterials = new List<Material>();
-    [SerializeField] List<Material> depotMaterials = new List<Material>();
+    [SerializeField] List<Material> depotBaseMaterials = new List<Material>();
+    [SerializeField] List<Material> depotRoofMaterials = new List<Material>();
     [SerializeField] List<Material> gateMaterials = new List<Material>();
     [SerializeField] List<Material> keyMaterials = new List<Material>();
     [SerializeField] List<Material> passengersMaterials = new List<Material>();
@@ -233,7 +234,7 @@ public class LevelVisualizer : MonoBehaviour
             if (go.TryGetComponent<TrackPartView>(out var view))
                 view.Setup(inst);//, partsMaterial);
 
-            yield return new WaitForSeconds(tileDelay);
+            //yield return new WaitForSeconds(tileDelay);
         }
 
         SoundsManager.Instance.Building(false);
@@ -246,16 +247,6 @@ public class LevelVisualizer : MonoBehaviour
             {
                 if (occupied.Contains(new Vector2Int(x, y))) continue;
 
-
-                
-                if (addedEmptyHolder == false)
-                {
-                    addedEmptyHolder = true;
-                    emptyHolder = new GameObject();
-                    emptyHolder.name = "EmptyHolder";
-                    emptyHolder.transform.SetParent(levelHolder);
-
-                }
 
                 // center of this grid cell
                 float cx = (x - minX) + 0.5f;
@@ -271,7 +262,7 @@ public class LevelVisualizer : MonoBehaviour
                     0f
                 );
 
-                var go = Instantiate(emptyPartPrefab, emptyHolder.transform);
+                var go = Instantiate(emptyPartPrefab, levelHolder.transform);
                 go.name = $"Empty_{x}_{y}";
                 go.transform.position = pos;
                 go.transform.rotation = Quaternion.identity;
@@ -283,7 +274,7 @@ public class LevelVisualizer : MonoBehaviour
                 // if (((x - minX) * gridH + (y - minY)) % 100 == 0) yield return null;
             }
         }
-
+        */
         // ADD: configurable borders
         int borderX = 4;
         int borderTopY = 4;
@@ -297,13 +288,12 @@ public class LevelVisualizer : MonoBehaviour
                 if (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     continue;
 
-                if (addedEmptyHolder == false)
-                {
-                    addedEmptyHolder = true;
-                    emptyHolder = new GameObject();
-                    emptyHolder.name = "EmptyHolder";
-                    emptyHolder.transform.SetParent(levelHolder);
-                }
+                //dont put trees too close to bottom objects
+                if (y == maxY+1)
+                    continue;
+
+                if (UnityEngine.Random.value > 0.15f)
+                    continue;
 
                 // center of this grid cell
                 float cx = (x - minX) + 0.5f;
@@ -319,16 +309,17 @@ public class LevelVisualizer : MonoBehaviour
                     0f
                 );
 
-                var go = Instantiate(emptyPartPrefab, emptyHolder.transform);
+                var go = Instantiate(emptyPartPrefab, levelHolder);
                 go.name = $"EmptyBorder_{x}_{y}";
                 go.transform.position = pos;
                 go.transform.rotation = Quaternion.identity;
+                go.transform.localScale*=cellSize;
 
                 if (go.TryGetComponent<EmptyTrackPartView>(out var emptyView))
                     emptyView.Setup();// partsMaterial);
             }
         }
-        */
+        
 
         GameManager.Instance.StartNewLevel(currLevel);
 
@@ -339,6 +330,8 @@ public class LevelVisualizer : MonoBehaviour
             // keep your existing bootstrap here
             SimAppInstance.Bootstrap(currLevel, cellSize, currLevel.gameData, worldOrigin, minX, minY, gridH, partsLibrary);
         }
+
+        globalPathRenderer.widthMultiplier = 0.7f * cellSize;
 
         dynamicBuildRoutine = StartCoroutine(BuildAndResetTest());
 
@@ -800,9 +793,9 @@ public class LevelVisualizer : MonoBehaviour
         return boatMaterials[colorIndex];
     }
 
-    public Material GetDepotMaterialByIndex(int colorIndex)
+    public Material GetDepotBaseMaterialByIndex(int colorIndex)
     {
-        return depotMaterials[colorIndex];
+        return depotBaseMaterials[colorIndex];
     }
 
     public Material GetGateMaterialByIndex(int colorIndex)
@@ -823,6 +816,11 @@ public class LevelVisualizer : MonoBehaviour
     internal Material GetPassengersEmptyMaterial()
     {
         return passengerEmptyMaterial;
+    }
+
+    internal Material GetDepotTopMaterialByIndex(int colorIndex)
+    {
+        return depotRoofMaterials[colorIndex];
     }
 }
 

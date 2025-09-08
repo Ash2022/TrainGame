@@ -275,6 +275,13 @@ consider making the path spline as a drawing on the roads -- Need texture from N
 consider what to do in the crash --- DONE
 SFX
 
+
+fix path size based on gridcell -- DONE
+add the textures to the BG
+add trees
+finish new depot
+put blender for nina
+
 levels index for recordings - 15,6,8
 
 select a truck

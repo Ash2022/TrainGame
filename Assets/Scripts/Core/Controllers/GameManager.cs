@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     public int CurrentLevelIndex = 0;
     private int tutorialSteps = 0;
     bool gameOver = false;
+    [SerializeField] Texture2D _handTexture;
 
     private enum GameEndOutcome { None, Win, LoseWrongDepot, LosePrematureDepot }
 
@@ -53,18 +54,39 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+#if UNITY_EDITOR
+        
+            //Cursor.SetCursor(_handTexture, Vector2.zero, CursorMode.ForceSoftware);
+#endif
+
         if (modelManager != null) modelManager.Init();
 
         if (UseSimulation)
             simApp = new SimApp(); // single sim instance for the app
 
         //fix aspect
+        /*
         float currentAspect = (float)Screen.width / Screen.height;
         float refRad = 62f * Mathf.Deg2Rad * 0.5f;
         float refHorizRad = Mathf.Atan(Mathf.Tan(refRad) * 9f/16f);
 
         float newVertRad = Mathf.Atan(Mathf.Tan(refHorizRad) / currentAspect);
         Camera.main.fieldOfView = newVertRad * 2f * Mathf.Rad2Deg;
+        */
+        // reference settings (16:9)
+
+        //PlayerPrefs.DeleteAll();
+
+        float referenceAspect = 9f / 16f;
+        float referenceOrthoSize = 10f; // pick a baseline size
+
+        // current aspect
+        float currentAspect = (float)Screen.width / Screen.height;
+
+        // adjust so horizontal coverage matches reference
+        Camera.main.orthographicSize = referenceOrthoSize * (referenceAspect / currentAspect);
+
+
 
         Application.targetFrameRate = 60;
 
@@ -427,6 +449,8 @@ public class GameManager : MonoBehaviour
             // --- Correct depot, no more passengers of this color → park this train ---
             //tc.ClearAllCarts();                 // visuals + sim offsets cleared (engine-only)
             _parkedTrains.Add(tc.TrainId);
+
+            tc.ShowHideTrainHighLight(false);
 
             level.totalArrivedPassengers += tc.currCarts.Count;
 

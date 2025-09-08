@@ -10,7 +10,8 @@ public class DepotView : MonoBehaviour
     private GamePoint _pointModel;
 
     [SerializeField] Transform exits;
-    [SerializeField] Renderer depotRenderer;
+    [SerializeField] Renderer depotBaseRenderer;
+    [SerializeField] Renderer depotRoofRenderer;
     [SerializeField] Transform depotHolder;
 
     [SerializeField] Transform gateHinge;
@@ -35,7 +36,8 @@ public class DepotView : MonoBehaviour
 
         exits.transform.localEulerAngles = new Vector3(0, 0, -part.rotation);
 
-        depotRenderer.material = LevelVisualizer.Instance.GetDepotMaterialByIndex(point.colorIndex);
+        depotBaseRenderer.material = LevelVisualizer.Instance.GetDepotBaseMaterialByIndex(point.colorIndex);
+        depotRoofRenderer.material = LevelVisualizer.Instance.GetDepotTopMaterialByIndex(point.colorIndex);
 
         gateRenderer.material = LevelVisualizer.Instance.GetGateMaterialByIndex(point.colorIndex);
 
