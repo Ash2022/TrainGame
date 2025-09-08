@@ -17,6 +17,7 @@ public class TutorialImageView : MonoBehaviour
         {
             tutAuxImage.sprite = auxSprite;
             tutAuxImage.gameObject.SetActive(true);
+            tutAuxImage.SetNativeSize();
         }
         else
             tutAuxImage.gameObject.SetActive(false);

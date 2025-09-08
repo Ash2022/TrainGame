@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
         //PlayerPrefs.DeleteAll();
 
         float referenceAspect = 9f / 16f;
-        float referenceOrthoSize = 10f; // pick a baseline size
+        float referenceOrthoSize = 9f; // pick a baseline size
 
         // current aspect
         float currentAspect = (float)Screen.width / Screen.height;
@@ -217,13 +217,19 @@ public class GameManager : MonoBehaviour
 
             if (AnyStationHasColor(depotView.PointModel.colorIndex))
             {
-                uiManager.ShowUserMessage("Collect all the passengers\nbefore going to depot",Vector2.zero,2,true);
+                uiManager.ShowUserMessage("Collect all the passengers\nbefore going to depot",Vector2.zero,1.5f,true);
                 return;
             }
 
             if(depotView.PointModel.MyDepotIsLockedByDepotPointID != -1)
             {
-                uiManager.ShowUserMessage("Collect gate key\nbefore going to depot", Vector2.zero, 2, true);
+                uiManager.ShowUserMessage("Collect gate key\nbefore going to depot", Vector2.zero, 1.5f, true);
+                return;
+            }
+
+            if(selectedTrain !=null && selectedTrain.trainPointModel.colorIndex != depotView.PointModel.colorIndex)
+            {
+                uiManager.ShowUserMessage("Wrong depot\nmatch truck and depot colors", Vector2.zero, 1.5f, true);
                 return;
             }
 

@@ -82,7 +82,7 @@ public class TrainController : MonoBehaviour
         float cellY = worldCell.y - minY + 0.5f;
         Vector2 flipped = new Vector2(cellX, gridH - cellY);
         Vector3 centerPos = new Vector3(worldOrigin.x + flipped.x * cellSize,
-                                        worldOrigin.y + flipped.y * cellSize, -0.05f);
+                                        worldOrigin.y + flipped.y * cellSize, -0.001f);
         transform.position = centerPos;
 
         if(animTime > 0)

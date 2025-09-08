@@ -606,7 +606,7 @@ public class LevelVisualizer : MonoBehaviour
 
         //draw the preview under the boats
         for (int i = 0; i < extracted.Count; i++)
-            extracted[i] = new Vector3(extracted[i].x, extracted[i].y, 0.1f);
+            extracted[i] = new Vector3(extracted[i].x, extracted[i].y, -0.05f);
         
 
         globalPathRenderer.material.color = color;
